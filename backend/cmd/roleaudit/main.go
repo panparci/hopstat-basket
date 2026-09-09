@@ -57,7 +57,7 @@ func env(k, def string) string {
 
 func main() {
 	base := strings.TrimRight(env("ROLEAUDIT_BASE", "https://hoopstats.kognifx.com"), "/")
-	adminEmail := env("ROLEAUDIT_ADMIN_EMAIL", "admin@hospital.kognifx.com")
+	adminEmail := env("ROLEAUDIT_ADMIN_EMAIL", "admin@hoopstats.kognifx.com")
 	adminPass := env("ROLEAUDIT_ADMIN_PASS", "")
 	userPass := env("ROLEAUDIT_USER_PASS", adminPass)
 	if adminPass == "" {
@@ -96,10 +96,10 @@ func main() {
 
 	accounts := []struct{ role, email, name string }{
 		{"admin", adminEmail, "Admin"},
-		{"customer", env("ROLEAUDIT_CUSTOMER_EMAIL", "tester@hospital.kognifx.com"), "Customer Audit"},
-		{"statistician", "stat@hospital.kognifx.com", "Stat Audit"},
-		{"scout", "scout@hospital.kognifx.com", "Scout Audit"},
-		{"coach", "coach@hospital.kognifx.com", "Coach Audit"},
+		{"customer", env("ROLEAUDIT_CUSTOMER_EMAIL", "tester@hoopstats.kognifx.com"), "Customer Audit"},
+		{"statistician", "stat@hoopstats.kognifx.com", "Stat Audit"},
+		{"scout", "scout@hoopstats.kognifx.com", "Scout Audit"},
+		{"coach", "coach@hoopstats.kognifx.com", "Coach Audit"},
 	}
 	for _, a := range accounts {
 		pass := userPass
