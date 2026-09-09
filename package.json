@@ -1,0 +1,42 @@
+{
+  "name": "hoopstat",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:api": "go -C backend run ./cmd/api",
+    "dev:web": "vite --port 3000 --strictPort",
+    "db:tunnel": "ssh -N -L 15432:127.0.0.1:5432 vm44",
+    "build": "vite build",
+    "start": "go -C backend run ./cmd/api",
+    "prod": "vite build && go -C backend run ./cmd/api",
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fuse.js": "^7.3.0",
+    "html2canvas-pro": "^2.0.2",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.13.1",
+    "react-youtube": "^10.1.0",
+    "recharts": "^3.9.2",
+    "tesseract.js": "^7.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.14",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "tailwindcss": "^4.1.14",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<title>HoopStat — System Design Pattern &amp; Business Process Patent</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt; line-height: 1.55; color: #1a1f2e;
+    background: #fff;
+  }
+  h1, h2, h3, h4 { color: #0B1F3A; page-break-after: avoid; }
+  h1 { font-size: 22pt; letter-spacing: -0.3px; margin: 0 0 8pt; }
+  h2 { font-size: 15pt; border-bottom: 2.5px solid #E85D04; padding-bottom: 4pt; margin: 22pt 0 10pt; }
+  h3 { font-size: 12pt; margin: 16pt 0 6pt; color: #123056; }
+  h4 { font-size: 10.5pt; margin: 12pt 0 4pt; color: #2a4060; }
+  p { margin: 0 0 8pt; }
+  ul, ol { margin: 0 0 10pt 18pt; padding: 0; }
+  li { margin-bottom: 3pt; }
+  table { width: 100%; border-collapse: collapse; margin: 8pt 0 14pt; font-size: 9pt; page-break-inside: avoid; }
+  th { background: #0B1F3A; color: #fff; text-align: left; padding: 5pt 6pt; font-weight: 600; }
+  td { border: 0.6pt solid #d5dbe6; padding: 4.5pt 6pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #f6f8fb; }
+  code, .mono { font-family: "SF Mono", Consolas, Menlo, monospace; font-size: 8.5pt; background: #eef2f7; padding: 1pt 3pt; border-radius: 2pt; }
+  .cover {
+    page-break-after: always;
+    min-height: 250mm;
+    padding: 28mm 8mm 16mm;
+    background: linear-gradient(165deg, #0B1F3A 0%, #123056 55%, #1a3a5c 100%);
+    color: #fff;
+    margin: -18mm -16mm 0;
+    padding: 32mm 22mm 24mm;
+  }
+  .cover .eyebrow { color: #F4A261; letter-spacing: 3px; font-size: 9pt; font-weight: 700; text-transform: uppercase; }
+  .cover h1 { color: #fff; font-size: 34pt; line-height: 1.15; margin: 10pt 0 8pt; border: 0; }
+  .cover .sub { color: #d5e4f5; font-size: 13pt; max-width: 140mm; }
+  .cover .meta { margin-top: 36mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8pt 16pt; font-size: 10pt; color: #c9d7e8; }
+  .cover .meta b { display: block; color: #F4A261; font-size: 8pt; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 2pt; }
+  .badge { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1pt 6pt; border-radius: 8pt; letter-spacing: 0.3px; white-space: nowrap; }
+  .ok { background: #d1fae5; color: #065f46; }
+  .wip { background: #fef3c7; color: #92400e; }
+  .gap { background: #fee2e2; color: #991b1b; }
+  .plan { background: #dbeafe; color: #1e3a8a; }
+  .callout { border-left: 4px solid #E85D04; background: #fff7ed; padding: 8pt 10pt; margin: 8pt 0 12pt; page-break-inside: avoid; }
+  .note { border-left: 4px solid #0B1F3A; background: #eef4fb; padding: 8pt 10pt; margin: 8pt 0 12pt; page-break-inside: avoid; }
+  .warn { border-left: 4px solid #b45309; background: #fffbeb; padding: 8pt 10pt; margin: 8pt 0 12pt; page-break-inside: avoid; }
+  .flow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4pt; margin: 8pt 0 14pt;
+    font-size: 8.5pt; font-weight: 600;
+  }
+  .flow span.box {
+    background: #0B1F3A; color: #fff; padding: 4pt 8pt; border-radius: 4pt;
+  }
+  .flow span.box.alt { background: #E85D04; }
+  .flow span.box.soft { background: #e2e8f0; color: #0B1F3A; }
+  .flow span.arr { color: #E85D04; font-size: 12pt; }
+  .toc a { color: #0B1F3A; text-decoration: none; }
+  .toc td { border: 0; padding: 3pt 4pt; background: transparent !important; }
+  .toc tr:nth-child(even) td { background: #f6f8fb !important; }
+  .small { font-size: 8.5pt; color: #4b5563; }
+  .footer-note { font-size: 8pt; color: #6b7280; margin-top: 16pt; }
+  .kpi { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8pt; margin: 8pt 0 14pt; }
+  .kpi .card { border: 1pt solid #d5dbe6; padding: 8pt; border-top: 3pt solid #E85D04; page-break-inside: avoid; }
+  .kpi .card b { display: block; font-size: 8pt; color: #E85D04; text-transform: uppercase; letter-spacing: 0.6px; }
+  .section { page-break-inside: auto; }
+  .keep { page-break-inside: avoid; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="eyebrow">Confidential · Canonical System Patent · Do Not Fork Silently</div>
+  <h1>HOOPSTAT<br/>System Design Pattern<br/>&amp; Business Process Patent</h1>
+  <p class="sub">Dokumen paten desain resmi sistem. Bagian I = PRD as-is + target. Bagian II = katalog design pattern yang wajib diikuti, seluruh proses bisnis, state machine, tabel keputusan, dan RACI. Ini adalah sumber kebenaran produk — fitur baru harus mematuhi pola di sini, bukan membuat alur tandingan.</p>
+  <div class="meta">
+    <div><b>Produk</b>HoopStat / HoopStats</div>
+    <div><b>Versi dokumen</b>2.0 — Design Patent</div>
+    <div><b>Tanggal</b>30 Agustus 2026</div>
+    <div><b>Status</b>Canonical — wajib dipatuhi engineering &amp; operasi</div>
+    <div><b>Sumber</b>Audit codebase + ekstraksi proses dari service nyata</div>
+    <div><b>Klasifikasi</b>Internal IP — tidak untuk distribusi publik</div>
+    <div><b>Bahasa UI</b>Indonesia (primer)</div>
+    <div><b>Stack</b>React 19 · Vite 6 · IndexedDB v24 · Express · Gemini</div>
+  </div>
+</div>
+
+<h2>Daftar Isi</h2>
+<table class="toc">
+  <tr><td>1.</td><td><a href="#s1">Ringkasan Eksekutif</a></td></tr>
+  <tr><td>2.</td><td><a href="#s2">Identitas Produk, Visi, dan Positioning</a></td></tr>
+  <tr><td>3.</td><td><a href="#s3">Masalah, Peluang, dan Tujuan</a></td></tr>
+  <tr><td>4.</td><td><a href="#s4">Persona, Peran, dan Hak Akses</a></td></tr>
+  <tr><td>5.</td><td><a href="#s5">Ruang Lingkup</a></td></tr>
+  <tr><td>6.</td><td><a href="#s6">Arsitektur Sistem (As-Is)</a></td></tr>
+  <tr><td>7.</td><td><a href="#s7">Information Architecture &amp; Rute</a></td></tr>
+  <tr><td>8.</td><td><a href="#s8">Alur Pengguna (User Journeys)</a></td></tr>
+  <tr><td>9.</td><td><a href="#s9">Kebutuhan Fungsional — Domain Inti</a></td></tr>
+  <tr><td>10.</td><td><a href="#s10">Kebutuhan Fungsional — Operasi &amp; Monetisasi</a></td></tr>
+  <tr><td>11.</td><td><a href="#s11">Model Data</a></td></tr>
+  <tr><td>12.</td><td><a href="#s12">Model Bisnis &amp; Monetisasi</a></td></tr>
+  <tr><td>13.</td><td><a href="#s13">Integrasi</a></td></tr>
+  <tr><td>14.</td><td><a href="#s14">Kebutuhan Non-Fungsional</a></td></tr>
+  <tr><td>15.</td><td><a href="#s15">Metrik Keberhasilan</a></td></tr>
+  <tr><td>16.</td><td><a href="#s16">Audit Kematangan As-Is</a></td></tr>
+  <tr><td>17.</td><td><a href="#s17">Kesenjangan, Risiko, dan Rekomendasi</a></td></tr>
+  <tr><td>18.</td><td><a href="#s18">Roadmap yang Diusulkan</a></td></tr>
+  <tr><td>19.</td><td><a href="#s19">Lampiran PRD</a></td></tr>
+  <tr><td colspan="2"><strong>BAGIAN II — DESIGN PATTERN PATENT &amp; BUSINESS PROCESS</strong></td></tr>
+  <tr><td>20.</td><td><a href="#s20">Status dokumen sebagai paten desain</a></td></tr>
+  <tr><td>21.</td><td><a href="#s21">Katalog Design Pattern resmi (DP-01 s/d DP-16)</a></td></tr>
+  <tr><td>22.</td><td><a href="#s22">Peta proses bisnis (katalog BP)</a></td></tr>
+  <tr><td>23.</td><td><a href="#s23">Proses akuisisi, akun, dan identitas</a></td></tr>
+  <tr><td>24.</td><td><a href="#s24">Proses klaim, pembayaran, dan refund</a></td></tr>
+  <tr><td>25.</td><td><a href="#s25">Proses master data (org, tim, merge, kurasi)</a></td></tr>
+  <tr><td>26.</td><td><a href="#s26">Proses produksi pertandingan (setup → publish)</a></td></tr>
+  <tr><td>27.</td><td><a href="#s27">Proses jasa statistik &amp; tenaga kerja</a></td></tr>
+  <tr><td>28.</td><td><a href="#s28">Proses konsumsi, scouting, AI, dan latihan</a></td></tr>
+  <tr><td>29.</td><td><a href="#s29">State machine seluruh entitas</a></td></tr>
+  <tr><td>30.</td><td><a href="#s30">Tabel keputusan (RACI, visibilitas, SLA)</a></td></tr>
+  <tr><td>31.</td><td><a href="#s31">Katalog event, exception, dan data lifecycle</a></td></tr>
+  <tr><td>32.</td><td><a href="#s32">Aturan perubahan paten (governance)</a></td></tr>
+</table>
+
+<!-- 1 -->
+<div class="section" id="s1">
+<h2>1. Ringkasan Eksekutif</h2>
+<p><strong>HoopStat</strong> (brand di UI/landing: <strong>HoopStats</strong>) adalah platform analitik basket remaja yang mencatat play-by-play secara live atau dari video YouTube, membangun ulang possession dan lineup, menjalani pipeline produksi <em>tracking → QA → coach → publish</em>, lalu menampilkan box score, advanced stats, shot chart, match story, dan umpan balik AI Coach berbasis Gemini.</p>
+<p>Produk ini menargetkan ekosistem basket usia dini hingga junior Indonesia (KU-8 sampai KU-19, Putra/Putri/Campuran) dengan bahasa operasional klub/akademi (termasuk nuansa DBL). Pengguna utama: orang tua/wali, pelatih, statistician profesional, scout, dan super-admin operasional.</p>
+
+<div class="kpi">
+  <div class="card"><b>Status produk</b>Prototype offline-first yang sudah kaya fitur, belum production-ready (auth lokal, pembayaran simulasi, sync cloud dimatikan).</div>
+  <div class="card"><b>Inti diferensiasi</b>Prompt-flow modular untuk tracking cepat + pipeline QA/coach + klaim atlet berbayar + jasa statistik YouTube.</div>
+  <div class="card"><b>Keputusan PRD ini</b>Mendokumentasikan as-is sebagai baseline, lalu menetapkan target produk yang harus dibawa ke produksi.</div>
+</div>
+
+<div class="callout">
+  <strong>Satu kalimat produk.</strong> HoopStat adalah sistem operasi statistik basket remaja: dari ketukan di bangku cadangan sampai profil atlet terverifikasi yang siap dilihat scout.
+</div>
+
+<p>Dokumen ini adalah PRD lengkap <strong>sekaligus paten desain resmi</strong> (Bagian II). Bukan ringkasan pemasaran. Setiap requirement merujuk kondisi kode saat audit (Agustus 2026): React SPA + Express OCR + IndexedDB <code>hoopstats-db</code> v24. Fitur baru wajib merujuk DP-xx dan BP-xx. Bagian “Status” memakai badge:</p>
+<ul>
+  <li><span class="badge ok">AS-IS</span> sudah diimplementasi dan dapat dipakai lokal</li>
+  <li><span class="badge wip">PARSIAL</span> ada UI/logic, belum lengkap atau belum terhubung</li>
+  <li><span class="badge gap">GAP</span> dijanjikan di landing/komentar, belum ada implementasi nyata</li>
+  <li><span class="badge plan">TARGET</span> requirement produksi yang harus dibangun</li>
+</ul>
+</div>
+
+<!-- 2 -->
+<div class="section" id="s2">
+<h2>2. Identitas Produk, Visi, dan Positioning</h2>
+<h3>2.1 Identitas</h3>
+<table>
+  <tr><th>Atribut</th><th>Nilai di sistem</th></tr>
+  <tr><td>Nama teknis</td><td><code>HoopStat</code> (<code>metadata.json</code>, <code>server.ts</code>)</td></tr>
+  <tr><td>Nama konsumen</td><td>HoopStats (landing, email seed, copy CMS)</td></tr>
+  <tr><td>Asal</td><td>Google AI Studio app; README masih boilerplate AI Studio</td></tr>
+  <tr><td>Tagline landing</td><td>“SIAP MELACAK &amp; MEMAKSIMALKAN POTENSI ATLET?”</td></tr>
+  <tr><td>Fallback hero</td><td>“STATISTIK NYATA. PERKEMBANGAN NYATA.”</td></tr>
+  <tr><td>Kategori</td><td>AI-Powered Basketball Analytics + labor marketplace statistician</td></tr>
+  <tr><td>Geografi</td><td>Indonesia (copy, KU, Putra/Putri, harga Rupiah)</td></tr>
+  <tr><td>Package.json</td><td>Masih <code>react-example</code> / <code>0.0.0</code> — harus diganti sebelum rilis</td></tr>
+</table>
+
+<h3>2.2 Visi</h3>
+<p>Menjadi sumber kebenaran statistik basket remaja Indonesia: data yang dicatat sekali (live atau video), lolos QA, dianotasi pelatih, lalu menjadi aset perkembangan atlet dan aset scouting yang terpercaya.</p>
+
+<h3>2.3 Positioning</h3>
+<table>
+  <tr><th>Bukan</th><th>Adalah</th></tr>
+  <tr><td>Aplikasi skor sederhana / papan skor</td><td>Sistem play-by-play + possession + stint/lineup</td></tr>
+  <tr><td>Hanya dashboard statistik</td><td>Alat kerja statistician dengan prompt engine yang dapat diedit admin</td></tr>
+  <tr><td>Hanya AI chat olahraga</td><td>AI yang membaca event nyata (efisiensi, turnover, tren) lalu memberi saran</td></tr>
+  <tr><td>Hanya SaaS self-serve</td><td>Kombinasi self-serve + jasa manusia (Verified / request YouTube)</td></tr>
+  <tr><td>Platform klub enterprise penuh</td><td>Saat ini akun organisasi belum jadi tenant login (<code>ownerAccountId</code> ada, belum dipakai auth)</td></tr>
+</table>
+
+<h3>2.4 Job-to-be-done</h3>
+<ol>
+  <li><strong>Orang tua:</strong> “Saya ingin melihat perkembangan anak saya tanpa harus mencatat kertas di tribun.”</li>
+  <li><strong>Pelatih:</strong> “Saya ingin evaluasi instan saat time-out dan catatan video setelah laga.”</li>
+  <li><strong>Statistician:</strong> “Saya ingin mencatat full-game YouTube secepat mungkin tanpa kehilangan possession chain.”</li>
+  <li><strong>Scout:</strong> “Saya ingin melihat atlet terverifikasi, bukan highlight mentah.”</li>
+  <li><strong>Admin:</strong> “Saya ingin mengoperasikan klaim, pembayaran, penugasan, dan kualitas data dari satu control center.”</li>
+</ol>
+</div>
+
+<!-- 3 -->
+<div class="section" id="s3">
+<h2>3. Masalah, Peluang, dan Tujuan</h2>
+<h3>3.1 Masalah yang diselesaikan</h3>
+<table>
+  <tr><th>Masalah</th><th>Bukti di produk</th></tr>
+  <tr><td>Statistik kertas berantakan, tidak bisa diulang</td><td>Tracking tap-to-log, undo/redo, event source type, export/import JSON</td></tr>
+  <tr><td>Orang tua tidak melihat perkembangan objektif</td><td>Stats page, tren, PDF, AI Coach agents</td></tr>
+  <tr><td>Tidak sempat mencatat live</td><td>Jasa statistik YouTube + pipeline produksi</td></tr>
+  <tr><td>Data tidak dipercaya scout/agensi</td><td>QA audit score, trust classification, Verified badge, claim + dokumen</td></tr>
+  <tr><td>Identitas atlet terpecah antar klub/turnamen</td><td>Claim, merge player, curations org/tim, transfer history</td></tr>
+  <tr><td>Clock video tidak selaras dengan event</td><td>Automatic clock mapping, visual sync, on-the-fly OCR</td></tr>
+</table>
+
+<h3>3.2 Tujuan produk (Outcome)</h3>
+<table>
+  <tr><th>ID</th><th>Tujuan</th><th>Horizon</th></tr>
+  <tr><td>G-1</td><td>Satu pertandingan dapat dicatat end-to-end (setup → track → QA → coach → story) tanpa kehilangan data.</td><td>Sekarang (as-is lokal)</td></tr>
+  <tr><td>G-2</td><td>Orang tua dapat klaim anak, bayar, dan melihat statistik terverifikasi.</td><td>Produksi (butuh payment + auth cloud)</td></tr>
+  <tr><td>G-3</td><td>Statistician dapat dikerjakan sebagai tenaga kerja terukur (inbox → assign → track → submit).</td><td>Parsial; butuh multi-user cloud</td></tr>
+  <tr><td>G-4</td><td>Scout hanya melihat atlet <code>published</code> + <code>isDiscoverable</code>.</td><td>As-is logic ada</td></tr>
+  <tr><td>G-5</td><td>Admin dapat mengubah prompt-flow tracking tanpa deploy kode.</td><td>As-is editor ada</td></tr>
+  <tr><td>G-6</td><td>Data pertandingan aman, tersinkron, dan tidak hanya hidup di satu browser.</td><td>Gap kritis</td></tr>
+</table>
+
+<h3>3.3 Non-goals (saat ini bukan fokus rilis)</h3>
+<ul>
+  <li>Live broadcast / streaming sendiri (mengandalkan YouTube).</li>
+  <li>Fantasy league, betting, atau prediksi odds.</li>
+  <li>Aplikasi native iOS/Android terpisah (web-first).</li>
+  <li>Manajemen keuangan klub, absensi latihan, atau payroll pelatih.</li>
+  <li>Integrasi Google Classroom sungguhan (modul Fundamentals hanya memakai nama itu).</li>
+</ul>
+</div>
+
+<!-- 4 -->
+<div class="section" id="s4">
+<h2>4. Persona, Peran, dan Hak Akses</h2>
+<h3>4.1 Peran login (<code>UserRole</code>)</h3>
+<p>Sistem hanya mengenal lima peran akun. Atlet, organisasi, dan QA <em>bukan</em> role login.</p>
+<table>
+  <tr><th>Role</th><th>Persona dunia nyata</th><th>Permission default</th></tr>
+  <tr><td><code>customer</code></td><td>Orang tua / wali / manajer atlet</td><td><code>view_home</code>, <code>view_matches</code>, <code>view_own_stats</code>, <code>view_published_story</code>, <code>request_stats</code>, <code>manage_teams</code>, <code>manage_profiles</code>. <strong>Tidak</strong> punya <code>track_match</code>.</td></tr>
+  <tr><td><code>statistician</code></td><td>Pencatat profesional (statter)</td><td><code>view_home</code>, <code>view_matches</code>, <code>track_match</code>, <code>do_stat_tasks</code>, <code>view_own_stats</code></td></tr>
+  <tr><td><code>coach</code></td><td>Pelatih klub/akademi</td><td><code>view_home</code>, <code>view_matches</code>, <code>view_own_stats</code>, <code>view_published_story</code>, <code>do_coach_analysis</code></td></tr>
+  <tr><td><code>scout</code></td><td>Pemandu bakat / agensi</td><td><code>view_home</code>, <code>view_gallery</code>, <code>view_published_story</code></td></tr>
+  <tr><td><code>admin</code></td><td>Operator platform</td><td>Semua permission</td></tr>
+</table>
+
+<h3>4.2 Entitas yang sering disalahpahami sebagai “role”</h3>
+<table>
+  <tr><th>Konsep</th><th>Implementasi aktual</th></tr>
+  <tr><td>Atlet / anak</td><td>Entitas <code>ChildProfile</code>, diklaim wali lewat <code>AthleteLink</code></td></tr>
+  <tr><td>QA reviewer</td><td>Permission <code>do_qa_review</code> — default hanya admin</td></tr>
+  <tr><td>Organisasi (klub/akademi/sekolah)</td><td>Entitas <code>Organization</code>, bukan akun login</td></tr>
+  <tr><td>Statter</td><td>Alias operasional untuk <code>statistician</code></td></tr>
+</table>
+
+<h3>4.3 Katalog permission</h3>
+<table>
+  <tr><th>Permission</th><th>Kategori</th><th>Arti produk</th></tr>
+  <tr><td><code>view_home</code></td><td>General</td><td>Dashboard / beranda</td></tr>
+  <tr><td><code>view_gallery</code></td><td>General</td><td>Katalog bakat publik</td></tr>
+  <tr><td><code>view_published_story</code></td><td>General</td><td>Match story yang sudah publish</td></tr>
+  <tr><td><code>track_match</code></td><td>Stats</td><td>Masuk full-screen tracker</td></tr>
+  <tr><td><code>view_matches</code></td><td>Stats</td><td>Daftar &amp; detail pertandingan</td></tr>
+  <tr><td><code>view_own_stats</code></td><td>Stats</td><td>Halaman statistik / AI Coach</td></tr>
+  <tr><td><code>request_stats</code></td><td>Stats</td><td>Pesan jasa YouTube</td></tr>
+  <tr><td><code>do_stat_tasks</code></td><td>Stats</td><td>Inbox tugas statistician</td></tr>
+  <tr><td><code>do_qa_review</code></td><td>Stats</td><td>Halaman QA</td></tr>
+  <tr><td><code>do_coach_analysis</code></td><td>Stats</td><td>Anotasi &amp; publish</td></tr>
+  <tr><td><code>manage_teams</code> / <code>manage_profiles</code></td><td>Management</td><td>CRUD tim &amp; anak (customer)</td></tr>
+  <tr><td><code>manage_athletes</code></td><td>Management</td><td>Direktori atlet + tautkan wali</td></tr>
+  <tr><td><code>manage_users</code> / <code>manage_roles_config</code></td><td>Admin</td><td>User &amp; matriks RBAC</td></tr>
+  <tr><td><code>manage_crm</code> / <code>manage_cms</code></td><td>Admin</td><td>Leads &amp; konten landing</td></tr>
+  <tr><td><code>assign_stat_tasks</code></td><td>Admin</td><td>Assign statistician (ada di katalog; penugasan UI memakai <code>approve_applications</code>)</td></tr>
+  <tr><td><code>approve_applications</code></td><td>Admin</td><td>Klaim, role-app, curations, request admin</td></tr>
+</table>
+
+<h3>4.4 Visibilitas pertandingan (<code>canViewMatch</code>)</h3>
+<ul>
+  <li><code>admin</code>, <code>statistician</code>, <code>coach</code> — selalu dapat melihat.</li>
+  <li><code>customer</code> — hanya jika <code>canManage(athlete, user.id)</code> (link guardian terverifikasi) <strong>atau</strong> ada <code>PaymentRecord.status === 'success'</code> yang terkait.</li>
+  <li><code>scout</code> — hanya jika <code>productionStage === 'published'</code> dan minimal satu atlet <code>isDiscoverable === true</code>.</li>
+</ul>
+
+<h3>4.5 Akun seed (lingkungan lokal)</h3>
+<table>
+  <tr><th>Email</th><th>Password</th><th>Role</th></tr>
+  <tr><td>admin@hoopstats.com</td><td>Admin#2024</td><td>admin</td></tr>
+  <tr><td>stat1@hoopstats.com / stat2@hoopstats.com</td><td>Stat#2024</td><td>statistician</td></tr>
+  <tr><td>customer@hoopstats.com</td><td>Cust#2024</td><td>customer</td></tr>
+  <tr><td>scout@hoopstats.com</td><td>Scout#2024</td><td>scout</td></tr>
+  <tr><td>coach@hoopstats.com</td><td>Coach#2024</td><td>coach</td></tr>
+</table>
+<div class="warn"><strong>Keamanan.</strong> Auth saat ini SHA-256 + salt di IndexedDB, sesi di <code>localStorage</code> key <code>hoopstats_current_user</code>. RBAC klien dapat dipalsukan. Target produksi: Supabase Auth + RLS. Password seed tidak boleh dipakai di lingkungan publik.</div>
+</div>
+
+<!-- 5 -->
+<div class="section" id="s5">
+<h2>5. Ruang Lingkup</h2>
+<h3>5.1 In-scope (produk yang sudah ada + harus dipertahankan)</h3>
+<ol>
+  <li>Akun, RBAC dinamis, apply role, suspend user.</li>
+  <li>Landing CMS + CRM leads.</li>
+  <li>Profil atlet, tim, organisasi, divisi KU, merge, curations.</li>
+  <li>Klaim atlet + dokumen + paket bayar.</li>
+  <li>Setup pertandingan, live/video tracking, prompt engine, voice, keyboard, shot chart.</li>
+  <li>Possession engine, stint 5 pemain, event links, audit integritas.</li>
+  <li>Clock mapping otomatis, visual sync, on-the-fly OCR.</li>
+  <li>AI lineup detector (Gemini vision).</li>
+  <li>Pipeline tracking → QA → coach → published + match story.</li>
+  <li>Jasa statistik YouTube (request → assign → track).</li>
+  <li>Stats dasar + advanced + AI Coach + PDF.</li>
+  <li>Gallery scout + player profile publik.</li>
+  <li>Fundamentals (latihan / library / classroom in-app).</li>
+  <li>Admin: prompt editor, users, claims, applications, games, athletes, CRM, CMS.</li>
+</ol>
+
+<h3>5.2 Out-of-scope rilis produksi pertama (P0 cloud)</h3>
+<ul>
+  <li>Aplikasi native terpisah.</li>
+  <li>Pembayaran recurring yang kompleks (cukup PSP + invoice dulu).</li>
+  <li>Video hosting sendiri (tetap YouTube).</li>
+  <li>Marketplace terbuka antar-statistician (admin tetap dispatcher).</li>
+  <li>Multi-tenant org login penuh (boleh menyusul P1).</li>
+</ul>
+</div>
+
+<!-- 6 -->
+<div class="section" id="s6">
+<h2>6. Arsitektur Sistem (As-Is)</h2>
+<h3>6.1 Ringkasan teknis</h3>
+<table>
+  <tr><th>Lapisan</th><th>Pilihan</th></tr>
+  <tr><td>UI</td><td>React 19, React Router 7, Tailwind 4, Motion, Lucide, Recharts</td></tr>
+  <tr><td>App server</td><td>Express 4 di port 3000; Vite middleware di dev</td></tr>
+  <tr><td>Build</td><td>Vite 6 + esbuild <code>server.ts</code> → <code>dist/server.cjs</code></td></tr>
+  <tr><td>DB utama</td><td>IndexedDB <code>hoopstats-db</code> v24 via <code>idb</code></td></tr>
+  <tr><td>DB kedua</td><td><code>basketball_knowledge_db</code> (alias suara)</td></tr>
+  <tr><td>Fundamentals</td><td>localStorage, terpisah dari IDB utama</td></tr>
+  <tr><td>Auth</td><td>Klien: hash password + localStorage session</td></tr>
+  <tr><td>AI</td><td><code>@google/genai</code> — model bervariasi (<code>gemini-3.6-flash</code> OCR, <code>gemini-3.5-flash</code> coach, <code>gemini-2.5-flash</code> lineup)</td></tr>
+  <tr><td>Video</td><td><code>react-youtube</code></td></tr>
+  <tr><td>OCR</td><td>Tesseract.js + Gemini batch OCR</td></tr>
+  <tr><td>Dokumen</td><td>jspdf, html2canvas, xlsx</td></tr>
+  <tr><td>Search</td><td>Fuse.js</td></tr>
+</table>
+
+<h3>6.2 Backend yang ada</h3>
+<p><code>server.ts</code> hanya melakukan tiga hal:</p>
+<ol>
+  <li>Host SPA.</li>
+  <li><code>GET /api/health</code>.</li>
+  <li><code>POST /api/gemini/batch-ocr</code> — body <code>{ items: [{ id, base64Image, videoTimeSeconds }] }</code>, batch 10, mengembalikan <code>gameClockText</code>, <code>isBlocked</code>, <code>clockState</code>, <code>confidence</code>, plus token usage.</li>
+</ol>
+<div class="warn">Endpoint OCR tidak berautentikasi. Tidak ada REST CRUD pertandingan/pengguna. Hampir seluruh business logic berjalan di browser.</div>
+
+<h3>6.3 Supabase</h3>
+<p>Klien ada di <code>src/lib/supabase.ts</code> dan <code>src/supabaseClient.ts</code>, tetapi <code>syncService.isSupabaseConfigured()</code> <strong>dipaksa <code>false</code></strong>. Store <code>sync_queue</code> ditulis lokal, tidak pernah di-flush. Komentar kode menyatakan produksi harus pindah ke Supabase Auth + RLS.</p>
+
+<h3>6.4 Struktur folder</h3>
+<p>Feature-Sliced Design parsial (<code>entities/</code>, <code>features/</code>, <code>widgets/</code>, <code>shared/</code>) hidup berdampingan dengan warisan <code>core/</code>, <code>components/</code>, <code>services/</code>, <code>hooks/</code>, <code>modules/</code>. Ada duplikasi: dua merge service, dua supabase client, hook tracking di <code>hooks/</code> dan <code>modules/tracking/</code>.</p>
+<p class="small">Target arsitektur: satu sumber kebenaran per domain, sync cloud, auth server-side, OCR tetap di server (dengan auth).</p>
+
+<h3>6.5 Diagram konteks</h3>
+<div class="flow">
+  <span class="box">Browser SPA</span><span class="arr">→</span>
+  <span class="box soft">IndexedDB v24</span><span class="arr">→</span>
+  <span class="box">Express :3000</span><span class="arr">→</span>
+  <span class="box alt">Gemini OCR</span>
+</div>
+<div class="flow">
+  <span class="box">YouTube iframe</span><span class="arr">→</span>
+  <span class="box soft">Frame capture</span><span class="arr">→</span>
+  <span class="box">Tesseract / Gemini</span><span class="arr">→</span>
+  <span class="box alt">ClockTimeline</span>
+</div>
+<div class="flow">
+  <span class="box">Customer</span><span class="arr">→</span>
+  <span class="box soft">Stat request</span><span class="arr">→</span>
+  <span class="box">Admin assign</span><span class="arr">→</span>
+  <span class="box">Statistician track</span><span class="arr">→</span>
+  <span class="box soft">QA</span><span class="arr">→</span>
+  <span class="box">Coach</span><span class="arr">→</span>
+  <span class="box alt">Published story</span>
+</div>
+</div>
+
+<!-- 7 -->
+<div class="section" id="s7">
+<h2>7. Information Architecture &amp; Rute</h2>
+<p>Layout: <code>AdaptiveAppShellLayout</code> — admin memakai <code>AdminLayout</code>, peran lain <code>AppShell</code>. Tracking full-screen tanpa shell.</p>
+<h3>7.1 Publik</h3>
+<table>
+  <tr><th>Path</th><th>Halaman</th><th>Fungsi</th></tr>
+  <tr><td><code>/welcome</code></td><td>LandingPage</td><td>Pemasaran CMS-driven; lead modal; user login diarahkan ke <code>/</code></td></tr>
+  <tr><td><code>/login</code></td><td>LoginPage</td><td>Email/password lokal</td></tr>
+  <tr><td><code>/signup</code></td><td>SignUpPage</td><td>Register default <code>customer</code></td></tr>
+  <tr><td><code>/forgot-password</code></td><td>ForgotPasswordPage</td><td>Reset lokal (Supabase dikomentari)</td></tr>
+</table>
+
+<h3>7.2 Aplikasi konsumen / operasional</h3>
+<table>
+  <tr><th>Path</th><th>Permission</th><th>Fungsi</th></tr>
+  <tr><td><code>/</code></td><td><code>view_home</code></td><td>RoleBasedDashboard: admin→/admin, statistician→tugas, lain→Home</td></tr>
+  <tr><td><code>/games</code></td><td><code>view_matches</code></td><td>Daftar laga, series, filter KU/grade, setup, export/import</td></tr>
+  <tr><td><code>/stats</code></td><td><code>view_own_stats</code></td><td>Tab anak / rekan / tim / AI Coach + PDF</td></tr>
+  <tr><td><code>/profiles</code></td><td><code>manage_profiles</code></td><td>Anak, tim, klaim, merge, apply role</td></tr>
+  <tr><td><code>/gallery</code>, <code>/gallery/:id</code></td><td><code>view_gallery</code></td><td>Katalog bakat + profil publik</td></tr>
+  <tr><td><code>/match/:gameId</code></td><td><code>view_matches</code></td><td>Box, momentum, advanced, lineup, shot chart, health</td></tr>
+  <tr><td><code>/story/:matchId</code></td><td><code>view_published_story</code></td><td>Match story simple/pro</td></tr>
+  <tr><td><code>/qa/:matchId</code></td><td><code>do_qa_review</code></td><td>Audit + enrich + advance/return</td></tr>
+  <tr><td><code>/coach-analysis/:matchId</code></td><td><code>do_coach_analysis</code></td><td>Anotasi video + publish</td></tr>
+  <tr><td><code>/services</code></td><td><code>request_stats</code></td><td>Order jasa YouTube Rp 50.000</td></tr>
+  <tr><td><code>/account/apply</code></td><td><code>view_home</code></td><td>Apply statistician/coach</td></tr>
+  <tr><td><code>/workspace</code></td><td>(dicek di halaman)</td><td>Hub input / QA / coach</td></tr>
+  <tr><td><code>/fundamentals</code></td><td>tidak dijaga permission</td><td>Workout, library, classroom</td></tr>
+  <tr><td><code>/track/:gameId</code></td><td><code>track_match</code></td><td>Tracker full-screen</td></tr>
+</table>
+<p>Redirect: <code>/players</code> → <code>/profiles</code>; <code>/teams</code> → <code>/profiles?tab=teams</code>; <code>/coach</code> → <code>/stats?tab=aicoach</code>; <code>/claim</code> &amp; <code>/claim/status</code> → <code>/profiles?tab=claim</code>.</p>
+
+<h3>7.3 Admin</h3>
+<table>
+  <tr><th>Path</th><th>Permission</th><th>Fungsi</th></tr>
+  <tr><td><code>/admin</code></td><td><code>manage_users</code></td><td>Control center</td></tr>
+  <tr><td><code>/admin/crm</code></td><td><code>manage_crm</code></td><td>Pipeline lead</td></tr>
+  <tr><td><code>/admin/cms</code></td><td><code>manage_cms</code></td><td>Hero, pricing, FAQ</td></tr>
+  <tr><td><code>/admin/prompt-editor</code></td><td><code>manage_roles_config</code></td><td>Desainer prompt-flow + simulator</td></tr>
+  <tr><td><code>/admin/roles</code></td><td><code>manage_roles_config</code></td><td>Editor matriks permission</td></tr>
+  <tr><td><code>/admin/users</code></td><td><code>manage_users</code></td><td>Ubah role, suspend</td></tr>
+  <tr><td><code>/admin/applications</code></td><td><code>approve_applications</code></td><td>Review apply role</td></tr>
+  <tr><td><code>/admin/claims</code></td><td><code>approve_applications</code></td><td>Klaim + refund + merge placeholder</td></tr>
+  <tr><td><code>/admin/athletes</code></td><td><code>manage_athletes</code></td><td>Direktori + link guardian</td></tr>
+  <tr><td><code>/admin/games</code></td><td><code>manage_athletes</code></td><td>Manajemen pertandingan</td></tr>
+  <tr><td><code>/admin/curations</code></td><td><code>approve_applications</code></td><td>Verifikasi/merge org &amp; tim</td></tr>
+  <tr><td><code>/services/admin</code></td><td><code>approve_applications</code></td><td>Assign statistician &amp; pembayaran</td></tr>
+  <tr><td><code>/services/tasks</code></td><td><code>do_stat_tasks</code></td><td>Inbox pekerjaan</td></tr>
+</table>
+
+<h3>7.4 Navigasi</h3>
+<p>Consumer: <code>/</code>, <code>/gallery</code>, <code>/games</code>, <code>/stats</code>, <code>/fundamentals</code>, <code>/profiles</code>, <code>/services</code>, <code>/workspace</code>.</p>
+<p>Admin groups: Utama · Operasional &amp; Verifikasi · Layanan &amp; Tugas · Konten &amp; AI Engine · Akses &amp; Keamanan.</p>
+</div>
+
+<!-- 8 -->
+<div class="section" id="s8">
+<h2>8. Alur Pengguna</h2>
+
+<h3>8.1 Customer / orang tua</h3>
+<div class="flow">
+  <span class="box">Landing</span><span class="arr">→</span>
+  <span class="box soft">Signup customer</span><span class="arr">→</span>
+  <span class="box">Buat anak / Klaim</span><span class="arr">→</span>
+  <span class="box alt">Bayar 50–250rb</span><span class="arr">→</span>
+  <span class="box soft">Admin approve</span><span class="arr">→</span>
+  <span class="box">Stats / Story / Services</span>
+</div>
+<ol>
+  <li>Masuk dari <code>/welcome</code> (bisa isi lead) atau <code>/signup</code> sebagai customer.</li>
+  <li>Di <code>/profiles</code> membuat profil anak <strong>atau</strong> klaim: search → teaser PPG/RPG/APG → form hubungan (ayah/ibu/wali) + dokumen KK/akta/kartu pelajar → pilih paket → pembayaran (saat ini selalu sukses) → status pending.</li>
+  <li>Admin menyetujui di <code>/admin/claims</code>: <code>claimStatus: verified</code> + <code>AthleteLink.relationship = guardian</code>. Toast “Klaim … disetujui/ditolak”.</li>
+  <li>Home menampilkan tren dan highlight. Customer <strong>tidak dapat</strong> membuka tracker (desain: tidak punya <code>track_match</code>).</li>
+  <li>Dapat memesan jasa di <code>/services</code> (Rp 50.000) atau melihat <code>/stats</code> dan story jika wali atau sudah bayar.</li>
+  <li>Opsional apply jadi statistician/coach di <code>/account/apply</code>.</li>
+</ol>
+<div class="note"><strong>Konflik produk.</strong> Landing menjanjikan “Self-tracking pertandingan” di paket Gratis, tetapi role customer sengaja dilucuti <code>track_match</code>. PRD menetapkan keputusan di §12.4.</div>
+
+<h3>8.2 Statistician</h3>
+<div class="flow">
+  <span class="box">Login</span><span class="arr">→</span>
+  <span class="box soft">Inbox tugas</span><span class="arr">→</span>
+  <span class="box">Buat match dari request</span><span class="arr">→</span>
+  <span class="box alt">/track/:id</span><span class="arr">→</span>
+  <span class="box">Submit QA</span>
+</div>
+<ol>
+  <li>Dashboard default adalah inbox (<code>StatTasksPage</code>).</li>
+  <li>Membuka request assigned → <code>createMatchFromRequest</code> → <code>/track/:gameId</code>.</li>
+  <li>Mencatat dengan video, prompt, clock sync, AI lineup; lalu advance ke <code>qa_review</code>.</li>
+  <li>Jika dikembalikan QA, memperbaiki dan submit ulang.</li>
+</ol>
+
+<h3>8.3 QA</h3>
+<ol>
+  <li>Masuk <code>/workspace?tab=qa</code> atau <code>/qa/:matchId</code>.</li>
+  <li>Jalankan <code>auditMatchIntegrity</code> (healthScore 0–100, TRUSTED / CAUTION / UNRELIABLE).</li>
+  <li>Enrich <code>shotZone</code>, <code>assistType</code>, <code>phaseOfPlay</code>, <code>pressureLevel</code>.</li>
+  <li>Checklist skor / anomali / lineup → advance ke <code>coach_analysis</code> atau return ke tracking dengan catatan.</li>
+</ol>
+
+<h3>8.4 Coach</h3>
+<ol>
+  <li><code>/workspace?tab=coach</code> → <code>/coach-analysis/:matchId</code>.</li>
+  <li>Anotasi pada possession/event/player/team/game (kategori skill/strategy/decision/teamwork/effort/mental, rating 1–5, timestamp video).</li>
+  <li>Publish → <code>/story/:matchId</code>.</li>
+  <li>AI Coach di <code>/stats?tab=aicoach</code>; Fundamentals untuk perpustakaan drill.</li>
+</ol>
+
+<h3>8.5 Scout</h3>
+<p>Hanya <code>/gallery</code> dan story/profil yang published + discoverable. Tidak dapat track, request, atau kelola profil. Apply scout tidak tersedia di UI (tipe data mengizinkan, halaman apply hanya statistician/coach).</p>
+
+<h3>8.6 Admin</h3>
+<p>Control center dengan badge klaim/aplikasi pending. Mengelola klaim, role-app, curations, CRM, CMS, RBAC, user, atlet, laga, prompt editor, dan assignment jasa.</p>
+</div>
+
+<!-- 9 -->
+<div class="section" id="s9">
+<h2>9. Kebutuhan Fungsional — Domain Inti</h2>
+
+<h3>9.1 Autentikasi &amp; akun — FR-AUTH</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-AUTH-01</td><td>Pengguna dapat daftar dengan email + password (min. 6 karakter). Role default <code>customer</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-AUTH-02</td><td>Login menyimpan sesi; logout menghapus sesi.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-AUTH-03</td><td>Forgot password tersedia.</td><td><span class="badge wip">PARSIAL</span> lokal saja</td></tr>
+  <tr><td>FR-AUTH-04</td><td>Admin dapat mengubah role dan men-suspend akun.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-AUTH-05</td><td>Pengguna dapat mengajukan role <code>statistician</code> atau <code>coach</code> (satu pending per user). Approve memanggil <code>updateUserRole</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-AUTH-06</td><td>Apply <code>scout</code> tersedia di UI.</td><td><span class="badge gap">GAP</span></td></tr>
+  <tr><td>FR-AUTH-07</td><td>Auth produksi memakai identity provider + sesi server + RLS.</td><td><span class="badge plan">TARGET</span></td></tr>
+</table>
+
+<h3>9.2 RBAC — FR-RBAC</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-RBAC-01</td><td>Matriks permission per role dapat diedit di <code>/admin/roles</code> dan disimpan di store <code>role_permissions</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-RBAC-02</td><td>Admin selalu <code>can() = true</code>, terlepas dari matriks.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-RBAC-03</td><td>Rute dilindungi <code>ProtectedRoute</code> + <code>RequirePermission</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-RBAC-04</td><td>Reset ke default matrix tersedia.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-RBAC-05</td><td>Permission dievaluasi di server, bukan hanya di klien.</td><td><span class="badge plan">TARGET</span></td></tr>
+</table>
+
+<h3>9.3 Organisasi, tim, divisi, atlet — FR-ORG</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-ORG-01</td><td>Organization bertipe <code>club | academy | school</code>, status <code>pending | verified | merged</code>, kota/provinsi, logo, <code>ownerAccountId</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-02</td><td>Migrasi otomatis <code>clubs</code> → <code>organizations</code> dengan <code>type: club</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-03</td><td>Team terikat <code>organizationId</code> + <code>divisionCode</code>; jersey terang/gelap; roster tertanam.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-04</td><td><code>teamRepo.findCanonical(orgId, divisionCode)</code> mencegah duplikat tim.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-05</td><td>Master divisi KU-8–KU-19 × M/F/MIX → kode <code>KU{n}-M|F|MIX</code>, label PA/PI/Campuran.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-06</td><td>Atlet (<code>ChildProfile</code>) punya slot tim: main, school, academy, loan + transfer history.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-07</td><td>Admin curations dapat verifikasi/merge organisasi dan tim (cascade).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-08</td><td>Merge pemain: deteksi kemiripan nama + DOB ≤2 hari, preview, execute, undo, log rollback.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-ORG-09</td><td>Akun organisasi sebagai tenant login dengan anggota.</td><td><span class="badge plan">TARGET</span> P1</td></tr>
+</table>
+
+<p><strong>Aturan merge pemain.</strong> <code>executeMerge</code> memindahkan roster, event (<code>playerId</code> / <code>opponentPlayerId</code> / <code>linkedEntityId</code>), stint, klaim, AI insight, transfer, alias, links. Profil sekunder <code>archived: true</code> + <code>mergedIntoId</code>. Snapshot disimpan di <code>MergeLog</code>.</p>
+
+<h3>9.4 Klaim atlet — FR-CLAIM</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-CLAIM-01</td><td>Alur: search (nama/DOB/klub) → teaser statistik → form → payment → success.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-CLAIM-02</td><td>Form: hubungan ayah/ibu/wali, nama, telepon, NIK opsional, data anak, dokumen KK/akta/kartu pelajar (data URL), persetujuan syarat.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-CLAIM-03</td><td>Paket: Basic Rp 50.000, Premium Rp 150.000, Pro Rp 250.000. Metode card / transfer / e-wallet.</td><td><span class="badge wip">PARSIAL</span> selalu sukses lokal</td></tr>
+  <tr><td>FR-CLAIM-04</td><td>Approve menautkan guardian terverifikasi; opsional merge placeholder lokal.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-CLAIM-05</td><td>Reject → <code>refund_pending</code>; admin dapat <code>refunded</code> atau <code>refund_rejected</code>.</td><td><span class="badge ok">AS-IS</span> (status saja)</td></tr>
+  <tr><td>FR-CLAIM-06</td><td>Notifikasi status klaim (email/WA/push).</td><td><span class="badge gap">GAP</span> hanya toast</td></tr>
+  <tr><td>FR-CLAIM-07</td><td>Pembayaran nyata + invoice + refund ke PSP.</td><td><span class="badge plan">TARGET</span></td></tr>
+</table>
+
+<h3>9.5 Setup pertandingan — FR-MATCH</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-MATCH-01</td><td>GameSetupModal path <code>quick | full</code> membuat Match + roster via org/divisi kanonik.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-02</td><td>Tipe rekaman <code>single | team | full</code>; mode <code>lite | detailed</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-03</td><td>Format <code>5v5 | 3x3 | other</code>; clock <code>running | stop</code>; stop-on-made <code>fiba | always | never</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-04</td><td>Konteks: format (single/tournament/league/playoff), stage, importance, purpose, opponentLevel.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-05</td><td>Competition grade 1–6: friendly lokal → internasional (bobot statistik).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-06</td><td>Status <code>planned | ongoing | completed | aborted</code>; flag <code>excludeFromStats</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-07</td><td>Export/import JSON pertandingan.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MATCH-08</td><td>Video YouTube opsional (<code>videoUrl</code>), home/away, jersey colors/themes.</td><td><span class="badge ok">AS-IS</span></td></tr>
+</table>
+
+<h3>9.6 Live &amp; video tracking — FR-TRACK</h3>
+<p>Halaman <code>/track/:gameId</code> adalah jantung produk. Hook: <code>useTrackingLogic</code>, <code>useGameTracking</code>, <code>useVideoSyncTimer</code>.</p>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-TRACK-01</td><td>Scoreboard: skor, foul, timeout, kuarter, clock running/stop, edit clock.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-02</td><td>Starter tepat 5 pemain untuk stint valid; substitusi <code>recordSubstitution</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-03</td><td>Action panel: tim kita, lawan, single-player, shot chart modal.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-04</td><td>Smart prompt memandu event berantai (lihat FR-PROMPT).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-05</td><td>Voice capture: speech recognition + alias Fuse.js + commentary.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-06</td><td>Keyboard shortcuts untuk aksi cepat.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-07</td><td>Undo/redo, koreksi pemain, event-set editor, enrichment.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-08</td><td>Panel video YouTube tersinkron dengan event timestamp.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-09</td><td>Live stats &amp; log event/possession selama pencatatan.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-TRACK-10</td><td>Setiap event menyimpan <code>sourceType</code>: manual_button, smart_prompt, voice_capture, smart_suggestion, correction, batch_fix.</td><td><span class="badge ok">AS-IS</span></td></tr>
+</table>
+
+<h4>Tipe event yang wajib didukung</h4>
+<p>Scoring: <code>1pt_make/miss</code>, <code>2pt_make/miss</code>, <code>3pt_make/miss</code>. Rebound <code>oreb/dreb</code>. Playmaking <code>ast, stl, blk, to</code>. Foul (drawn, offensive, defensive, generic). <code>sub_in/out</code>, <code>timeout</code>, <code>inbound</code>, <code>jumpball</code>, <code>starter</code>. Generic: <code>free_throw, shot, rebound, turnover, substitution, dead_ball, possession_marker</code>.</p>
+<p>Metadata tembakan: koordinat x/y, <code>shotZone</code>, <code>shotDifficulty</code> (Open → Heavily Contested), <code>assistType</code> (Direct / Short Creation / Weak), <code>phaseOfPlay</code>, <code>pressureLevel</code>, <code>gameContext</code>, clutch, score difference.</p>
+
+<h3>9.7 Prompt engine — FR-PROMPT</h3>
+<p>Dua sistem tipe: modern <code>PromptFlow</code>/<code>EventContainer</code> dan legacy <code>SmartPromptFlow</code>. Editor admin di <code>/admin/prompt-editor</code> memakai library container + simulator match palsu.</p>
+<table>
+  <tr><th>Flow ID terdaftar</th><th>Kegunaan</th></tr>
+  <tr><td><code>plus_2pt</code>, <code>plus_3pt</code></td><td>Skor + opsi assist + and-1</td></tr>
+  <tr><td><code>missed_shot</code>, <code>missed_free_throw</code></td><td>Miss + rebound / FT lanjutan</td></tr>
+  <tr><td><code>turnover</code>, <code>rebound</code></td><td>TO / rebound chain</td></tr>
+  <tr><td><code>defensive_foul</code>, <code>offensive_foul</code></td><td>Foul + FT</td></tr>
+  <tr><td><code>substitution</code>, <code>timeout</code>, <code>jumpball</code></td><td>Dead ball / restart</td></tr>
+  <tr><td><code>standalone_steal</code>, <code>standalone_block</code></td><td>Aksi defensif mandiri</td></tr>
+  <tr><td><code>anomaly_missing_event</code></td><td>Perbaikan rantai yang bolong</td></tr>
+</table>
+<p>Override single-player: <code>singlePlayerScoringFlow</code>, <code>singlePlayerMissedShotFlow</code>. Secondary action: <code>inline_actor_select | toggle_actor | optional_choice | auto_flow | required_actor</code>. Scope aktor: OUR_TEAM / OPPONENT_TEAM / EITHER_TEAM / NONE. Field opsional dapat dibatasi mode lite/detailed.</p>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-PROMPT-01</td><td>Admin dapat membuat/ubah/simulasi/impor/ekspor flow tanpa deploy.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PROMPT-02</td><td>Flow menghormati recordingType dan recordingMode.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PROMPT-03</td><td>Branching berdasarkan primary/secondary/optional field.</td><td><span class="badge ok">AS-IS</span></td></tr>
+</table>
+
+<h3>9.8 Possession, stint, event link — FR-PBP</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-PBP-01</td><td><code>rebuildPossessionsEngine</code> mengurutkan event: kuarter → countdown clock → realTime → youtubeTimestamp.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-02</td><td>Opening source: steal, dreb, oreb, inbound, jumpball, deadball_restart.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-03</td><td>Closing: made_shot, missed_shot, turnover, foul_drawn, end_of_period, deadball_end.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-04</td><td>Outcome: score, empty, turnover, interrupted. FT series memakai <code>metadata.isFinalFT</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-05</td><td>EventLink: ASSISTS, STEALS_FROM, REBOUNDS, RESULTS_IN_FT.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-06</td><td>Stint = 5 playerIds + window clock. Ghost stint (durasi 0) ditandai.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-07</td><td>Audit: gap, overlap, unclosed, player-not-on-court, attribution mismatch, missing sub.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-PBP-08</td><td><code>validatePossessionChain</code> validasi kompleks penuh.</td><td><span class="badge wip">PARSIAL</span> placeholder</td></tr>
+</table>
+
+<h3>9.9 Shot chart — FR-SHOT</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-SHOT-01</td><td>Input koordinat saat tracking (<code>ShotChartModal</code>).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SHOT-02</td><td>Analisis per pemain di match details; zona via <code>getShotAreaName</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SHOT-03</td><td>Tampil di match story mode pro.</td><td><span class="badge ok">AS-IS</span></td></tr>
+</table>
+
+<h3>9.10 Statistik — FR-STAT</h3>
+<p>Box score dasar (<code>useStats</code>): pts, reb, oreb, dreb, ast, stl, blk, to, fouls, FGM/A, 2P, 3P, FT, gamesPlayed, turnoverDetails.</p>
+<p>Advanced (<code>calculateAdvancedStats</code> / <code>calculatePlayerAdvancedStats</code>): BoxScore, ShootingQuality (by difficulty &amp; shot type), PossessionEfficiency (PPP), TurnoverAnalysis, AssistQuality, PhaseOfPlay, ReboundControl, DefensiveImpact, PlayerUtilization (usage), DecisionQuality, CombinationInsight.</p>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-STAT-01</td><td>Hanya laga countable (bukan aborted, bukan excludeFromStats) masuk agregat.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-STAT-02</td><td><code>didPlayInMatch</code> via roster/stint.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-STAT-03</td><td>Filter series, KU, competition grade; bobot 1–6.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-STAT-04</td><td>Unduh PDF laporan.</td><td><span class="badge ok">AS-IS</span> (belum diikat paket berbayar)</td></tr>
+  <tr><td>FR-STAT-05</td><td>Batas 5 laga paket Gratis ditegakkan.</td><td><span class="badge gap">GAP</span></td></tr>
+</table>
+
+<h3>9.11 Production pipeline — FR-PIPE</h3>
+<div class="flow">
+  <span class="box">tracking</span><span class="arr">→</span>
+  <span class="box soft">qa_review</span><span class="arr">→</span>
+  <span class="box">coach_analysis</span><span class="arr">→</span>
+  <span class="box alt">published</span>
+</div>
+<table>
+  <tr><th>Transisi</th><th>Permission</th><th>Arah balik</th></tr>
+  <tr><td>tracking → qa_review</td><td><code>track_match</code> atau <code>do_stat_tasks</code></td><td>—</td></tr>
+  <tr><td>qa_review → coach_analysis</td><td><code>do_qa_review</code></td><td>QA → tracking</td></tr>
+  <tr><td>coach_analysis → published</td><td><code>do_coach_analysis</code></td><td>coach → QA</td></tr>
+</table>
+<p><code>stageHistory[]</code> mencatat stage, user, waktu, action <code>advanced | returned</code>, catatan. Trust: healthScore + TRUSTED / CAUTION / UNRELIABLE. Saran perbaikan: LINK_ASSIST, INSERT_REBOUND, LINK_STEAL, CLOSE_POSSESSION, REASSIGN_PLAYER, ADJUST_STINT_TIME.</p>
+
+<h3>9.12 Match story &amp; coach analysis — FR-STORY</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-STORY-01</td><td>Story hanya setelah published; mode simple / pro (stats + shot chart).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-STORY-02</td><td>Klip YouTube dari <code>youtubeTimestamp</code>; momentum Recharts; anotasi coach.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-STORY-03</td><td>Kunci premium (<code>isPremium</code>) berdasarkan pembayaran.</td><td><span class="badge wip">PARSIAL</span> UI lock ada, entitlement paket landing tidak ditegakkan</td></tr>
+</table>
+
+<h3>9.13 AI Coach — FR-AI</h3>
+<p>Service <code>aiCoachService.generateInsight</code>, model <code>gemini-3.5-flash</code>, output bahasa Indonesia + istilah basket Inggris. Disimpan sebagai <code>AiInsight</code>.</p>
+<table>
+  <tr><th>Agen</th><th>Tugas</th></tr>
+  <tr><td><code>skill_coach</code></td><td>Pengembangan keterampilan individu</td></tr>
+  <tr><td><code>shot_analyst</code></td><td>Kualitas dan seleksi tembakan</td></tr>
+  <tr><td><code>progress_analyst</code></td><td>Tren antar laga</td></tr>
+  <tr><td><code>team_analyst</code> + DataSummarizer</td><td>Kontribusi dalam konteks tim</td></tr>
+  <tr><td><code>strategist</code></td><td>Saran taktik</td></tr>
+  <tr><td><code>scout</code></td><td>Sudut pandang pemanduan bakat</td></tr>
+</table>
+<p>Output: <code>{ role, title, content, actionableAdvice[] }</code>.</p>
+
+<h3>9.14 Clock mapping &amp; sinkronisasi video — FR-CLOCK</h3>
+<p>Tiga sistem terkait:</p>
+<p><strong>A. Automatic clock mapping.</strong> Pipeline adaptif: coarse 30s → capture → OCR paralel (Tesseract) → validasi region → fallback Gemini → fine scrub 1s. Status: DRAFT → SCANNING → REVIEW_REQUIRED → READY_TO_PUBLISH → PUBLISHED | FAILED. Fail-fast jika region tidak valid. Disimpan di store <code>timelines</code>.</p>
+<p><strong>B. Visual clock sync.</strong> Titik sync manual/OCR (<code>OCR_CONFIRMED | MANUAL_CORRECTION</code>) + modal kalibrasi.</p>
+<p><strong>C. On-the-fly.</strong> Setiap event: crop region jam dari video/screenshare; jika confidence ≥ 75 (default) tulis ulang timestamp. Status: SUCCESS | LOW_CONFIDENCE | NO_CLOCK_DETECTED | SKIPPED | FAILED.</p>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-CLOCK-01</td><td>Pipeline otomatis + review UI (quarter marker, progress, timeline review).</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-CLOCK-02</td><td>Batch OCR server <code>/api/gemini/batch-ocr</code>.</td><td><span class="badge ok">AS-IS</span> tanpa auth</td></tr>
+  <tr><td>FR-CLOCK-03</td><td>Visual + on-the-fly sync.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-CLOCK-04</td><td>OCR API wajib auth + rate limit + kuota token per org.</td><td><span class="badge plan">TARGET</span></td></tr>
+</table>
+
+<h3>9.15 AI lineup detector — FR-LINEUP</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-LINEUP-01</td><td>Ambil hingga 16 frame dari quarter marker, crop iframe YouTube, kirim ke Gemini vision.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-LINEUP-02</td><td>Hasil: warna jersey home/away + nomor; biaya token USD/IDR dilog.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-LINEUP-03</td><td>Cocokkan ke roster atau buat placeholder <code>Pemain #N</code> di bangku.</td><td><span class="badge ok">AS-IS</span></td></tr>
+</table>
+</div>
+
+<!-- 10 -->
+<div class="section" id="s10">
+<h2>10. Kebutuhan Fungsional — Operasi &amp; Monetisasi</h2>
+
+<h3>10.1 Jasa statistik (marketplace) — FR-SVC</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-SVC-01</td><td>Customer mengirim YouTube URL + org home/away + <code>recordingType</code> + <code>divisionCode</code>. Harga tetap Rp 50.000.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SVC-02</td><td>Status: pending → awaiting_payment → paid → assigned → in_progress → completed → reviewed.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SVC-03</td><td>Admin assign statistician; statistician membuka tracker dari match yang dibuat <code>createMatchFromRequest</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SVC-04</td><td>Back-office request: price 0, auto-paid, <code>customerId: 'back-office'</code>.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SVC-05</td><td>Prompt reuse tim kanonik jika org+divisi sudah ada.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-SVC-06</td><td>Harga jasa selaras dengan paket Verified landing (Rp 299.000/laga) atau keduanya dijelaskan sebagai SKU berbeda.</td><td><span class="badge gap">GAP</span> inkonsistensi harga</td></tr>
+</table>
+
+<h3>10.2 Landing, CMS, CRM — FR-MKT</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-MKT-01</td><td>CMS mengedit hero, pricing, testimonial, FAQ (store <code>site_content</code> id <code>main</code>).</td><td><span class="badge ok">AS-IS</span> lokal per-browser</td></tr>
+  <tr><td>FR-MKT-02</td><td>CTA paket membuat Lead: source landing_hero/pricing/footer/manual; interest free/pro/verified; stage new/contacted/trial/customer/lost.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-MKT-03</td><td>Checkout paket Gratis/Pro/Verified sungguhan.</td><td><span class="badge gap">GAP</span> hanya lead capture</td></tr>
+  <tr><td>FR-MKT-04</td><td>Konten CMS terpusat di cloud agar semua pengunjung melihat versi sama.</td><td><span class="badge plan">TARGET</span></td></tr>
+</table>
+
+<h3>10.3 Gallery &amp; profil publik — FR-GAL</h3>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-GAL-01</td><td>Scout melihat katalog atlet discoverable + kartu publik, chart, playing-up, bobot kompetisi.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-GAL-02</td><td>Highlight match berasal dari data published, bukan hard-code.</td><td><span class="badge gap">GAP</span> <code>FEATURED_SYNERGY_MATCHES</code> hard-coded</td></tr>
+</table>
+
+<h3>10.4 Fundamentals — FR-FUND</h3>
+<p>Modul terpisah (localStorage: <code>fundamental_drills_v1</code>, <code>athlete_profile_v1</code>, <code>workout_schedule_v1</code>, <code>drill_submissions_v1</code>, <code>classroom_qa_v1</code>).</p>
+<table>
+  <tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+  <tr><td>FR-FUND-01</td><td>Tab workout (Freeletics-style), library drill, classroom Q&amp;A in-app.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-FUND-02</td><td>Profil latihan: posisi PG–C, skill pemula/menengah/pro, fasilitas full/half/tanpa ring.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-FUND-03</td><td>Jadwal AI via Gemini; admin/coach CRUD drill + impor Excel + demonstrator YouTube loop.</td><td><span class="badge ok">AS-IS</span></td></tr>
+  <tr><td>FR-FUND-04</td><td>Identitas atlet Fundamentals = <code>ChildProfile</code> utama (satu ID).</td><td><span class="badge plan">TARGET</span></td></tr>
+  <tr><td>FR-FUND-05</td><td>Integrasi Google Classroom API.</td><td><span class="badge gap">GAP</span> nama saja</td></tr>
+</table>
+
+<h3>10.5 Workspace operasional — FR-WS</h3>
+<p>Satu hub tiga tab (input / QA / coach). Akses ditolak jika user tidak punya <code>do_stat_tasks</code>, <code>do_qa_review</code>, atau <code>do_coach_analysis</code>. Default QA hanya admin — statistician tidak dapat meriview kecuali RBAC diubah.</p>
+</div>
+
+<!-- 11 -->
+<div class="section" id="s11">
+<h2>11. Model Data</h2>
+<p>Database IndexedDB <code>hoopstats-db</code> versi 24. Repo generik: <code>createIdbRepo&lt;T&gt;</code> (<code>getById</code>, <code>list</code>, <code>create</code>, <code>update</code>, <code>softDelete</code>).</p>
+
+<h3>11.1 Store</h3>
+<p><code>players, teams, clubs, organizations, series, matches, match_rosters, match_stints, events, possessions, game_states, sync_queue, profiles, ai_insights, event_links, audit_issue_resolutions, stat_requests, user_accounts, payments, leads, site_content, role_permissions, role_applications, claim_requests, merge_logs, coach_annotations, timelines</code>.</p>
+
+<h3>11.2 Relasi utama</h3>
+<div class="callout">
+UserAccount 1—N RoleApplication · UserAccount 1—N ClaimRequest N—1 ChildProfile · UserAccount 1—N StatServiceRequest N—1 Match · PaymentRecord N—1 (request ATAU claim) · Organization 1—N Team 1—N Player (embedded) · ChildProfile N—1 Team (main/school/academy/loan) · Match 1—N MatchRoster N—1 ChildProfile · Match 1—N MatchStint (5 IDs) · Match 1—N GameEvent N—1 Possession · Match 1—1 GameState · Match 1—N EventLink / CoachAnnotation / ClockTimeline.
+</div>
+
+<h3>11.3 Field kunci (ringkas)</h3>
+<table>
+  <tr><th>Entitas</th><th>Field penting</th></tr>
+  <tr><td>UserAccount</td><td>id, email, name, role, passwordHash/Salt, status active|suspended</td></tr>
+  <tr><td>ChildProfile</td><td>name, birthDate, jersey, empat teamId, claimStatus, links, isDiscoverable, archived, mergedIntoId</td></tr>
+  <tr><td>Organization</td><td>name, type, city, province, ownerAccountId, status, mergedIntoId</td></tr>
+  <tr><td>Team</td><td>organizationId, divisionCode, roster[], light/dark jersey</td></tr>
+  <tr><td>Match</td><td>date, venue, team/opponent, KU, divisionCode, competitionGrade, gameType, clockMode, recordingType/Mode, videoUrl, productionStage, stageHistory, stopClockOnMadeBasket, excludeFromStats</td></tr>
+  <tr><td>MatchRoster</td><td>matchId, teamId, profileId, jersey, isStarter, isActive, isGuest</td></tr>
+  <tr><td>MatchStint</td><td>playerIds[5], start/end quarter+clock, isGhostStint, isValid</td></tr>
+  <tr><td>GameEvent</td><td>quarter, timestamp, gameClock, youtubeTimestamp, type, playerId, x/y, shot metadata, sourceType, possessionId, realTime</td></tr>
+  <tr><td>Possession</td><td>opening/closing source+player, outcome, pointsScored, isAnomaly</td></tr>
+  <tr><td>GameState</td><td>skor, foul, timeout, kuarter, timeRemaining, isRunning</td></tr>
+  <tr><td>CoachAnnotation</td><td>targetType, category, rating 1–5, note, videoTimestamp</td></tr>
+  <tr><td>ClaimRequest</td><td>relationship, childData, documents[], matchScore, status, paymentStatus</td></tr>
+  <tr><td>StatServiceRequest</td><td>youtubeUrl, rosters, status, assignedTo, matchId, price</td></tr>
+  <tr><td>PaymentRecord</td><td>requestId, amount, status, method</td></tr>
+  <tr><td>Lead</td><td>source, interest, stage, notes[]</td></tr>
+  <tr><td>RoleApplication</td><td>requestedRole statistician|scout|coach, motivation, status</td></tr>
+</table>
+
+<h3>11.4 Identitas yang masih terpecah (harus disatukan di target)</h3>
+<table>
+  <tr><th>Konsep “pemain”</th><th>Tipe</th><th>Penyimpanan</th></tr>
+  <tr><td>Atlet produk</td><td><code>ChildProfile</code></td><td>store <code>profiles</code></td></tr>
+  <tr><td>Pemain roster tim</td><td><code>Player</code> embedded</td><td>store <code>teams</code> / <code>players</code></td></tr>
+  <tr><td>Atlet latihan</td><td>Fundamentals <code>AthleteProfile</code></td><td>localStorage</td></tr>
+  <tr><td>Placeholder AI lineup</td><td><code>Pemain #N</code></td><td>roster match</td></tr>
+</table>
+<div class="note">PRD mewajibkan satu identitas atlet kanonik. Roster match merujuk <code>profileId</code>. Placeholder AI harus dapat di-merge ke profil nyata. Fundamentals wajib memakai ID yang sama.</div>
+</div>
+
+<!-- 12 -->
+<div class="section" id="s12">
+<h2>12. Model Bisnis &amp; Monetisasi</h2>
+<h3>12.1 Paket landing (janji pemasaran)</h3>
+<table>
+  <tr><th>Paket</th><th>Harga</th><th>Janji</th></tr>
+  <tr><td>Gratis</td><td>Rp 0 selamanya</td><td>Self-tracking, statistik dasar, dashboard, maks. 5 pertandingan</td></tr>
+  <tr><td>Pro</td><td>Rp 99.000 / bulan</td><td>Semua Gratis + AI Coach + PDF + tren + tanpa batas laga</td></tr>
+  <tr><td>Verified</td><td>Rp 299.000 / pertandingan</td><td>Semua Pro + dicatat statistician profesional + YouTube + Verified badge + profil scout-ready</td></tr>
+</table>
+<p>CTA paket hanya membuat Lead CRM, bukan checkout. Batas 5 laga dan gerbang Pro tidak ditegakkan di kode.</p>
+
+<h3>12.2 Harga yang benar-benar dikode</h3>
+<table>
+  <tr><th>SKU</th><th>Harga</th><th>Keterangan</th></tr>
+  <tr><td>Stat request</td><td>Rp 50.000 flat</td><td><code>requestService.createRequest</code></td></tr>
+  <tr><td>Claim Basic</td><td>Rp 50.000</td><td>Klaim profil anak</td></tr>
+  <tr><td>Claim Premium</td><td>Rp 150.000</td><td>Klaim profil anak</td></tr>
+  <tr><td>Claim Pro</td><td>Rp 250.000</td><td>Klaim profil anak</td></tr>
+  <tr><td>Back-office request</td><td>Rp 0</td><td>Auto-paid, customerId <code>back-office</code></td></tr>
+</table>
+
+<h3>12.3 Rantai nilai tenaga kerja</h3>
+<div class="flow">
+  <span class="box">Customer bayar</span><span class="arr">→</span>
+  <span class="box soft">Admin dispatch</span><span class="arr">→</span>
+  <span class="box">Statistician</span><span class="arr">→</span>
+  <span class="box soft">QA</span><span class="arr">→</span>
+  <span class="box">Coach</span><span class="arr">→</span>
+  <span class="box alt">Scout / wali konsumsi</span>
+</div>
+<p>Customer adalah pembayar. Statistician adalah tenaga. Coach menambah nilai editorial. Scout adalah kanal distribusi. Admin mengoperasikan pasar.</p>
+
+<h3>12.4 Keputusan produk yang harus dikunci (open questions → rekomendasi)</h3>
+<table>
+  <tr><th>Isu</th><th>Rekomendasi PRD</th></tr>
+  <tr><td>Landing janji self-track, role customer tidak boleh track</td><td><strong>Pilih A (disarankan):</strong> berikan <code>track_match</code> ke customer pada paket Gratis/Pro, batasi 5 laga di Gratis. <strong>Pilih B:</strong> ubah copy landing — Gratis hanya klaim/lihat, tracking hanya jasa. Jangan biarkan keduanya bertentangan.</td></tr>
+  <tr><td>Stat request Rp 50rb vs Verified Rp 299rb</td><td>Pisahkan SKU: <em>Basic Stat Pack</em> (50rb, box score saja, tanpa QA/coach) vs <em>Verified Match</em> (299rb, pipeline penuh + badge). Atau naikkan request ke 299rb dan hapus angka 50rb dari UI.</td></tr>
+  <tr><td>Claim 50/150/250 vs langganan Pro 99rb</td><td>Claim = one-time identity verification. Pro = langganan analitik. Verified = jasa per laga. Tiga funnel terpisah, satu pembayaran PSP.</td></tr>
+  <tr><td>QA bukan role</td><td>Tambah role <code>qa</code> ATAU assign <code>do_qa_review</code> ke statistician senior. Default sekarang menumpuk kerja QA di admin.</td></tr>
+  <tr><td>PDF &amp; AI Coach “khusus Pro”</td><td>Gating entitlement berdasarkan subscription, bukan hanya keberadaan tombol.</td></tr>
+</table>
+</div>
+
+<!-- 13 -->
+<div class="section" id="s13">
+<h2>13. Integrasi</h2>
+<table>
+  <tr><th>Integrasi</th><th>Status</th><th>Lokasi / catatan</th></tr>
+  <tr><td>YouTube embed</td><td><span class="badge ok">AS-IS</span></td><td>Tracking, story, coach, gallery, fundamentals</td></tr>
+  <tr><td>YouTube sebagai sumber data</td><td><span class="badge ok">AS-IS</span></td><td><code>StatServiceRequest.youtubeUrl</code>, <code>Match.videoUrl</code></td></tr>
+  <tr><td>Gemini AI Coach</td><td><span class="badge ok">AS-IS</span></td><td>Butuh <code>GEMINI_API_KEY</code> / <code>VITE_GEMINI_API_KEY</code></td></tr>
+  <tr><td>Gemini lineup vision</td><td><span class="badge ok">AS-IS</span></td><td><code>aiLineupService</code>, <code>aiVisionService</code></td></tr>
+  <tr><td>Gemini clock OCR</td><td><span class="badge ok">AS-IS</span></td><td><code>POST /api/gemini/batch-ocr</code></td></tr>
+  <tr><td>Gemini drill scheduler</td><td><span class="badge ok">AS-IS</span></td><td>Fundamentals</td></tr>
+  <tr><td>Tesseract OCR</td><td><span class="badge ok">AS-IS</span></td><td>Worker + visual sync</td></tr>
+  <tr><td>Screen capture / mikrofon</td><td><span class="badge ok">AS-IS</span></td><td>Dideklarasikan di <code>metadata.json</code></td></tr>
+  <tr><td>Pembayaran PSP</td><td><span class="badge gap">GAP</span></td><td>Selalu success; tidak ada Midtrans/Xendit/Stripe</td></tr>
+  <tr><td>Email / WhatsApp / push</td><td><span class="badge gap">GAP</span></td><td>Toast saja; komentar menyebut Supabase trigger / OneSignal</td></tr>
+  <tr><td>Supabase</td><td><span class="badge gap">GAP</span></td><td>Klien ada, sync dimatikan; ada publishable key ter-commit</td></tr>
+  <tr><td>Google Classroom</td><td><span class="badge gap">GAP</span></td><td>Q&amp;A in-app, bukan API Google</td></tr>
+  <tr><td>Excel</td><td><span class="badge ok">AS-IS</span></td><td>Impor/ekspor drill</td></tr>
+  <tr><td>PDF</td><td><span class="badge ok">AS-IS</span></td><td>jspdf + html2canvas di Stats</td></tr>
+</table>
+</div>
+
+<!-- 14 -->
+<div class="section" id="s14">
+<h2>14. Kebutuhan Non-Fungsional</h2>
+<table>
+  <tr><th>ID</th><th>Kategori</th><th>Requirement</th><th>As-is</th></tr>
+  <tr><td>NFR-01</td><td>Offline</td><td>Tracking tidak boleh gagal jika jaringan putus di gedung olahraga.</td><td>Terpenuhi (IDB). Sync cloud belum ada.</td></tr>
+  <tr><td>NFR-02</td><td>Latency tracking</td><td>Tap event terasa instan (&lt;100ms ke log UI).</td><td>Lokal, terpenuhi.</td></tr>
+  <tr><td>NFR-03</td><td>Ketahanan data</td><td>Tidak ada single-browser source of truth di produksi.</td><td>Gagal — data hanya di perangkat.</td></tr>
+  <tr><td>NFR-04</td><td>Keamanan</td><td>Auth server-side, RLS, tidak ada kunci di repo, OCR berautentikasi.</td><td>Gagal.</td></tr>
+  <tr><td>NFR-05</td><td>Privasi anak</td><td>Dokumen klaim (KK/akta) terenkripsi, retensi terbatas, akses admin ter-audit. Scout tidak melihat dokumen.</td><td>Data URL di IDB — risiko tinggi.</td></tr>
+  <tr><td>NFR-06</td><td>Akurasi statistik</td><td>Laga published wajib healthScore di atas ambang (usulan ≥80 / bukan UNRELIABLE) kecuali override admin.</td><td>Skor ada, gerbang publish tidak memaksa.</td></tr>
+  <tr><td>NFR-07</td><td>Observabilitas</td><td>Log token Gemini, error OCR, audit trail stage.</td><td>Token meter lokal; tidak ada APM.</td></tr>
+  <tr><td>NFR-08</td><td>A11y &amp; mobile</td><td>Tracker dipakai di tablet tribun; target lebar ≥768px dulu, sentuhan 44px.</td><td>Belum diaudit formal.</td></tr>
+  <tr><td>NFR-09</td><td>I18n</td><td>UI Indonesia primer; istilah basket Inggris dipertahankan (PPP, usage, clutch).</td><td>Terpenuhi.</td></tr>
+  <tr><td>NFR-10</td><td>Performa IDB</td><td>Rebuild possession 1 laga penuh (&gt;400 event) &lt; 1 detik di laptop modern.</td><td>Perlu benchmark.</td></tr>
+  <tr><td>NFR-11</td><td>Kunci AI</td><td>Gemini key hanya server-side. Model ID distandarkan.</td><td>Campuran 2.5 / 3.5 / 3.6; sebagian di klien.</td></tr>
+  <tr><td>NFR-12</td><td>Backup</td><td>Export JSON per match + backup cloud harian.</td><td>Export ada; backup cloud tidak.</td></tr>
+</table>
+</div>
+
+<!-- 15 -->
+<div class="section" id="s15">
+<h2>15. Metrik Keberhasilan</h2>
+<table>
+  <tr><th>Metrik</th><th>Definisi</th><th>Target awal produksi</th></tr>
+  <tr><td>Time-to-first-stat</td><td>Waktu dari signup customer sampai event pertama terlihat di /stats</td><td>&lt; 24 jam (klaim cepat atau 1 laga jasa)</td></tr>
+  <tr><td>Tracking throughput</td><td>Menit video per jam kerja statistician (full-game)</td><td>≥ 1.5× realtime setelah prompt+clock siap</td></tr>
+  <tr><td>QA bounce rate</td><td>% laga dikembalikan dari QA ke tracking</td><td>&lt; 25% setelah 1 bulan runbook</td></tr>
+  <tr><td>Publish SLA</td><td>Waktu request paid → story published</td><td>&lt; 72 jam kerja</td></tr>
+  <tr><td>Data trust</td><td>% published dengan TRUSTED</td><td>≥ 80%</td></tr>
+  <tr><td>Claim approval</td><td>Waktu pending → decided</td><td>&lt; 48 jam</td></tr>
+  <tr><td>Paid conversion</td><td>Lead interest=verified → payment success</td><td>Baseline dulu, target 15% dalam 90 hari</td></tr>
+  <tr><td>Retention Pro</td><td>Langganan aktif bulan ke-2</td><td>≥ 60%</td></tr>
+  <tr><td>Scout sessions</td><td>Gallery view atlet unique / minggu</td><td>Diukur setelah 50 atlet discoverable</td></tr>
+</table>
+</div>
+
+<!-- 16 -->
+<div class="section" id="s16">
+<h2>16. Audit Kematangan As-Is</h2>
+<h3>16.1 Yang sudah lengkap dan dapat didemo lokal</h3>
+<ul>
+  <li>Tracker live + YouTube: prompt, voice, keyboard, undo, shot chart.</li>
+  <li>Possession rebuild, stint, event links, audit health.</li>
+  <li>Match details: box, advanced, lineup, log, momentum, data-health.</li>
+  <li>Pipeline QA + anotasi coach + match story.</li>
+  <li>Claim, apply role, editor RBAC.</li>
+  <li>Inbox jasa + assignment (lokal).</li>
+  <li>CRUD atlet/tim/org + merge + curations.</li>
+  <li>Clock mapping stack (auto + visual + on-the-fly).</li>
+  <li>AI lineup + AI Coach agents.</li>
+  <li>Fundamentals (terisolasi).</li>
+  <li>Landing + CMS + CRM.</li>
+  <li>Seed user + mock data + export/import match JSON.</li>
+</ul>
+
+<h3>16.2 Parsial</h3>
+<ul>
+  <li>Supabase: queue tertulis, tidak pernah dikirim.</li>
+  <li>Auth masih IndexedDB.</li>
+  <li>Pembayaran selalu sukses.</li>
+  <li>Apply scout tidak ada di UI.</li>
+  <li>QA hanya permission admin default.</li>
+  <li>Fundamentals terpisah dari profil utama.</li>
+  <li>FSD campur legacy; dua merge service; dua supabase client.</li>
+  <li>Model Gemini tidak konsisten.</li>
+  <li>Gallery Synergy hard-coded.</li>
+  <li><code>assign_stat_tasks</code> hampir tidak dipakai rute (admin request memakai <code>approve_applications</code>).</li>
+</ul>
+
+<h3>16.3 Stub / limitasi keras</h3>
+<ul>
+  <li><code>isSupabaseConfigured = () =&gt; false</code>.</li>
+  <li>Tidak ada kebenaran bersama multi-perangkat / multi-user.</li>
+  <li>Tidak ada penegakan limit paket Gratis.</li>
+  <li>README masih template AI Studio.</li>
+  <li><code>package.json</code> nama <code>react-example</code> versi 0.0.0.</li>
+  <li>Publishable key Supabase ter-commit (meski unused).</li>
+  <li>OCR API tanpa auth.</li>
+  <li>Dokumen identitas anak disimpan sebagai data URL di browser.</li>
+</ul>
+</div>
+
+<!-- 17 -->
+<div class="section" id="s17">
+<h2>17. Kesenjangan, Risiko, dan Rekomendasi</h2>
+<table>
+  <tr><th>Prioritas</th><th>Temuan</th><th>Dampak</th><th>Tindakan</th></tr>
+  <tr><td>P0</td><td>Tidak ada backend data / sync</td><td>Produk tidak bisa multi-user nyata</td><td>Postgres (Supabase) + RLS untuk semua store bisnis; IDB jadi cache offline</td></tr>
+  <tr><td>P0</td><td>Auth klien + RBAC forgeable</td><td>Eskalasi hak</td><td>Supabase Auth; permission dicek server</td></tr>
+  <tr><td>P0</td><td>Pembayaran palsu</td><td>Pendapatan &amp; sengketa</td><td>PSP Indonesia (Xendit/Midtrans) + webhook + invoice</td></tr>
+  <tr><td>P0</td><td>Dokumen anak di IDB</td><td>Privasi / kepatuhan</td><td>Object storage terenkripsi, TTL, akses ber-audit</td></tr>
+  <tr><td>P0</td><td>OCR tanpa auth + API key klien</td><td>Biaya Gemini bocor</td><td>Key hanya server; auth + kuota</td></tr>
+  <tr><td>P1</td><td>Copy landing ≠ kemampuan role</td><td>Kepercayaan pengguna</td><td>Putuskan §12.4 dan selaraskan CMS</td></tr>
+  <tr><td>P1</td><td>Tiga harga jasa yang saling tabrakan</td><td>Konversi kacau</td><td>Katalog SKU tunggal</td></tr>
+  <tr><td>P1</td><td>QA menumpuk di admin</td><td>Bottleneck SLA</td><td>Role QA atau permission ke stat senior</td></tr>
+  <tr><td>P1</td><td>Identitas atlet triple</td><td>Merge &amp; stats salah</td><td>Satu ChildProfile kanonik</td></tr>
+  <tr><td>P2</td><td>Duplikasi modul FSD/legacy</td><td>Biaya ubah fitur</td><td>Hapus service kembar; satu folder tracking</td></tr>
+  <tr><td>P2</td><td>Gallery hard-code</td><td>Scout melihat data palsu</td><td>Query published + discoverable</td></tr>
+  <tr><td>P2</td><td>Email/WA tidak ada</td><td>Klaim “menggantung”</td><td>Trigger status + template Indonesia</td></tr>
+  <tr><td>P2</td><td>Tidak ada org tenant</td><td>Klub tidak bisa kolaborasi</td><td>Anggota org + ownerAccountId hidup</td></tr>
+</table>
+
+<div class="warn"><strong>Risiko hukum.</strong> Produk menyimpan data anak (nama, DOB, NIK, KK, akta). Sebelum produksi publik, wajib kebijakan privasi, persetujuan wali, dasar pemrosesan, dan prosedur hapus akun. Jangan menaruh dokumen identitas di IndexedDB.</div>
+</div>
+
+<!-- 18 -->
+<div class="section" id="s18">
+<h2>18. Roadmap yang Diusulkan</h2>
+<h3>Fase 0 — Stabilisasi prototipe (2 minggu)</h3>
+<ul>
+  <li>Samakan brand: HoopStat vs HoopStats.</li>
+  <li>Ganti <code>package.json</code> name/version; ganti README.</li>
+  <li>Cabut kunci yang ter-commit; rotasi jika sempat ter-push.</li>
+  <li>Kunci keputusan §12.4 secara tertulis (self-track vs jasa-only; SKU harga).</li>
+  <li>Hapus atau tandai jelas seed password di lingkungan non-dev.</li>
+</ul>
+
+<h3>Fase 1 — Production spine (6–8 minggu) — P0</h3>
+<ol>
+  <li>Supabase Auth + tabel inti: users, orgs, teams, profiles, matches, events, possessions, stints, rosters.</li>
+  <li>RLS sesuai role + <code>canViewMatch</code>.</li>
+  <li>Sync offline: IDB cache + <code>sync_queue</code> yang benar-benar flush.</li>
+  <li>PSP + webhook untuk claim dan stat request.</li>
+  <li>Storage dokumen klaim + notifikasi email status.</li>
+  <li>Auth pada OCR; Gemini key server-only.</li>
+  <li>Gating paket Gratis/Pro (limit laga, AI, PDF).</li>
+</ol>
+
+<h3>Fase 2 — Operasi jasa (4 minggu)</h3>
+<ul>
+  <li>SKU jelas + SLA dashboard (paid → published).</li>
+  <li>Role QA atau assignment reviewer.</li>
+  <li>Gerbang publish berdasarkan healthScore.</li>
+  <li>Inbox statistician dengan timer &amp; checklist.</li>
+  <li>Gallery dari data nyata; apply scout.</li>
+</ul>
+
+<h3>Fase 3 — Produk pertumbuhan (berikutnya)</h3>
+<ul>
+  <li>Org tenant (pelatih klub mengelola banyak tim).</li>
+  <li>Satukan Fundamentals ke profil kanonik.</li>
+  <li>Bersihkan FSD, hapus duplikat.</li>
+  <li>Mobile/tablet polish untuk tribun.</li>
+  <li>Laporan PDF branded per paket.</li>
+</ul>
+</div>
+
+<!-- 19 -->
+<div class="section" id="s19">
+<h2>19. Lampiran</h2>
+<h3>19.1 Indeks berkas sumber audit</h3>
+<table>
+  <tr><th>Domain</th><th>Berkas</th></tr>
+  <tr><td>Rute</td><td><code>src/App.tsx</code></td></tr>
+  <tr><td>Skema IDB</td><td><code>src/lib/db.ts</code></td></tr>
+  <tr><td>Tipe inti</td><td><code>src/core/types/stats.ts</code>, <code>serviceRequests.ts</code>, <code>claim.ts</code>, <code>promptFlow.ts</code></td></tr>
+  <tr><td>Atlet / org</td><td><code>src/entities/athlete/model/types.ts</code>, <code>organization/model/types.ts</code></td></tr>
+  <tr><td>Auth / RBAC</td><td><code>src/services/authService.ts</code>, <code>rbacService.ts</code>, <code>src/core/config/permissions.ts</code></td></tr>
+  <tr><td>Pipeline</td><td><code>src/features/production-pipeline/model/pipelineService.ts</code></td></tr>
+  <tr><td>Tracking</td><td><code>src/pages/TrackingPage.tsx</code>, <code>src/modules/tracking/</code></td></tr>
+  <tr><td>Clock</td><td><code>src/features/automatic-clock-mapping/</code></td></tr>
+  <tr><td>AI</td><td><code>src/core/services/ai</code>, <code>src/features/ai-lineup-detector/</code></td></tr>
+  <tr><td>CMS/harga</td><td><code>src/services/contentService.ts</code>, <code>src/core/config/landingContent.ts</code></td></tr>
+  <tr><td>Server</td><td><code>server.ts</code></td></tr>
+</table>
+
+<h3>19.2 Acceptance criteria rilis produksi minimum (MVP cloud)</h3>
+<ol>
+  <li>Dua perangkat, satu akun: match yang sama muncul setelah sync.</li>
+  <li>Customer tidak dapat memalsukan role lewat DevTools.</li>
+  <li>Pembayaran claim dan request tercatat dari webhook, bukan <code>status: success</code> palsu.</li>
+  <li>Statistician hanya melihat tugas assigned-nya.</li>
+  <li>Scout tidak melihat laga unpublished atau atlet tidak discoverable.</li>
+  <li>Dokumen KK/akta tidak pernah masuk IndexedDB.</li>
+  <li>OCR menolak request tanpa sesi valid.</li>
+  <li>Copy landing, permission, dan harga merujuk katalog SKU yang sama.</li>
+  <li>Laga UNRELIABLE tidak dapat dipublish tanpa override bertanda.</li>
+  <li>Admin dapat menelusuri stageHistory lengkap per laga.</li>
+</ol>
+
+<h3>19.3 Glosarium</h3>
+<table>
+  <tr><th>Istilah</th><th>Arti di HoopStat</th></tr>
+  <tr><td>KU</td><td>Kategori Umur (KU-8 s/d KU-19)</td></tr>
+  <tr><td>Stint</td><td>Jendela lineup 5 pemain di lapangan</td></tr>
+  <tr><td>Possession</td><td>Rantai event dari opening sampai closing satu penguasaan bola</td></tr>
+  <tr><td>Prompt flow</td><td>Wizard modular yang memandu statistician mencatat event berantai</td></tr>
+  <tr><td>Lite / detailed</td><td>Kedalaman field opsional saat tracking</td></tr>
+  <tr><td>Single / team / full</td><td>Cakupan rekaman: satu anak, satu tim, atau kedua tim</td></tr>
+  <tr><td>Verified</td><td>Paket jasa manusia + badge kepercayaan</td></tr>
+  <tr><td>Claim</td><td>Wali mengklaim profil atlet yang sudah ada di sistem</td></tr>
+  <tr><td>Discoverable</td><td>Atlet boleh muncul di gallery scout</td></tr>
+  <tr><td>Health score</td><td>0–100 hasil audit integritas play-by-play</td></tr>
+  <tr><td>Playing-up</td><td>Anak bermain di KU lebih tinggi dari usianya</td></tr>
+</table>
+
+<h3>19.4 Kontrol dokumen</h3>
+<table>
+  <tr><th>Versi</th><th>Tanggal</th><th>Perubahan</th></tr>
+  <tr><td>1.0</td><td>30 Agustus 2026</td><td>PRD awal hasil audit codebase as-is + target produksi</td></tr>
+</table>
+<p class="small">Penulis: audit otomatis terhadap workspace hoopstat. Review wajib: Product Owner, Tech Lead, Operasional Statistician, Legal/Privasi (data anak).</p>
+<p class="footer-note">Bagian I menggambarkan sistem sebagaimana ada di repositori pada tanggal audit. Fitur yang ditandai TARGET atau GAP bukan janji jadwal kecuali dimasukkan ke sprint. Brand di kode terpecah antara HoopStat dan HoopStats — samakan sebelum rilis publik. Bagian II di bawah ini adalah paten desain yang wajib dipatuhi.</p>
+</div>
+
+<div class="page-break" id="s20">
+<h2>20. Status dokumen sebagai paten desain</h2>
+<p>Mulai versi 2.0, dokumen ini adalah <strong>System Design Pattern Patent</strong> HoopStat. Artinya:</p>
+<ol>
+  <li>Setiap fitur baru harus memakai salah satu pola DP-01 s/d DP-16, atau mengajukan amandemen pola baru lewat §32.</li>
+  <li>Dilarang membuat alur tandingan untuk klaim, pembayaran, pipeline, visibilitas match, atau identitas atlet.</li>
+  <li>Nama state, permission, dan SKU di UI wajib sama dengan katalog ini.</li>
+  <li>Kalau kode as-is menyimpang dari paten (ditandai GAP), yang menang adalah kolom <em>Paten (wajib)</em> — kode harus ditarik ke paten, bukan sebaliknya, kecuali amandemen disetujui.</li>
+  <li>Business process BP-xx adalah kontrak operasi: QA, admin, dan statistician bekerja menurut langkah ini.</li>
+</ol>
+<div class="callout"><strong>Prinsip utama paten.</strong> Satu kebenaran identitas atlet. Satu pipeline produksi. Satu matriks visibilitas. Satu katalog SKU. Event play-by-play adalah sumber, statistik adalah turunan. Manusia (QA/coach) mengunci kepercayaan; AI hanya membaca data terstruktur.</div>
+</div>
+
+<div class="section" id="s21">
+<h2>21. Katalog Design Pattern resmi</h2>
+<p>Enam belas pola di bawah ini adalah IP operasional sistem. Implementasi boleh berganti teknologi (IDB → Postgres), tetapi bentuk pola tidak boleh pecah.</p>
+
+<h3>DP-01 — Prompt-Flow Event Capture</h3>
+<p><strong>Masalah.</strong> Mencatat basket full-game dengan tombol datar menghasilkan event yatim (tembakan tanpa rebound, skor tanpa assist).</p>
+<p><strong>Pola.</strong> Setiap aksi pemicu membuka <code>PromptFlow</code>: container berantai dengan primary action, secondary action (aktor/pilihan), optional field (gated lite/detailed), dan branching. Event yang dihasilkan membawa <code>sourceType</code>, <code>promptFlowId</code>, <code>promptStepId</code>.</p>
+<p><strong>Aturan paten.</strong> Jangan menambah tombol event baru di tracker tanpa mendaftarkannya ke flow library. Admin mengubah urutan lewat Prompt Flow Editor, bukan hard-code di komponen.</p>
+<p><strong>Flow wajib:</strong> plus_2pt, plus_3pt, missed_shot, missed_free_throw, turnover, rebound, defensive_foul, offensive_foul, substitution, timeout, jumpball, standalone_steal, standalone_block, anomaly_missing_event + override single-player.</p>
+
+<h3>DP-02 — Dual Recording Axis</h3>
+<p>Dua sumbu independen, jangan digabung jadi satu enum:</p>
+<ul>
+  <li><strong>Cakupan</strong> <code>recordingType</code>: <code>single</code> (satu anak) · <code>team</code> (satu tim) · <code>full</code> (kedua tim).</li>
+  <li><strong>Kedalaman</strong> <code>recordingMode</code>: <code>lite</code> (wajib saja) · <code>detailed</code> (zona, contest, pressure, phase).</li>
+</ul>
+<p>Harga jasa dan SLA boleh berbeda per kombinasi, tetapi data model tetap dua field ini.</p>
+
+<h3>DP-03 — Stint Integrity (tepat 5)</h3>
+<p>Lineup sah = tepat 5 <code>playerIds</code> dalam satu <code>MatchStint</code> dengan jendela clock. Substitusi menutup stint lama dan membuka stint baru. Stint durasi 0 = <code>isGhostStint</code>. Event yang pemainnya tidak ada di stint aktif = temuan audit <code>PLAYER_NOT_ON_COURT</code>. 3x3 memakai aturan yang sama dengan ukuran lineup 3 — jangan pecah entitas, parameterisasi jumlah.</p>
+
+<h3>DP-04 — Possession as Derived Truth</h3>
+<p>Possession <em>bukan</em> diinput manual sebagai sumber. Ia dibangun ulang dari event terurut (kuarter → countdown clock → realTime → youtubeTimestamp) oleh <code>rebuildPossessionsEngine</code>. Opening/closing/outcome diisi mesin. Anomali ditandai, tidak dihapus diam-diam. Koreksi manusia memperbaiki <em>event</em>, lalu rebuild.</p>
+
+<h3>DP-05 — Event Link Graph</h3>
+<p>Hubungan antar event disimpan eksplisit di <code>EventLink</code>: ASSISTS, STEALS_FROM, REBOUNDS, RESULTS_IN_FT. Jangan hanya mengandalkan urutan waktu. Helper wajib: <code>createAssistShotLink</code>, <code>createStealTurnoverLink</code>, <code>createReboundShotLink</code>, <code>createBlockShotLink</code>, <code>createFoulFreeThrowLink</code>.</p>
+
+<h3>DP-06 — Production Pipeline + Return</h3>
+<p>Empat tahap linear dengan dua jalur balik. Tidak ada lompat tahap. Setiap transisi menulis <code>stageHistory</code> (<code>advanced</code> | <code>returned</code> + user + waktu + note).</p>
+<table>
+  <tr><th>Dari</th><th>Ke (advance)</th><th>Permission</th><th>Return ke</th><th>Permission return</th></tr>
+  <tr><td>tracking (default)</td><td>qa_review</td><td>track_match ATAU do_stat_tasks</td><td>—</td><td>—</td></tr>
+  <tr><td>qa_review</td><td>coach_analysis</td><td>do_qa_review</td><td>tracking</td><td>do_qa_review</td></tr>
+  <tr><td>coach_analysis</td><td>published</td><td>do_coach_analysis</td><td>qa_review</td><td>do_coach_analysis</td></tr>
+  <tr><td>published</td><td>—</td><td>—</td><td>tidak bisa</td><td>—</td></tr>
+</table>
+<p><strong>Paten tambahan (TARGET):</strong> publish ditolak jika <code>trustClassification === 'UNRELIABLE'</code> kecuali override admin bertanda di history.</p>
+
+<h3>DP-07 — Trust Classification</h3>
+<p>Audit menghasilkan <code>healthScore</code> 0–100 dan kelas TRUSTED / CAUTION / UNRELIABLE. Temuan punya severity, grouping, dan suggestion (LINK_ASSIST, INSERT_REBOUND, LINK_STEAL, CLOSE_POSSESSION, REASSIGN_PLAYER, ADJUST_STINT_TIME). Resolusi disimpan di <code>audit_issue_resolutions</code>. Skor adalah sinyal kepercayaan publik, bukan kosmetik UI.</p>
+
+<h3>DP-08 — Visibility Triangle</h3>
+<p>Siapa boleh melihat match/story diputuskan <em>hanya</em> oleh <code>canViewMatch</code>:</p>
+<ol>
+  <li>admin / statistician / coach → ya.</li>
+  <li>customer → ya jika <code>canManage</code> (link guardian <code>verified</code>) ATAU ada <code>PaymentRecord.status === 'success'</code> yang <code>requestId</code>-nya = match.id ATAU childId ATAU athlete.id.</li>
+  <li>scout → ya hanya jika <code>productionStage === 'published'</code> DAN minimal satu atlet <code>isDiscoverable</code>.</li>
+</ol>
+<p>Dilarang menambah bypass “kalau login boleh lihat semua”. Story, PDF, dan clip YouTube memakai fungsi yang sama.</p>
+
+<h3>DP-09 — Canonical Team Key</h3>
+<p>Satu tim sah = <code>(organizationId, divisionCode)</code>. <code>teamRepo.findCanonical</code> wajib dipanggil sebelum create. Nama tampilan boleh beda; kunci tidak. Divisi master: KU 8–19 × M/F/MIX → <code>KU{n}-M|F|MIX</code>.</p>
+
+<h3>DP-10 — Merge with Rollback Snapshot</h3>
+<p>Dua identitas yang sama (pemain atau org) disatukan ke primary. Secondary <code>archived/merged</code> + <code>mergedIntoId</code>. Semua FK (roster, event, stint, klaim, insight, transfer) dipindah. <code>MergeLog</code> menyimpan snapshot untuk <code>undoMerge</code>. Org merge men-cascade tim: jika target sudah punya canonical division yang sama, roster digabung.</p>
+<p>Deteksi duplikat pemain: nama mirip (token/prefix) DAN DOB selisih ≤ 2 hari. Primary = yang lebih lengkap (avatar, displayName, jersey).</p>
+
+<h3>DP-11 — Claim-to-Guardian</h3>
+<p>Alur wajib lima langkah: search → teaser (PPG/RPG/APG, jumlah laga) → form (ayah/ibu/wali + dokumen) → payment → pending review. Approve menulis <code>AthleteLink { relationship: 'guardian', verified: true }</code> dan <code>claimStatus: verified</code>. Reject: <code>refund_pending</code>; claimStatus kembali <code>unclaimed</code> <em>hanya jika</em> tidak ada guardian verified lain (multi-guardian safety). Opsional merge placeholder lokal ke profil resmi.</p>
+
+<h3>DP-12 — Labor Marketplace (Request → Assign → Produce)</h3>
+<p>Customer tidak mencatat laga jasa. Mereka membayar request. Admin menugaskan statistician. Statistician membuat match dari request (idempotent jika matchId sudah ada), mencatat, lalu masuk DP-06. Back-office request: price 0, status langsung <code>paid</code>, <code>customerId: 'back-office'</code> — untuk laga internal tanpa checkout.</p>
+<p>Status request: pending → awaiting_payment → paid → assigned → in_progress → completed → reviewed. Jangan loncat, jangan reuse status klaim.</p>
+
+<h3>DP-13 — Triple Clock Alignment</h3>
+<p>Tiga lapisan, urutan prioritas saat konflik: (1) titik MANUAL_CORRECTION, (2) OCR_CONFIRMED visual sync, (3) on-the-fly per event jika confidence ≥ 75, (4) automatic timeline published. Pipeline otomatis: DRAFT → SCANNING → REVIEW_REQUIRED → READY_TO_PUBLISH → PUBLISHED | FAILED. Fail-fast jika region jam tidak valid. OCR batch hanya lewat server berautentikasi (TARGET; as-is belum auth).</p>
+
+<h3>DP-14 — AI Reads Structure, Not Film</h3>
+<p>AI Coach (skill_coach, shot_analyst, progress_analyst, team_analyst, strategist, scout) membaca agregat event/possession, bukan frame video. Vision hanya untuk dua tugas: lineup jersey (hingga 16 frame) dan OCR jam. Output coach: <code>{ role, title, content, actionableAdvice[] }</code> disimpan <code>AiInsight</code>. Bahasa: Indonesia + istilah Inggris baku.</p>
+
+<h3>DP-15 — RBAC as Data</h3>
+<p>Permission adalah string katalog, bukan if-role di komponen. Role → permission[] hidup di store <code>role_permissions</code>, diedit admin, bisa di-reset ke default. Komponen memakai <code>can(permission)</code> / <code>RequirePermission</code>. Admin lolos semua. TARGET: evaluasi yang sama di server.</p>
+
+<h3>DP-16 — SKU Separation</h3>
+<p>Tiga uang yang tidak boleh dicampur:</p>
+<table>
+  <tr><th>SKU</th><th>Apa yang dibeli</th><th>Pemicu</th></tr>
+  <tr><td>Identity Claim</td><td>Hak wali atas satu profil (Basic 50k / Premium 150k / Pro 250k)</td><td>BP-05</td></tr>
+  <tr><td>Analytics Plan</td><td>Langganan Gratis / Pro 99k/bulan (limit laga, AI, PDF)</td><td>BP-01 + entitlement</td></tr>
+  <tr><td>Verified Match / Stat Pack</td><td>Jasa manusia per laga (katalog harus satu angka resmi — lihat §12.4)</td><td>BP-19</td></tr>
+</table>
+<p>Lead CRM (<code>interest: free|pro|verified</code>) bukan pembayaran. Pembayaran wajib <code>PaymentRecord</code>.</p>
+
+<h3>Pola teknis pendukung (bukan IP produk, wajib arsitektur)</h3>
+<table>
+  <tr><th>Pola</th><th>Pakai di</th></tr>
+  <tr><td>Offline-first + sync queue</td><td>Event tracking di gedung olahraga</td></tr>
+  <tr><td>Repository generik + domain repo</td><td><code>createIdbRepo</code> + <code>organizationRepo</code>/<code>teamRepo</code></td></tr>
+  <tr><td>Soft-delete / archive + mergedIntoId</td><td>Semua master data</td></tr>
+  <tr><td>Derived views</td><td>Box score, advanced, story, AI — jangan disimpan sebagai sumber</td></tr>
+  <tr><td>Idempotent match-from-request</td><td>Jika <code>request.matchId</code> sudah ada, jangan create kedua</td></tr>
+</table>
+</div>
+
+<div class="section" id="s22">
+<h2>22. Peta proses bisnis</h2>
+<table>
+  <tr><th>ID</th><th>Proses</th><th>Pemicu</th><th>Output</th><th>Pola</th></tr>
+  <tr><td>BP-01</td><td>Akuisisi lead landing</td><td>CTA hero/pricing/footer</td><td>Lead stage=new</td><td>DP-16</td></tr>
+  <tr><td>BP-02</td><td>Daftar / masuk / reset sandi</td><td>User publik</td><td>UserAccount + sesi</td><td>DP-15</td></tr>
+  <tr><td>BP-03</td><td>Ajukan naik role</td><td>Customer di /account/apply</td><td>RoleApplication pending</td><td>DP-15</td></tr>
+  <tr><td>BP-04</td><td>Buat profil anak sendiri</td><td>Customer di /profiles</td><td>ChildProfile + optional link</td><td>DP-11</td></tr>
+  <tr><td>BP-05</td><td>Klaim atlet</td><td>Tab claim</td><td>Claim pending + payment success (as-is)</td><td>DP-11, DP-16</td></tr>
+  <tr><td>BP-06</td><td>Review klaim &amp; refund</td><td>Admin /admin/claims</td><td>verified + guardian ATAU refund_pending</td><td>DP-11, DP-10</td></tr>
+  <tr><td>BP-07</td><td>Buat org &amp; tim kanonik</td><td>Setup game / profiles</td><td>Organization + Team</td><td>DP-09</td></tr>
+  <tr><td>BP-08</td><td>Kurasi &amp; merge org/tim</td><td>Admin curations</td><td>status verified/merged</td><td>DP-09, DP-10</td></tr>
+  <tr><td>BP-09</td><td>Merge pemain</td><td>Admin/profil duplikat</td><td>MergeLog + FK pindah</td><td>DP-10</td></tr>
+  <tr><td>BP-10</td><td>Setup pertandingan</td><td>FAB / games / request</td><td>Match + roster, stage=tracking</td><td>DP-02, DP-09</td></tr>
+  <tr><td>BP-11</td><td>Sesi live tracking</td><td>/track/:id</td><td>events, stints, game_state</td><td>DP-01..05</td></tr>
+  <tr><td>BP-12</td><td>Video tracking + clock + lineup AI</td><td>Match ber-videoUrl</td><td>timeline + roster terisi</td><td>DP-13, DP-14</td></tr>
+  <tr><td>BP-13</td><td>Eksekusi prompt flow</td><td>Tap aksi di tracker</td><td>1..n GameEvent + links</td><td>DP-01</td></tr>
+  <tr><td>BP-14</td><td>Rebuild possession &amp; audit</td><td>Setelah event / buka QA</td><td>possessions + MatchAuditResult</td><td>DP-04, DP-07</td></tr>
+  <tr><td>BP-15</td><td>Advance / return pipeline</td><td>Tombol di match/workspace</td><td>productionStage + history</td><td>DP-06</td></tr>
+  <tr><td>BP-16</td><td>QA review</td><td>/qa/:id atau workspace</td><td>enrich + lolos/return</td><td>DP-06, DP-07</td></tr>
+  <tr><td>BP-17</td><td>Coach analysis &amp; publish</td><td>/coach-analysis/:id</td><td>anotasi + published</td><td>DP-06, DP-08</td></tr>
+  <tr><td>BP-18</td><td>Konsumsi story / stats / PDF</td><td>Wali, coach, scout</td><td>tayangan (bukan mutasi)</td><td>DP-08, DP-14</td></tr>
+  <tr><td>BP-19</td><td>Pesan jasa statistik</td><td>/services</td><td>StatServiceRequest + payment</td><td>DP-12, DP-16</td></tr>
+  <tr><td>BP-20</td><td>Assign &amp; kerjakan tugas</td><td>Admin → statistician</td><td>match dari request, lalu BP-11..17</td><td>DP-12</td></tr>
+  <tr><td>BP-21</td><td>Back-office request</td><td>Admin buat laga internal</td><td>request paid price=0</td><td>DP-12</td></tr>
+  <tr><td>BP-22</td><td>Pipeline CRM</td><td>Admin /admin/crm</td><td>stage lead berubah</td><td>DP-16</td></tr>
+  <tr><td>BP-23</td><td>Ubah CMS landing</td><td>Admin /admin/cms</td><td>site_content main</td><td>—</td></tr>
+  <tr><td>BP-24</td><td>Scout gallery</td><td>/gallery</td><td>hanya published+discoverable</td><td>DP-08</td></tr>
+  <tr><td>BP-25</td><td>Generate AI Coach</td><td>/stats?tab=aicoach</td><td>AiInsight</td><td>DP-14</td></tr>
+  <tr><td>BP-26</td><td>Fundamentals (latihan)</td><td>/fundamentals</td><td>jadwal/drill/Q&amp;A lokal</td><td>TARGET: satu ID atlet</td></tr>
+  <tr><td>BP-27</td><td>Konfigurasi RBAC</td><td>/admin/roles</td><td>role_permissions</td><td>DP-15</td></tr>
+  <tr><td>BP-28</td><td>Kelola user (role/suspend)</td><td>/admin/users</td><td>UserAccount mutasi</td><td>DP-15</td></tr>
+  <tr><td>BP-29</td><td>Export / import match JSON</td><td>/games</td><td>berkas portabel</td><td>DP-04</td></tr>
+  <tr><td>BP-30</td><td>Review apply role</td><td>/admin/applications</td><td>role berubah jika approved</td><td>DP-15</td></tr>
+</table>
+</div>
+
+<div class="section" id="s23">
+<h2>23. Proses akuisisi, akun, dan identitas</h2>
+
+<h3>BP-01 — Akuisisi lead</h3>
+<p><strong>Aktor:</strong> pengunjung, sistem, admin CRM. <strong>Pra-syarat:</strong> halaman /welcome.</p>
+<ol>
+  <li>Pengunjung mengisi formulir dari hero, kartu harga, atau footer.</li>
+  <li>Sistem merekam <code>source</code> ∈ {landing_hero, landing_pricing, landing_footer, manual} dan <code>interest</code> ∈ {free, pro, verified, unknown}.</li>
+  <li><code>leadService.createLead</code> menulis stage <code>new</code>, notes [].</li>
+  <li>Tidak ada akun yang dibuat otomatis. Tidak ada charge.</li>
+</ol>
+<p><strong>Pengecualian:</strong> user sudah login diarahkan ke / — lead tidak dibuat dari kunjungan itu. <strong>Pasca:</strong> admin melihat di /admin/crm (BP-22).</p>
+
+<h3>BP-02 — Daftar / masuk / reset</h3>
+<ol>
+  <li>Signup: email + nama + password ≥ 6. Role dipaksa <code>customer</code>. Password di-hash SHA-256+salt. Status <code>active</code>.</li>
+  <li>Login: cocokkan hash; tulis sesi <code>hoopstats_current_user</code>.</li>
+  <li>Forgot-password: alur lokal (Supabase dikomentari). TARGET: reset email provider.</li>
+  <li>Logout: hapus sesi.</li>
+  <li>ProtectedRoute menolak yang tanpa sesi. RequirePermission menolak yang tanpa hak.</li>
+</ol>
+<p><strong>Seed lokal (bukan produksi):</strong> admin@ / stat1@ / stat2@ / customer@ / scout@ / coach@ hoopstats.com.</p>
+
+<h3>BP-03 + BP-30 — Naik role</h3>
+<ol>
+  <li>User (biasanya customer) buka /account/apply. UI menawarkan statistician | coach (scout ada di tipe, belum di UI — GAP).</li>
+  <li>Isi motivasi + pengalaman. Sistem menolak jika sudah ada aplikasi <code>pending</code> untuk user itu.</li>
+  <li>Admin di /admin/applications memilih approved/rejected + catatan.</li>
+  <li>Jika approved: <code>authService.updateUserRole(userId, requestedRole)</code>. Permission langsung mengikuti matriks role baru. Aplikasi kedua tidak mengubah history role secara otomatis.</li>
+</ol>
+<p><strong>Keputusan:</strong> menolak tidak mengunci user — mereka boleh mengajukan lagi setelah status bukan pending.</p>
+
+<h3>BP-04 — Buat profil anak</h3>
+<ol>
+  <li>Customer di /profiles membuat ChildProfile (nama, DOB, gender, jersey, klub/tim).</li>
+  <li>Boleh menautkan ke tim main/school/academy/loan.</li>
+  <li>claimStatus awal biasanya unclaimed sampai ada klaim formal, atau langsung dikelola pembuat jika produk menautkan link (implementasi tautan mandiri vs klaim harus satu jalur — paten: profil yang dibuat wali sendiri langsung dapat link guardian verified, tanpa bayar claim, agar tidak memaksa orang tua membayar untuk anak yang mereka input sendiri).</li>
+</ol>
+<div class="note"><strong>Paten keputusan identitas.</strong> Klaim berbayar hanya untuk profil yang <em>sudah ada</em> di sistem (hasil jasa/statistikian). Profil yang wali buat sendiri = gratis + link verified. Jangan tagih dua kali.</div>
+</div>
+
+<div class="section" id="s24">
+<h2>24. Proses klaim, pembayaran, dan refund</h2>
+
+<h3>BP-05 — Klaim atlet (customer)</h3>
+<p><strong>Pra-syarat:</strong> login customer; profil target ada; claimStatus ≠ claim_pending milik orang lain (satu klaim aktif per profil disarankan).</p>
+<table>
+  <tr><th>Langkah</th><th>UI</th><th>Sistem menulis</th></tr>
+  <tr><td>1 Search</td><td>nama / DOB / klub</td><td>—</td></tr>
+  <tr><td>2 Teaser</td><td>PPG, RPG, APG, jumlah laga (paywall lunak)</td><td>—</td></tr>
+  <tr><td>3 Form</td><td>hubungan ayah|ibu|wali, nama, telp, NIK opsional, data anak, dokumen kk|akta|kartu_pelajar, syarat</td><td>draft di memori halaman</td></tr>
+  <tr><td>4 Payment</td><td>paket basic 50k / premium 150k / pro 250k; metode card|transfer|e-wallet</td><td>as-is: PaymentRecord success langsung</td></tr>
+  <tr><td>5 Commit</td><td>success</td><td>ClaimRequest pending, paymentStatus=paid, profile.claimStatus=claim_pending</td></tr>
+</table>
+<p><strong>TARGET langkah 4:</strong> status payment pending → webhook PSP → baru paid. Jangan tulis success di klien.</p>
+<p><strong>Notifikasi as-is:</strong> toast saat status berubah (localStorage <code>claim_seen_{id}</code>). TARGET: email/WA.</p>
+
+<h3>BP-06 — Review klaim (admin)</h3>
+<ol>
+  <li>Buka /admin/claims. Cek dokumen, matchScore, data anak vs profil.</li>
+  <li><strong>Approve:</strong> claim.status=approved; profile.claimStatus=verified; tambah AthleteLink guardian verified jika belum ada; opsional <code>mergeService.executeMerge(profileId, mergePlaceholderId)</code>.</li>
+  <li><strong>Reject:</strong> claim.status=rejected; paymentStatus=refund_pending; claimStatus=unclaimed hanya jika tidak ada guardian verified lain.</li>
+  <li><strong>Refund:</strong> admin <code>processRefund</code> → refunded (PaymentRecord.status jadi failed) atau refund_rejected.</li>
+</ol>
+<p><strong>RACI:</strong> Customer = Responsible submit. Admin = Accountable keputusan. Sistem = Consulted skor. Legal = Informed jika dokumen mencurigakan (TARGET SOP).</p>
+
+<h3>Pembayaran — kontrak data</h3>
+<p><code>PaymentRecord</code>: id, requestId (bisa claimId, stat requestId, atau match/child id untuk tiket lihat), amount, status pending|success|failed, method card|transfer|e-wallet, createdAt.</p>
+<p>Satu payment satu request. Refund mengubah payment jadi failed (as-is) — TARGET: status tersendiri <code>refunded</code> agar histori sukses tidak hilang.</p>
+</div>
+
+<div class="section" id="s25">
+<h2>25. Proses master data</h2>
+
+<h3>BP-07 — Org &amp; tim kanonik</h3>
+<ol>
+  <li>Input nama org + kota (+ tipe club|academy|school). Status awal <code>pending</code>.</li>
+  <li><code>findSimilar(name, city)</code>: normalisasi alfanumerik, kota harus sama, nama equal/contains. Jika ketemu, tawarkan pakai yang ada — jangan create buta.</li>
+  <li>Tim: pilih org + divisionCode. <code>findCanonical</code>; jika ada, pakai itu (isi roster), jika tidak, create.</li>
+  <li>Jersey terang/gelap opsional. Roster Player embedded (nama, jersey, voiceAliases, guest flag).</li>
+</ol>
+<p>Migrasi warisan: saat buka DB, <code>clubs</code> disalin ke <code>organizations</code> type=club.</p>
+
+<h3>BP-08 — Kurasi admin</h3>
+<ol>
+  <li>/admin/curations daftar org/tim pending.</li>
+  <li>Verify → status verified.</li>
+  <li>Merge org: source.status=merged, mergedIntoId=target. Setiap tim source: jika target sudah punya canonical division yang sama, gabung roster (unik by id atau nama); jika tidak, pindahkan organizationId ke target. Pertandingan yang merujuk tim source tetap valid (tim id tidak dihapus jika di-merge ke canonical).</li>
+</ol>
+
+<h3>BP-09 — Merge pemain</h3>
+<ol>
+  <li>Deteksi: pasangan aktif, nama similar, DOB ≤2 hari.</li>
+  <li>Preview: hitung roster/event yang akan pindah.</li>
+  <li>Execute: pindahkan match_rosters, events (playerId/opponentPlayerId/linkedEntityId), stints, claims, ai_insights, transfers, aliases, links. Secondary archived + mergedIntoId.</li>
+  <li>Undo: dari MergeLog snapshot.</li>
+</ol>
+<p><strong>Dilarang:</strong> hapus hard secondary tanpa log. <strong>Dilarang:</strong> merge lintas gender/DOB jauh tanpa override admin bertanda.</p>
+</div>
+
+<div class="section" id="s26">
+<h2>26. Proses produksi pertandingan</h2>
+
+<h3>BP-10 — Setup</h3>
+<p>Dua path UI: <code>quick</code> | <code>full</code> (GameSetupModal). Wajib terisi: kedua sisi (org/tim atau nama), tanggal, recordingType, gameType 5v5|3x3|other, periodCount, durationPerPeriod, clockMode running|stop, stopClockOnMadeBasket fiba|always|never. Full menambah: venue, eventName, series, competitionGrade, matchContext, videoUrl, KU/division, home/away, warna jersey.</p>
+<p>Sistem: <code>statsService.addMatch</code> → productionStage default <code>tracking</code>, status planned. Roster via addMatchRoster. childId diisi jika recordingType=single.</p>
+
+<h3>BP-11 — Live tracking</h3>
+<ol>
+  <li>Masuk /track/:gameId (permission track_match). Full-screen, tanpa app shell.</li>
+  <li>Set starter tepat 5 (atau 3 untuk 3x3). Clock start → status ongoing, GameState hidup.</li>
+  <li>Setiap aksi: BP-13. Substitusi: tutup stint, buka stint baru.</li>
+  <li>Foul/timeout/skor di GameState harus konsisten dengan event (audit akan menandai jika tidak).</li>
+  <li>Undo/redo, koreksi pemain, event-set editor diizinkan selama stage=tracking (dan saat return dari QA).</li>
+  <li>Selesai: status completed (atau aborted + optional excludeFromStats). Lanjut BP-15.</li>
+</ol>
+<p>Sumber input sah: manual_button, smart_prompt, voice_capture, smart_suggestion, correction, batch_fix. Voice memakai alias Fuse.js (<code>basketball_knowledge_db</code>).</p>
+
+<h3>BP-12 — Video + clock + lineup</h3>
+<ol>
+  <li>Jika ada videoUrl YouTube, panel video aktif. Event menyimpan youtubeTimestamp.</li>
+  <li>Lineup AI: hitung hingga 16 timestamp dari quarter marker → capture frame → Gemini vision → warna + nomor → apply ke roster atau placeholder <code>Pemain #N</code>.</li>
+  <li>Clock auto: set region → AdaptivePipeline (coarse 30s → OCR Tesseract → validasi → Gemini fallback → fine 1s) → review timeline → publish timeline.</li>
+  <li>Visual sync: user/OCR menandai titik. On-the-fly: tiap log event, crop jam; confidence ≥75 menulis timestamp.</li>
+</ol>
+
+<h3>BP-13 — Prompt flow (detail langkah)</h3>
+<ol>
+  <li>User memicu (contoh +2). Engine buka flow <code>plus_2pt</code>, container awal.</li>
+  <li>Primary: event shot/2pt_make + aktor (OUR_TEAM default).</li>
+  <li>Secondary: assist? (inline_actor_select, exclude primary). And-1? → bisa loncat ke foul/FT.</li>
+  <li>Optional (detailed): shotDifficulty, area, pressure, phaseOfPlay.</li>
+  <li>Commit: tulis event + links + realTime ISO. Rebuild possession (BP-14) boleh debounce.</li>
+</ol>
+<p>Single-player mode memakai flow override agar tidak memaksa input lawan lengkap.</p>
+
+<h3>BP-14 — Rebuild &amp; audit</h3>
+<ol>
+  <li>Urutkan event. Buka possession pada opening source. Tutup pada closing. FT series menunggu isFinalFT.</li>
+  <li>Outcome: score | empty | turnover | interrupted. Anomali: bolong, overlap, unclosed.</li>
+  <li>Audit stint: gap, overlap, ghost, player not on court, missing sub, attribution mismatch.</li>
+  <li>Hasil: healthScore, trust class, issues[], suggestions. QA memakai ini (BP-16).</li>
+</ol>
+
+<h3>BP-15 / 16 / 17 — Pipeline manusia</h3>
+<p><strong>Workspace antrian:</strong> tab input = tugas/track; tab QA = match stage qa_review (bukan aborted); tab coach = stage coach_analysis.</p>
+<p><strong>QA (BP-16):</strong> buka /qa/:id → jalankan audit → enrich shotZone/assistType/phaseOfPlay/pressureLevel → checklist skor/anomali/lineup → advance (Setujui &amp; Kirim ke Coach) atau return + note ke tracking.</p>
+<p><strong>Coach (BP-17):</strong> video + daftar possession. Anotasi: targetType possession|event|player|team|game; category skill|strategy|decision|teamwork|effort|mental; rating 1–5; note; videoTimestamp. Publish → published. Return → qa_review. Setelah published, story /story/:id hidup (BP-18).</p>
+<p>Label UI resmi tahap: “Perekaman Statistik” → “Pemeriksaan Kualitas (QA)” → “Penyusunan Analisis Coach Bersertifikat” → “Selesai &amp; Dipublikasikan”.</p>
+</div>
+
+<div class="section" id="s27">
+<h2>27. Proses jasa statistik &amp; tenaga kerja</h2>
+
+<h3>BP-19 — Customer pesan jasa</h3>
+<ol>
+  <li>/services: YouTube URL, org/nama home &amp; away, roster opsional, recordingType, divisionCode, event/tanggal/venue, grade.</li>
+  <li>Jika org+divisi sudah punya tim kanonik, tawarkan reuse.</li>
+  <li><code>createRequest</code>: status pending, price 50000 (as-is). TARGET: pakai SKU katalog resmi.</li>
+  <li><code>processPayment</code> (as-is selalu success, method card) → status paid + PaymentRecord.</li>
+  <li>Customer menunggu. Mereka tidak track.</li>
+</ol>
+
+<h3>BP-20 — Assign &amp; kerjakan</h3>
+<ol>
+  <li>Admin /services/admin melihat paid/pending. Assign statistician → status assigned.</li>
+  <li>Statistician / atau /services/tasks atau /workspace. Buka tugas → <code>createMatchFromRequest</code> (idempotent): match 5v5, 4 period, 10 menit default, clock stop, warna default, roster dari request (profileId baru per baris — TARGET: cocokkan ke ChildProfile existing).</li>
+  <li>Status in_progress saat tracker dibuka (paten: wajib di-set; cek implementasi jika belum).</li>
+  <li>Kerjakan BP-11..15. Setelah published, request → completed, lalu reviewed jika ada QC bisnis tambahan.</li>
+</ol>
+
+<h3>BP-21 — Back-office</h3>
+<p>Admin membuat match dulu, lalu <code>createBackOfficeRequest</code>: customerId=back-office, price=0, status=paid, matchId terisi. Masuk antrian kerja tanpa checkout. Dipakai untuk laga internal, demo, atau koreksi.</p>
+</div>
+
+<div class="section" id="s28">
+<h2>28. Proses konsumsi, scouting, AI, latihan, operasi</h2>
+
+<h3>BP-18 — Konsumsi</h3>
+<ul>
+  <li>/match/:id: box, momentum, advanced, lineup, shot chart, log, data-health. Gerbang canViewMatch.</li>
+  <li>/story/:id: simple | pro (stats+shotchart). Clip dari youtubeTimestamp. Anotasi coach. Lock premium jika isPremium dan user tidak berhak.</li>
+  <li>/stats: tab anak / rekan / tim / aicoach. Filter series, KU, grade. Countable match saja. PDF.</li>
+</ul>
+
+<h3>BP-24 — Scout</h3>
+<p>Gallery hanya atlet isDiscoverable yang punya laga published. Kartu publik: chart, playing-up, bobot kompetisi. Highlight wajib dari DB, bukan konstanta FEATURED_SYNERGY_MATCHES (GAP → paten).</p>
+
+<h3>BP-25 — AI Coach</h3>
+<p>User dengan view_own_stats (dan TARGET: paket Pro/Verified) pilih agen → ringkas event → Gemini → simpan AiInsight. Jangan kirim video mentah. Jangan pakai insight sebagai sumber statistik.</p>
+
+<h3>BP-26 — Fundamentals</h3>
+<p>Tab workout, library, classroom (Q&amp;A in-app). Profil latihan: PG–C, pemula|menengah|pro, fasilitas full|half|tanpa_ring. Jadwal AI, Excel drill, YouTube loop. TARGET: athlete_profile_v1 = ChildProfile.id. Bukan Google Classroom API.</p>
+
+<h3>BP-22 CRM</h3>
+<p>Stage: new → contacted → trial → customer | lost. Admin geser stage, tambah note (prepend). Hapus lead diizinkan (operasional; paten produksi: soft-delete + alasan).</p>
+
+<h3>BP-23 CMS</h3>
+<p>Satu dokumen id=main: hero, pricing, testimonials, faqs, updatedAt. As-is per-browser. TARGET: cloud agar publik sama.</p>
+
+<h3>BP-27 / 28</h3>
+<p>RBAC editor mengubah permission[]. User management: ganti role, suspend (status=suspended → login ditolak). Suspend tidak menghapus data atlet.</p>
+
+<h3>BP-29 Export/import</h3>
+<p>JSON portabel match+event+roster untuk cadangan atau pindah perangkat selama sync cloud belum hidup. Import harus rebuild possession, bukan percaya possession tersimpan membabi buta.</p>
+</div>
+
+<div class="section" id="s29">
+<h2>29. State machine seluruh entitas</h2>
+
+<h3>UserAccount.status</h3>
+<div class="flow"><span class="box">active</span><span class="arr">→</span><span class="box alt">suspended</span><span class="arr">→</span><span class="box">active</span></div>
+<p>Role: customer | statistician | scout | coach | admin (mutasi hanya admin atau BP-30 approve).</p>
+
+<h3>ChildProfile.claimStatus</h3>
+<div class="flow">
+  <span class="box soft">unclaimed</span><span class="arr">→</span>
+  <span class="box">claim_pending</span><span class="arr">→</span>
+  <span class="box alt">verified</span>
+</div>
+<p>Reject tanpa guardian lain: pending → unclaimed. Multi-guardian: reject tidak menurunkan verified.</p>
+
+<h3>ClaimRequest.status × paymentStatus</h3>
+<table>
+  <tr><th>status</th><th>paymentStatus yang sah</th></tr>
+  <tr><td>pending</td><td>paid (as-is setelah checkout)</td></tr>
+  <tr><td>approved</td><td>paid</td></tr>
+  <tr><td>rejected</td><td>refund_pending → refunded | refund_rejected</td></tr>
+</table>
+
+<h3>StatServiceRequest.status</h3>
+<div class="flow">
+  <span class="box">pending</span><span class="arr">→</span>
+  <span class="box soft">awaiting_payment</span><span class="arr">→</span>
+  <span class="box">paid</span><span class="arr">→</span>
+  <span class="box alt">assigned</span><span class="arr">→</span>
+  <span class="box">in_progress</span><span class="arr">→</span>
+  <span class="box soft">completed</span><span class="arr">→</span>
+  <span class="box">reviewed</span>
+</div>
+<p>Back-office masuk di paid. Tidak ada cancel state di as-is — TARGET: cancelled + refund rules.</p>
+
+<h3>Match.status</h3>
+<p>planned → ongoing → completed. Cabang: aborted (boleh excludeFromStats). Independen dari productionStage.</p>
+
+<h3>Match.productionStage</h3>
+<div class="flow">
+  <span class="box">tracking</span><span class="arr">→</span>
+  <span class="box soft">qa_review</span><span class="arr">→</span>
+  <span class="box">coach_analysis</span><span class="arr">→</span>
+  <span class="box alt">published</span>
+</div>
+<p>Return: qa_review→tracking; coach_analysis→qa_review. Published terminal.</p>
+
+<h3>Organization.status / Team</h3>
+<p>org: pending → verified; atau → merged (terminal). Team: aktif | mergedIntoId | soft-deleted.</p>
+
+<h3>Lead.stage</h3>
+<p>new → contacted → trial → customer | lost. Boleh mundur (kontak ulang) kecuali kebijakan CRM mengunci lost.</p>
+
+<h3>RoleApplication.status</h3>
+<p>pending → approved | rejected. Terminal. Satu pending per user.</p>
+
+<h3>ClockTimeline.status</h3>
+<p>DRAFT → SCANNING → REVIEW_REQUIRED → READY_TO_PUBLISH → PUBLISHED | FAILED.</p>
+
+<h3>AuditIssue.status</h3>
+<p>open → reviewed | resolved | dismissed | failed.</p>
+
+<h3>PaymentRecord.status (as-is)</h3>
+<p>pending | success | failed. Refund as-is menimpa success→failed. TARGET: tambah refunded tanpa menghapus success historis (dual record).</p>
+</div>
+
+<div class="section" id="s30">
+<h2>30. Tabel keputusan, RACI, visibilitas, SLA</h2>
+
+<h3>30.1 RACI operasi inti</h3>
+<table>
+  <tr><th>Aktivitas</th><th>Customer</th><th>Stat</th><th>QA</th><th>Coach</th><th>Admin</th><th>Scout</th></tr>
+  <tr><td>Bayar klaim / jasa</td><td>R</td><td></td><td></td><td></td><td>A (refund)</td><td></td></tr>
+  <tr><td>Approve klaim / role</td><td>C</td><td></td><td></td><td></td><td>R/A</td><td></td></tr>
+  <tr><td>Track laga jasa</td><td>I</td><td>R</td><td></td><td></td><td>A assign</td><td></td></tr>
+  <tr><td>QA</td><td></td><td>C (jika return)</td><td>R</td><td></td><td>A</td><td></td></tr>
+  <tr><td>Anotasi &amp; publish</td><td>I</td><td></td><td>C</td><td>R</td><td>A override</td><td>I</td></tr>
+  <tr><td>Lihat story published</td><td>R*</td><td>R</td><td>R</td><td>R</td><td>R</td><td>R*</td></tr>
+  <tr><td>CMS / CRM / RBAC</td><td></td><td></td><td></td><td></td><td>R/A</td><td></td></tr>
+</table>
+<p class="small">R* = hanya jika lolos DP-08. QA di as-is = admin kecuali matriks diubah.</p>
+
+<h3>30.2 Matriks visibilitas (wajib)</h3>
+<table>
+  <tr><th>Aset</th><th>Customer</th><th>Stat</th><th>Coach</th><th>Scout</th><th>Admin</th></tr>
+  <tr><td>Match unpublished, bukan wali/pembeli</td><td>Tidak</td><td>Ya</td><td>Ya</td><td>Tidak</td><td>Ya</td></tr>
+  <tr><td>Match published + atlet discoverable</td><td>Jika wali/bayar</td><td>Ya</td><td>Ya</td><td>Ya</td><td>Ya</td></tr>
+  <tr><td>Dokumen klaim KK/akta</td><td>Milik sendiri</td><td>Tidak</td><td>Tidak</td><td>Tidak</td><td>Ya + audit</td></tr>
+  <tr><td>Prompt editor</td><td>Tidak</td><td>Tidak</td><td>Tidak</td><td>Tidak</td><td>Ya (manage_roles_config)</td></tr>
+  <tr><td>Inbox tugas</td><td>Tidak</td><td>Assigned saja</td><td>Tidak</td><td>Tidak</td><td>Semua</td></tr>
+</table>
+
+<h3>30.3 Siapa boleh menekan tombol pipeline</h3>
+<table>
+  <tr><th>Tombol UI</th><th>Stage saat ini</th><th>Permission</th></tr>
+  <tr><td>Kirim ke QA</td><td>tracking</td><td>track_match ATAU do_stat_tasks</td></tr>
+  <tr><td>Setujui &amp; Kirim ke Coach</td><td>qa_review</td><td>do_qa_review</td></tr>
+  <tr><td>Publikasikan Statistik</td><td>coach_analysis</td><td>do_coach_analysis</td></tr>
+  <tr><td>Kembalikan</td><td>qa_review / coach_analysis</td><td>QA / Coach sesuai tahap</td></tr>
+</table>
+
+<h3>30.4 Countable stats</h3>
+<p>Masuk agregat jika: status ≠ aborted DAN excludeFromStats ≠ true DAN didPlayInMatch (roster/stint). Filter user: series, KU, competitionGrade. Bobot grade 1–6 hanya untuk skor “kualitas kompetisi”, bukan mengalikan poin box score (paten: jangan kalikan PTS dengan bobot).</p>
+
+<h3>30.5 SLA operasi (target produksi)</h3>
+<table>
+  <tr><th>Proses</th><th>SLA</th></tr>
+  <tr><td>Lead new → contacted</td><td>1 hari kerja</td></tr>
+  <tr><td>Klaim pending → decided</td><td>48 jam</td></tr>
+  <tr><td>Refund decided</td><td>5 hari kerja</td></tr>
+  <tr><td>Request paid → assigned</td><td>8 jam kerja</td></tr>
+  <tr><td>Assigned → published (Verified penuh)</td><td>72 jam kerja</td></tr>
+  <tr><td>QA bounce (return)</td><td>statistikian perbaiki ≤ 24 jam</td></tr>
+</table>
+</div>
+
+<div class="section" id="s31">
+<h2>31. Katalog event, exception, data lifecycle</h2>
+
+<h3>31.1 Event play-by-play (sumber)</h3>
+<p>Scoring: 1pt/2pt/3pt make|miss. Rebound oreb/dreb. ast, stl, blk, to. foul, foul_drawn, offensive_foul, defensive_foul, blocked_shot. sub_in/out, timeout, inbound, jumpball, starter. Generic: free_throw, shot, rebound, turnover, substitution, dead_ball, possession_marker.</p>
+<p>Wajib pada setiap event: matchId, quarter, timestamp (sisa detik), realTime ISO, playerId (atau aktor tim), type. Sangat disarankan: teamId, actorType, sourceType, youtubeTimestamp, possessionId, stint context.</p>
+<p>FoulType, TurnoverType, ShotDifficulty, AssistType, GameContext, PressureLevel, ReboundType, PhaseOfPlay — lihat §9.6; nilai lama + baru hidup berdampingan, paten baru harus memakai enum modern (snake_case) dan memetakan legacy saat baca.</p>
+
+<h3>31.2 Exception bisnis</h3>
+<table>
+  <tr><th>Kode</th><th>Kondisi</th><th>Perilaku wajib</th></tr>
+  <tr><td>X-AUTH-01</td><td>Sesi hilang di tengah track</td><td>Event sudah tersimpan di IDB tidak boleh hilang; minta login ulang, lanjut match yang sama</td></tr>
+  <tr><td>X-PIPE-01</td><td>Advance tanpa permission</td><td>Pesan Indonesia dari pipelineService; stage tidak berubah</td></tr>
+  <tr><td>X-PIPE-02</td><td>Advance dari published</td><td>Tolak “sudah tahap akhir”</td></tr>
+  <tr><td>X-PIPE-03</td><td>Return dari tracking/published</td><td>Tolak</td></tr>
+  <tr><td>X-CLAIM-01</td><td>Pending ganda user apply role</td><td>Tolak “sudah memiliki pengajuan”</td></tr>
+  <tr><td>X-CLAIM-02</td><td>Reject klaim tapi ada guardian lain</td><td>Jangan unclaimed-kan profil</td></tr>
+  <tr><td>X-PAY-01</td><td>PSP gagal (TARGET)</td><td>Request tetap awaiting_payment; jangan assigned</td></tr>
+  <tr><td>X-REQ-01</td><td>createMatchFromRequest dipanggil 2×</td><td>Kembalikan matchId existing</td></tr>
+  <tr><td>X-ORG-01</td><td>Nama+kota mirip</td><td>Blokir create sunyi; paksa pilih existing atau override</td></tr>
+  <tr><td>X-MERGE-01</td><td>Primary=secondary</td><td>Tolak</td></tr>
+  <tr><td>X-CLOCK-01</td><td>Region jam invalid</td><td>Fail-fast FAILED, jangan publish timeline</td></tr>
+  <tr><td>X-CLOCK-02</td><td>OCR low confidence</td><td>Jangan overwrite timestamp; status LOW_CONFIDENCE</td></tr>
+  <tr><td>X-STAT-01</td><td>Match aborted</td><td>Tidak masuk agregat</td></tr>
+  <tr><td>X-VIS-01</td><td>Scout buka unpublished</td><td>404/forbidden, bukan data kosong palsu</td></tr>
+</table>
+
+<h3>31.3 Data lifecycle</h3>
+<table>
+  <tr><th>Data</th><th>Create</th><th>Retensi paten</th><th>Hapus</th></tr>
+  <tr><td>Event / possession</td><td>Tracking</td><td>Selama match hidup + 5 tahun setelah published (TARGET)</td><td>Hanya lewat abort+exclude atau admin legal</td></tr>
+  <tr><td>Dokumen klaim</td><td>BP-05</td><td>TARGET: 90 hari setelah decided + encrypted storage. As-is data URL dilarang di produksi</td><td>Hapus objek, sisakan flag “docs reviewed”</td></tr>
+  <tr><td>Payment</td><td>Checkout</td><td>7 tahun (keuangan)</td><td>Tidak dihapus; anonymize PII</td></tr>
+  <tr><td>Lead</td><td>Landing</td><td>2 tahun idle → archive</td><td>Soft-delete</td></tr>
+  <tr><td>AiInsight</td><td>BP-25</td><td>Selama profil hidup</td><td>Ikut hapus akun</td></tr>
+  <tr><td>MergeLog</td><td>BP-09</td><td>Permanen (forensik)</td><td>Jangan hapus</td></tr>
+  <tr><td>stageHistory</td><td>BP-15</td><td>Permanen per match</td><td>Jangan hapus</td></tr>
+</table>
+
+<h3>31.4 Navigasi resmi (jangan pecah IA)</h3>
+<p>Consumer: Beranda, Katalog Talenta, Pertandingan, Statistik, Latihan &amp; Drill, Atlet Saya, Pesan Statistik, Ruang Kerja — masing-masing permission di CONSUMER_NAV_ITEMS. Admin groups: Utama, Operasional &amp; Verifikasi, Layanan &amp; Tugas, Konten &amp; AI Engine, Akses &amp; Keamanan. Tracking keluar dari shell.</p>
+</div>
+
+<div class="section" id="s32">
+<h2>32. Aturan perubahan paten (governance)</h2>
+<ol>
+  <li><strong>Ini sumber kebenaran.</strong> Ticket fitur wajib merujuk DP-xx dan BP-xx. PR tanpa rujukan pola ditolak review.</li>
+  <li><strong>Amandemen pola.</strong> Menambah DP baru atau mengubah state machine membutuhkan persetujuan Product Owner + Tech Lead, lalu naikkan versi dokumen (2.1, 2.2, …) dan catat di tabel kontrol.</li>
+  <li><strong>Kode menyimpang.</strong> Jika as-is ≠ paten, buat ticket “conformance” — jangan diam-diam ikut kode lama.</li>
+  <li><strong>SKU &amp; copy.</strong> CMS tidak boleh menjanjikan kemampuan di luar permission default tanpa mengubah DP-15/DP-16 dulu.</li>
+  <li><strong>Enum beku.</strong> productionStage, claimStatus, request status, recordingType/Mode, UserRole, Permission — perubahan adalah breaking. Migrasi data wajib.</li>
+  <li><strong>Satu identitas atlet.</strong> Dilarang menambah tabel “player” ketiga. Fundamentals harus merujuk ChildProfile.</li>
+  <li><strong>Satu fungsi visibilitas.</strong> Dilarang if (role===…) tersebar di halaman story/stats/gallery. Panggil canViewMatch / canManage.</li>
+  <li><strong>AI bukan sumber.</strong> Dilarang menulis box score dari output Gemini.</li>
+  <li><strong>Privasi anak.</strong> Setiap fitur baru yang menyentuh DOB/NIK/dokumen wajib review legal sebelum merge.</li>
+  <li><strong>Versi dokumen.</strong> HTML + PDF di <code>docs/prd/</code> selalu di-generate berpasangan. Jangan edit PDF lepas dari HTML.</li>
+</ol>
+
+<h3>Kontrol versi paten</h3>
+<table>
+  <tr><th>Versi</th><th>Tanggal</th><th>Isi</th></tr>
+  <tr><td>1.0</td><td>30 Agustus 2026</td><td>PRD audit as-is + target (Bagian I)</td></tr>
+  <tr><td>2.0</td><td>30 Agustus 2026</td><td>Paten desain: DP-01..16, BP-01..30, state machine, RACI, exception, governance</td></tr>
+</table>
+<p class="small">Review wajib paten: Product Owner, Tech Lead, Head of Stats Operations, Legal/Privasi. Setelah disetujui, dokumen ini dikunci; perubahan hanya lewat amandemen berversi.</p>
+<p class="footer-note">© HoopStat internal IP. Pola DP-01 (prompt-flow capture), DP-06 (pipeline + return), DP-08 (visibility triangle), DP-11 (claim-to-guardian), dan DP-13 (triple clock) adalah inti pembeda sistem dan tidak boleh dipecah di fork internal tanpa amandemen.</p>
+</div>
+
+</body>
+</html>

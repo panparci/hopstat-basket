@@ -1,0 +1,19 @@
+node_modules/
+backend/bin/
+backend/api
+*.exe
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Temporary code generation scripts
+*.py
+*.cjs
+rewrite*.js
+generate_*.js
+fix_*
+refactor*

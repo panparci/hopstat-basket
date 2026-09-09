@@ -1,0 +1,39 @@
+---
+description: HoopStat official system design patterns — do not invent parallel flows
+alwaysApply: true
+---
+
+# HoopStat Design Patent (canonical)
+
+Misi: aplikasi ini lahir dari vibe coding Google AI Studio. Tugas kita **menjadikannya nyata**.
+
+Pisahkan dua sumber kebenaran:
+- **Produk / proses** (fitur A/B/C ngapain, siapa boleh, state, SLA) → ikut paten `docs/prd/HoopStat-PRD.pdf` v2.0. Merujuk **DP-xx** + **BP-xx**. Jangan alur tandingan.
+- **Teknikal** (SQL, relasi, auth, sync, storage, API, folder, kualitas kode) → standar senior engineer kita. IndexedDB/localStorage/hash-di-klien **bukan** target arsitektur; itu warisan prototipe.
+
+Kalau as-is menyimpang dari paten di sisi bisnis, tarik ke paten. Kalau as-is jelek di sisi teknik, ganti dengan model relasional + server yang benar — jangan copy pola vibe.
+
+## Pola yang tidak boleh dipecah
+
+- **DP-01** Event baru di tracker harus masuk Prompt Flow library, bukan tombol yatim.
+- **DP-02** `recordingType` (single|team|full) dan `recordingMode` (lite|detailed) tetap dua sumbu terpisah.
+- **DP-03** Stint = tepat 5 pemain (3 untuk 3x3). Jangan pecah entitas.
+- **DP-04** Possession diturunkan dari event (`rebuildPossessionsEngine`). Koreksi = ubah event, lalu rebuild.
+- **DP-05** Relasi event lewat `EventLink`, bukan hanya urutan waktu.
+- **DP-06** Stage hanya `tracking → qa_review → coach_analysis → published` + return QA↔tracking, coach↔QA. Tidak loncat. Tulis `stageHistory`.
+- **DP-08** Visibilitas match/story hanya `canViewMatch` / `canManage`. Jangan `if (role === …)` tersebar.
+- **DP-09** Tim kanonik = `(organizationId, divisionCode)` via `findCanonical`.
+- **DP-10** Merge wajib `MergeLog` + undo. Jangan hard-delete secondary.
+- **DP-11** Klaim: search → teaser → form → pay → review. Multi-guardian: reject tidak unclaimed-kan jika masih ada guardian verified.
+- **DP-12** Jasa: request → pay → assign → track → pipeline. Customer tidak `track_match` untuk laga jasa.
+- **DP-14** AI Coach membaca agregat event, bukan menulis box score.
+- **DP-15** Cek `can(permission)`, bukan nama role di komponen.
+- **DP-16** Tiga SKU terpisah: Identity Claim, Analytics Plan, Verified Match/Stat Pack.
+
+## Identitas
+
+Satu atlet kanonik: `ChildProfile`. Jangan tambah tabel player ketiga. Fundamentals harus merujuk ID yang sama.
+
+## Enum beku (breaking jika diubah)
+
+`UserRole`, `Permission`, `productionStage`, `claimStatus`, request `status`, `recordingType`, `recordingMode`.
