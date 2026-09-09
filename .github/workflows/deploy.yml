@@ -1,0 +1,22 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  vps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull and rebuild on VPS
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          test -n "$SSH_KEY" || { echo "Add repo secret VPS_SSH_KEY"; exit 1; }
+          mkdir -p "$HOME/.ssh"
+          install -m 600 /dev/null "$HOME/.ssh/id"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/id"
+          ssh-keyscan -H 43.156.134.105 >> "$HOME/.ssh/known_hosts"
+          # authorized_keys forces vps-update.sh; remote argv is ignored.
+          ssh -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes ubuntu@43.156.134.105
