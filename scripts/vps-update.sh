@@ -20,3 +20,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable hoopstat
 sudo systemctl restart hoopstat
 sudo systemctl --no-pager --full status hoopstat
+curl -fsS http://127.0.0.1:8088/api/health
+echo
