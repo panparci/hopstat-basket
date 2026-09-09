@@ -21,7 +21,7 @@ export const RequirePermission: React.FC<RequirePermissionProps> = ({ permission
   }
 
   if (!user) {
-    return <Navigate to="/welcome" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (!can(permission)) {

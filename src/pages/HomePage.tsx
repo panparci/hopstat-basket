@@ -56,7 +56,7 @@ export const HomePage: React.FC = () => {
   const confirmLogout = async () => {
     setIsLogoutConfirmOpen(false);
     await authService.logout();
-    navigate('/welcome');
+    window.location.assign('/');
   };
 
   const calculateTrendForProfile = (profileId: string, activeMatches: Match[], eventsList: any[], rostersList: any[], pList: ChildProfile[]) => {

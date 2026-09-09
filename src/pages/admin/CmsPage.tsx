@@ -204,7 +204,7 @@ export const CmsPage: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <a 
-            href="/welcome" 
+            href="/" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 text-blue-600 dark:text-blue-400 rounded-xl transition-colors border border-zinc-200/50 dark:border-zinc-700/50 cursor-pointer shadow-sm"

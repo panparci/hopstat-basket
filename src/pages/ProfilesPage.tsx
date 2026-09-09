@@ -150,7 +150,7 @@ export const ProfilesPage: React.FC = () => {
   const confirmLogout = async () => {
     setIsLogoutConfirmOpen(false);
     await authService.logout();
-    navigate('/welcome');
+    window.location.assign('/');
   };
 
   const calculateKU = (dateString?: string) => {

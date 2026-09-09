@@ -51,7 +51,7 @@ export const AdminStatRequestsPage: React.FC = () => {
 
   const handleLogout = async () => {
     await authService.logout();
-    navigate('/welcome');
+    window.location.assign('/');
   };
 
   const totalRevenue = payments.reduce((sum, p) => sum + (p.status === 'success' ? p.amount : 0), 0);

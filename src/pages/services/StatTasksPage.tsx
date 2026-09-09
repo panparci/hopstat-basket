@@ -141,7 +141,7 @@ export const StatTasksPage: React.FC = () => {
 
   const handleLogout = async () => {
     await authService.logout();
-    navigate('/welcome');
+    window.location.assign('/');
   };
 
   const inProgressCount = tasks.filter(t => t.status === 'in_progress' || t.status === 'assigned').length;

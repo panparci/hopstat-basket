@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/authService';
 import { contentService } from '../services/contentService';
 import { Navbar } from '../components/landing/Navbar';
 import { Hero } from '../components/landing/Hero';
@@ -25,26 +24,17 @@ export const LandingPage: React.FC = () => {
   const [siteContent, setSiteContent] = useState<SiteContent | null>(null);
 
   useEffect(() => {
-    const checkAuthAndLoadContent = async () => {
+    const loadContent = async () => {
       try {
-        const user = await authService.getCurrentUser();
-        if (user) {
-          // If already logged in, redirect to main application
-          navigate('/', { replace: true });
-          return;
-        }
-        
-        // Load the landing page content from contentService
-        const content = await contentService.getContent();
-        setSiteContent(content);
+        setSiteContent(await contentService.getContent());
       } catch (err) {
         console.error('Failed to load landing page data', err);
       } finally {
         setLoading(false);
       }
     };
-    checkAuthAndLoadContent();
-  }, [navigate]);
+    void loadContent();
+  }, []);
 
   const handleLoginRedirect = () => {
     navigate('/login');

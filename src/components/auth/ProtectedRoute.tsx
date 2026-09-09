@@ -22,7 +22,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     </div>
   );
   
-  if (!session) return <Navigate to="/welcome" replace />;
+  if (!session) return <Navigate to="/" replace />;
   
   if (session.status === 'suspended') {
     void authService.logout();

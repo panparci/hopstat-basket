@@ -110,7 +110,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   const handleLogout = async () => {
     await authService.logout();
-    navigate('/welcome');
+    window.location.assign('/');
   };
 
   const isActive = (path: string) => {

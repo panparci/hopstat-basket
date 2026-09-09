@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { SignUpPage } from './pages/SignUpPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -50,7 +50,8 @@ import { RequirePermission } from './components/auth/RequirePermission';
 import { useTheme } from './core/hooks/useTheme';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { authService } from './services/authService';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { UserAccount } from './core/types/serviceRequests';
 import { ToastProvider, useToast } from './core/contexts/ToastContext';
 import { claimService } from './services/claimService';
 
@@ -60,6 +61,35 @@ const AdaptiveAppShellLayout = () => {
     return <AdminLayout />;
   }
   return <AppShellLayout />;
+};
+
+const GuestOrShell = () => {
+  const loc = useLocation();
+  const [session, setSession] = useState<UserAccount | null | undefined>(undefined);
+
+  useEffect(() => {
+    void authService.getCurrentUser().then(setSession);
+  }, []);
+
+  if (session === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    if (loc.pathname !== '/') return <Navigate to="/" replace />;
+    return <LandingPage />;
+  }
+
+  if (session.status === 'suspended') {
+    void authService.logout();
+    return <Navigate to="/login?error=suspended" replace />;
+  }
+
+  return <AdaptiveAppShellLayout />;
 };
 
 const AppContent = () => {
@@ -106,17 +136,13 @@ const AppContent = () => {
 
   return (
     <Routes>
-      <Route path="/welcome" element={<LandingPage />} />
+      <Route path="/welcome" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-      {/* Consumer Protected Routes with Centralized Adaptive AppShell */}
-      <Route element={
-        <ProtectedRoute>
-          <AdaptiveAppShellLayout />
-        </ProtectedRoute>
-      }>
+      {/* `/` is landing for guests, dashboard for signed-in users */}
+      <Route element={<GuestOrShell />}>
         <Route path="/" element={
           <RequirePermission permission="view_home">
             <RoleBasedDashboard />
