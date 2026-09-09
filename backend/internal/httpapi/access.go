@@ -23,39 +23,39 @@ var defaultPerms = map[string][]string{
 
 // Any of these permissions may write the store. Missing store = admin only.
 var writeAny = map[string][]string{
-	"players":                   {"manage_teams", "manage_profiles", "track_match", "do_stat_tasks"},
-	"teams":                     {"manage_teams", "manage_profiles"},
-	"clubs":                     {"manage_teams"},
-	"organizations":             {"manage_teams"},
-	"series":                    {"manage_teams", "track_match", "do_stat_tasks"},
-	"matches":                   {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
-	"match_rosters":             {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
-	"match_stints":              {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
-	"events":                    {"track_match", "do_stat_tasks", "do_qa_review"},
-	"possessions":               {"track_match", "do_stat_tasks", "do_qa_review"},
-	"game_states":               {"track_match", "do_stat_tasks", "do_qa_review"},
-	"event_links":               {"track_match", "do_stat_tasks", "do_qa_review"},
-	"audit_issue_resolutions":   {"do_qa_review", "track_match", "do_stat_tasks"},
-	"timelines":                 {"track_match", "do_stat_tasks"},
-	"coach_annotations":         {"do_coach_analysis"},
-	"ai_insights":               {"view_own_stats", "do_coach_analysis"},
-	"profiles":                  {"manage_profiles", "manage_athletes"},
-	"stat_requests":             {"request_stats", "assign_stat_tasks", "do_stat_tasks", "approve_applications"},
-	"user_accounts":             {"manage_users"},
-	"payments":                  {"request_stats", "approve_applications"},
-	"leads":                     {"manage_crm"},
-	"site_content":              {"manage_cms"},
-	"role_permissions":          {"manage_roles_config"},
-	"role_applications":         {"view_home", "approve_applications"},
-	"claim_requests":            {"manage_profiles", "approve_applications"},
-	"merge_logs":                {"manage_athletes", "manage_profiles"},
-	"knowledge_entries":         {"track_match", "do_stat_tasks", "manage_cms"},
-	"token_logs":                {"view_own_stats", "track_match", "do_stat_tasks", "do_coach_analysis"},
-	"fundamental_drills":        {"view_home"},
-	"fundamental_profiles":      {"view_home"},
-	"workout_schedules":         {"view_home"},
-	"drill_submissions":         {"view_home"},
-	"classroom_qa":              {"view_home"},
+	"players":                 {"manage_teams", "manage_profiles", "track_match", "do_stat_tasks"},
+	"teams":                   {"manage_teams", "manage_profiles"},
+	"clubs":                   {"manage_teams"},
+	"organizations":           {"manage_teams"},
+	"series":                  {"manage_teams", "track_match", "do_stat_tasks"},
+	"matches":                 {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
+	"match_rosters":           {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
+	"match_stints":            {"track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis"},
+	"events":                  {"track_match", "do_stat_tasks", "do_qa_review"},
+	"possessions":             {"track_match", "do_stat_tasks", "do_qa_review"},
+	"game_states":             {"track_match", "do_stat_tasks", "do_qa_review"},
+	"event_links":             {"track_match", "do_stat_tasks", "do_qa_review"},
+	"audit_issue_resolutions": {"do_qa_review", "track_match", "do_stat_tasks"},
+	"timelines":               {"track_match", "do_stat_tasks"},
+	"coach_annotations":       {"do_coach_analysis"},
+	"ai_insights":             {"view_own_stats", "do_coach_analysis"},
+	"profiles":                {"manage_profiles", "manage_athletes"},
+	"stat_requests":           {"request_stats", "assign_stat_tasks", "do_stat_tasks", "approve_applications"},
+	"user_accounts":           {"manage_users"},
+	"payments":                {"request_stats", "approve_applications"},
+	"leads":                   {"manage_crm"},
+	"site_content":            {"manage_cms"},
+	"role_permissions":        {"manage_roles_config"},
+	"role_applications":       {"view_home", "approve_applications"},
+	"claim_requests":          {"manage_profiles", "approve_applications"},
+	"merge_logs":              {"manage_athletes", "manage_profiles"},
+	"knowledge_entries":       {"track_match", "do_stat_tasks", "manage_cms"},
+	"token_logs":              {"view_own_stats", "track_match", "do_stat_tasks", "do_coach_analysis"},
+	"fundamental_drills":      {"view_home"},
+	"fundamental_profiles":    {"view_home"},
+	"workout_schedules":       {"view_home"},
+	"drill_submissions":       {"view_home"},
+	"classroom_qa":            {"view_home"},
 }
 
 var matchChildStores = map[string]bool{
@@ -139,7 +139,7 @@ func (s *Server) can(ctx context.Context, u map[string]any, perm string) bool {
 }
 
 func (s *Server) authorizeRead(ctx context.Context, u map[string]any, store, id string) error {
-	if store == "site_content" {
+	if store == "site_content" || store == "role_audits" {
 		return nil
 	}
 	if u == nil {
@@ -494,7 +494,7 @@ func matchIDOf(store string, doc map[string]any) string {
 
 func (s *Server) filterList(ctx context.Context, u map[string]any, store string, items []map[string]any) []map[string]any {
 	if u == nil {
-		if store == "site_content" {
+		if store == "site_content" || store == "role_audits" {
 			return items
 		}
 		return nil

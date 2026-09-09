@@ -30,6 +30,7 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string) http.Handler {
 	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
+	mux.HandleFunc("GET /api/audit/roles", s.auditRoles)
 	mux.HandleFunc("POST /api/auth/register", s.register)
 	mux.HandleFunc("POST /api/auth/login", s.login)
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
@@ -93,6 +94,23 @@ func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 		"backend":   "go",
 		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
+}
+
+func (s *Server) auditRoles(w http.ResponseWriter, r *http.Request) {
+	item, err := s.getDoc(r.Context(), "role_audits", "latest")
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	if item == nil {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"status":    "belum_ada",
+			"healthPct": 0,
+			"message":   "belum ada audit. jalankan backend/cmd/roleaudit",
+		})
+		return
+	}
+	writeJSON(w, http.StatusOK, item)
 }
 
 func (s *Server) list(w http.ResponseWriter, r *http.Request) {

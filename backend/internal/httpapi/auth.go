@@ -170,7 +170,9 @@ func (s *Server) requireAdmin(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func publicRead(store string) bool  { return store == "site_content" }
+func publicRead(store string) bool {
+	return store == "site_content" || store == "role_audits"
+}
 func publicCreate(store string) bool { return store == "leads" }
 
 func (s *Server) publicReadOrAuth(next http.HandlerFunc) http.HandlerFunc {

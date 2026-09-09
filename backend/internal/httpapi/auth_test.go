@@ -20,7 +20,7 @@ func TestSessionRoundTrip(t *testing.T) {
 }
 
 func TestPublicStoreGates(t *testing.T) {
-	if !publicRead("site_content") || publicRead("user_accounts") {
+	if !publicRead("site_content") || !publicRead("role_audits") || publicRead("user_accounts") {
 		t.Fatal("read gate")
 	}
 	if !publicCreate("leads") || publicCreate("matches") {
