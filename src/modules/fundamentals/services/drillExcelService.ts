@@ -43,12 +43,12 @@ export function extractYouTubeId(urlOrId: string): string {
 function normalizeCategory(catStr: string): DrillCategory {
   if (!catStr) return 'ball_handling';
   const lower = catStr.toLowerCase().trim();
-  if (lower.includes('ball') || lower.includes('handling') || lower.includes('dribble')) return 'ball_handling';
-  if (lower.includes('shoot') || lower.includes('tembak') || lower.includes('form')) return 'shooting';
-  if (lower.includes('foot') || lower.includes('step') || lower.includes('finish')) return 'footwork';
-  if (lower.includes('defen') || lower.includes('slide') || lower.includes('agility') || lower.includes('tahan')) return 'defense';
-  if (lower.includes('pass') || lower.includes('umpan') || lower.includes('vision')) return 'passing';
   if (lower.includes('post') || lower.includes('hook') || lower.includes('paint')) return 'post_moves';
+  if (lower.includes('shoot') || lower.includes('tembak') || lower.includes('form')) return 'shooting';
+  if (lower.includes('pass') || lower.includes('umpan') || lower.includes('vision')) return 'passing';
+  if (lower.includes('defen') || lower.includes('slide') || lower.includes('agility') || lower.includes('tahan')) return 'defense';
+  if (lower.includes('ball') || lower.includes('handling') || lower.includes('dribble') || lower.includes('pick') || lower.includes('screen')) return 'ball_handling';
+  if (lower.includes('foot') || lower.includes('step') || lower.includes('finish')) return 'footwork';
   return 'ball_handling';
 }
 
@@ -58,7 +58,7 @@ function normalizeCategory(catStr: string): DrillCategory {
 function normalizeDifficulty(diffStr: string): SkillLevel {
   if (!diffStr) return 'pemula';
   const lower = diffStr.toLowerCase().trim();
-  if (lower.includes('pro') || lower.includes('mahir') || lower.includes('tingkat atas')) return 'pro';
+  if (lower.includes('pro') || lower.includes('mahir') || lower.includes('tingkat atas') || lower.includes('lanjut') || lower.includes('advanced')) return 'pro';
   if (lower.includes('menengah') || lower.includes('interm') || lower.includes('sedang')) return 'menengah';
   return 'pemula';
 }
