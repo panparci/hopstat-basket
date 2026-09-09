@@ -61,7 +61,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanSelect, plans }) => {
                 <Card
                   className={`relative flex flex-col justify-between w-full p-8 border ${
                     isPopular
-                      ? 'border-brand-orange bg-brand-navy text-white shadow-2xl dark:bg-zinc-900 ring-2 ring-brand-orange/30'
+                      ? 'border-brand-orange shadow-2xl ring-2 ring-brand-orange/30'
                       : 'border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30'
                   }`}
                 >
@@ -78,7 +78,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanSelect, plans }) => {
                       <h3 className={`text-xl font-black uppercase tracking-tight ${isPopular ? 'text-brand-orange' : 'text-brand-navy dark:text-white'}`}>
                         {plan.name}
                       </h3>
-                      <p className={`text-xs mt-1 leading-relaxed ${isPopular ? 'text-zinc-300' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                      <p className="text-xs mt-1 leading-relaxed text-zinc-500 dark:text-zinc-400">
                         {plan.id === 'free' 
                           ? 'Cocok untuk mencoba pencatatan statistik mandiri dasar.' 
                           : plan.id === 'pro' 
@@ -88,15 +88,15 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanSelect, plans }) => {
                     </div>
 
                     <div className="flex items-baseline gap-1 py-2">
-                      <span className={`text-4xl font-extrabold tracking-tight ${isPopular ? 'text-white font-display' : 'text-zinc-900 dark:text-white font-display'}`}>
+                      <span className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white font-display">
                         {plan.price}
                       </span>
-                      <span className={`text-xs font-semibold ${isPopular ? 'text-zinc-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
+                      <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                         / {plan.period}
                       </span>
                     </div>
 
-                    <hr className={isPopular ? 'border-white/10' : 'border-zinc-100 dark:border-zinc-800'} />
+                    <hr className="border-zinc-100 dark:border-zinc-800" />
 
                     {/* Feature list */}
                     <ul className="space-y-3 pt-2">
@@ -107,7 +107,7 @@ export const Pricing: React.FC<PricingProps> = ({ onPlanSelect, plans }) => {
                           }`}>
                             <Check size={12} className="stroke-[3]" />
                           </div>
-                          <span className={`text-xs leading-relaxed ${isPopular ? 'text-zinc-100' : 'text-zinc-600 dark:text-zinc-300'}`}>
+                          <span className="text-xs leading-relaxed text-zinc-600 dark:text-zinc-300">
                             {feature}
                           </span>
                         </li>
