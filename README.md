@@ -17,4 +17,4 @@ npm run prod
 
 Go menyajikan `dist/` + `/api`. Di depan: Caddy/nginx HTTPS ke `:8080`. Set `HOOPSTAT_ENV=production`, `SESSION_SECRET`, `GEMINI_API_KEY`, `DATABASE_URL`.
 
-Public: https://hospital.kognifx.com (Caddy → `127.0.0.1:8088`). App dir: `/opt/hoopstat`. Push `main` → `.github/workflows/deploy.yml`. Secret: `VPS_SSH_KEY`. Manual: `ssh vm44 /opt/hoopstat/app/scripts/vps-update.sh`.
+Public: https://hoopstats.kognifx.com (Caddy → `127.0.0.1:8088`). App dir: `/opt/hoopstat`. Push `main` → `.github/workflows/deploy.yml`. Secret: `VPS_SSH_KEY`. Manual: `ssh vm44 /opt/hoopstat/app/scripts/vps-update.sh`.

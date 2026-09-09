@@ -1,4 +1,4 @@
-# Deploy hopstat-basket → VPS /opt/hoopstat, served at https://hospital.kognifx.com
+# Deploy hopstat-basket → VPS /opt/hoopstat, served at https://hoopstats.kognifx.com
 name: deploy
 
 on:

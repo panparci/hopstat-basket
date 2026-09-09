@@ -56,7 +56,7 @@ func env(k, def string) string {
 }
 
 func main() {
-	base := strings.TrimRight(env("ROLEAUDIT_BASE", "https://hospital.kognifx.com"), "/")
+	base := strings.TrimRight(env("ROLEAUDIT_BASE", "https://hoopstats.kognifx.com"), "/")
 	adminEmail := env("ROLEAUDIT_ADMIN_EMAIL", "admin@hospital.kognifx.com")
 	adminPass := env("ROLEAUDIT_ADMIN_PASS", "")
 	userPass := env("ROLEAUDIT_USER_PASS", adminPass)
