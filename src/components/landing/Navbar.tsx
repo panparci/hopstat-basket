@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Trophy, Menu, X, Sun, Moon } from 'lucide-react';
 import { Button } from '../atoms/Button';
+import { useTheme } from '../../core/hooks/useTheme';
 
 interface NavbarProps {
   onLoginClick: () => void;
@@ -9,20 +10,8 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onSignupClick }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
-
-  const toggleTheme = () => {
-    const root = document.documentElement;
-    if (root.classList.contains('dark')) {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   const navLinks = [
     { name: 'Fitur', href: '#features' },

@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sun, Moon } from 'lucide-react';
 import { GradientIcon } from '../components/atoms/GradientIcon';
 import { SignUpForm } from '../components/organisms/SignUpForm';
+import { useTheme } from '../core/hooks/useTheme';
 
 export const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#F8F9FA] dark:bg-zinc-950 transition-colors font-sans relative">
@@ -17,6 +19,14 @@ export const SignUpPage: React.FC = () => {
       >
         <ArrowLeft size={14} />
         <span>Kembali</span>
+      </button>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="absolute top-6 right-6 p-2 rounded-full text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm cursor-pointer"
+        aria-label="Toggle theme"
+      >
+        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
       <div className="w-full max-w-sm flex flex-col items-center">

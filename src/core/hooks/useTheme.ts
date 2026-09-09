@@ -1,24 +1,36 @@
 import { useState, useEffect } from 'react';
 
+const KEY = 'hoopstat_theme';
+
+function readTheme(): 'light' | 'dark' {
+  const saved = localStorage.getItem(KEY) || localStorage.getItem('theme');
+  if (saved === 'dark' || saved === 'light') return saved;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme: 'light' | 'dark') {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  localStorage.setItem(KEY, theme);
+}
+
 export const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('hoopstat_theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const [theme, setTheme] = useState<'light' | 'dark'>(readTheme);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('hoopstat_theme', theme);
+    applyTheme(theme);
   }, [theme]);
 
+  useEffect(() => {
+    const sync = () => setTheme(readTheme());
+    window.addEventListener('hoopstat-theme', sync);
+    return () => window.removeEventListener('hoopstat-theme', sync);
+  }, []);
+
   const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    const next = theme === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    setTheme(next);
+    window.dispatchEvent(new Event('hoopstat-theme'));
   };
 
   return { theme, toggleTheme };
