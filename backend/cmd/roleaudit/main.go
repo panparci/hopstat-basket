@@ -158,15 +158,11 @@ func runRole(c, admin *api, role string) []check {
 	}
 	out = append(out, ua)
 
-	leadsGet := 200
-	out = append(out, c.expect("GET", "/api/stores/leads", nil, leadsGet))
-	if role != "admin" {
-		n := itemCount(c.last)
-		if n != 0 {
-			out[len(out)-1].OK = false
-			out[len(out)-1].Detail = fmt.Sprintf("leads leaked %d rows", n)
-		}
+	wantLeads := 403
+	if role == "admin" {
+		wantLeads = 200
 	}
+	out = append(out, c.expect("GET", "/api/stores/leads", nil, wantLeads))
 
 	out = append(out, c.expectWrite(admin, role, "matches", canWrite(role, "track_match", "do_stat_tasks", "do_qa_review", "do_coach_analysis")))
 	out = append(out, c.expectWrite(admin, role, "events", canWrite(role, "track_match", "do_stat_tasks", "do_qa_review")))
@@ -250,12 +246,25 @@ func (c *api) expectWrite(admin *api, role, store string, allow bool) check {
 }
 
 func ensureUser(admin *api, base, role, email, name, pass string) error {
-	guest := mustClient(base)
-	if err := guest.login(email, pass); err == nil {
-		if roleOf(guest.last) == role || role == "admin" {
-			return nil
+	st, list := admin.status("GET", "/api/stores/user_accounts", nil)
+	if st != 200 {
+		return fmt.Errorf("list users %d", st)
+	}
+	if items, _ := list["items"].([]any); items != nil {
+		for _, it := range items {
+			m, _ := it.(map[string]any)
+			if !strings.EqualFold(fmt.Sprint(m["email"]), email) {
+				continue
+			}
+			if fmt.Sprint(m["role"]) == role && fmt.Sprint(m["status"]) == "active" {
+				return nil
+			}
+			m["role"] = role
+			m["status"] = "active"
+			return admin.put("user_accounts", fmt.Sprint(m["id"]), m)
 		}
 	}
+	guest := mustClient(base)
 	st, body := guest.status("POST", "/api/auth/register", map[string]any{
 		"name": name, "email": email, "password": pass,
 	})
@@ -264,22 +273,17 @@ func ensureUser(admin *api, base, role, email, name, pass string) error {
 			return fmt.Errorf("register %s: %d %v", email, st, body)
 		}
 	}
-	st, list := admin.status("GET", "/api/stores/user_accounts", nil)
+	st, list = admin.status("GET", "/api/stores/user_accounts", nil)
 	if st != 200 {
 		return fmt.Errorf("list users %d", st)
 	}
-	var uid string
 	if items, _ := list["items"].([]any); items != nil {
 		for _, it := range items {
 			m, _ := it.(map[string]any)
 			if strings.EqualFold(fmt.Sprint(m["email"]), email) {
-				uid = fmt.Sprint(m["id"])
 				m["role"] = role
 				m["status"] = "active"
-				if err := admin.put("user_accounts", uid, m); err != nil {
-					return err
-				}
-				return nil
+				return admin.put("user_accounts", fmt.Sprint(m["id"]), m)
 			}
 		}
 	}
