@@ -208,7 +208,7 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		if existing != nil && asString(existing["claimantAccountId"]) == id {
 			return nil
 		}
-		if incoming != nil && asString(incoming["claimantAccountId"]) == id && existing == nil {
+		if existing == nil && (s.can(ctx, u, "manage_profiles") || s.can(ctx, u, "approve_applications")) {
 			return nil
 		}
 		if s.can(ctx, u, "approve_applications") {
@@ -216,10 +216,10 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		}
 		return errForbidden
 	case "role_applications":
-		if existing != nil && asString(existing["userId"]) == id {
+		if existing == nil {
 			return nil
 		}
-		if incoming != nil && asString(incoming["userId"]) == id {
+		if asString(existing["userId"]) == id {
 			return nil
 		}
 		if s.can(ctx, u, "approve_applications") {
@@ -230,7 +230,7 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		if existing != nil && asString(existing["customerId"]) == id {
 			return nil
 		}
-		if incoming != nil && asString(incoming["customerId"]) == id && existing == nil {
+		if existing == nil && (s.can(ctx, u, "request_stats") || s.can(ctx, u, "assign_stat_tasks") || s.can(ctx, u, "do_stat_tasks") || s.can(ctx, u, "approve_applications")) {
 			return nil
 		}
 		if s.can(ctx, u, "assign_stat_tasks") || s.can(ctx, u, "do_stat_tasks") || s.can(ctx, u, "approve_applications") {
@@ -336,7 +336,7 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 		if s := asString(incoming["productionStage"]); s != "" {
 			to = s
 		}
-		if to != from && !stageAllowed(from, to) && !admin {
+		if to != from && !stageAllowed(from, to) {
 			return nil, fmt.Errorf("invalid stage %s → %s", from, to)
 		}
 		if to == "published" && from != "published" {

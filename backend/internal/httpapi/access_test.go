@@ -3,8 +3,11 @@ package httpapi
 import "testing"
 
 func TestStageAllowed(t *testing.T) {
-	if !stageAllowed("tracking", "qa_review") || stageAllowed("tracking", "published") {
-		t.Fatal("tracking")
+	if !stageAllowed("tracking", "qa_review") {
+		t.Fatal("tracking→qa")
+	}
+	if stageAllowed("tracking", "published") || stageAllowed("published", "qa_review") {
+		t.Fatal("no skip, no unpublish")
 	}
 	if !stageAllowed("qa_review", "tracking") || !stageAllowed("qa_review", "coach_analysis") {
 		t.Fatal("qa")
