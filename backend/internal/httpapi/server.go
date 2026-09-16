@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"hoopstat/internal/catalog"
+	"hoopstat/internal/gdrive"
+	"hoopstat/internal/media"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -22,12 +24,14 @@ type Server struct {
 	pool          *pgxpool.Pool
 	geminiKey     string
 	sessionSecret string
+	media         *media.Store
+	drive         *gdrive.Client
 	aiLimit       hitLimiter
 	authLimit     hitLimiter
 }
 
-func New(pool *pgxpool.Pool, geminiKey, sessionSecret string) http.Handler {
-	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret}
+func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, driveClient *gdrive.Client) http.Handler {
+	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, drive: driveClient}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
 	mux.HandleFunc("GET /api/audit/roles", s.auditRoles)
@@ -35,10 +39,19 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string) http.Handler {
 	mux.HandleFunc("POST /api/auth/login", s.login)
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
 	mux.HandleFunc("GET /api/auth/me", s.me)
+	mux.HandleFunc("GET /api/drive/status", s.requireAuth(s.driveStatus))
+	mux.HandleFunc("GET /api/drive/auth", s.requireDriveAdmin(s.driveAuthStart))
+	mux.HandleFunc("GET /api/drive/callback", s.driveAuthCallback)
 	mux.HandleFunc("POST /api/gemini/batch-ocr", s.requireAuth(s.rateLimitedOCR(s.batchOCR)))
 	mux.HandleFunc("POST /api/gemini/generate", s.requireAuth(s.generate))
 	mux.HandleFunc("POST /api/stores/batch", s.requireAuth(s.batch))
 	mux.HandleFunc("POST /api/admin/wipe", s.requireAdmin(s.wipe))
+	mux.HandleFunc("GET /api/drill-submissions", s.requireAuth(s.listDrillSubmissions))
+	mux.HandleFunc("GET /api/drill-submissions/{id}", s.requireAuth(s.getDrillSubmission))
+	mux.HandleFunc("POST /api/drill-submissions", s.requireAuth(s.createDrillSubmissionLink))
+	mux.HandleFunc("POST /api/drill-submissions/upload", s.requireAuth(s.createDrillSubmissionUpload))
+	mux.HandleFunc("POST /api/drill-submissions/{id}/review", s.requireAuth(s.reviewDrillSubmission))
+	mux.HandleFunc("GET /api/media/{file}", s.serveMedia)
 	mux.HandleFunc("GET /api/stores/{store}", s.publicReadOrAuth(s.list))
 	mux.HandleFunc("GET /api/stores/{store}/{id}", s.publicReadOrAuth(s.get))
 	mux.HandleFunc("PUT /api/stores/{store}/{id}", s.requireAuth(s.put))
@@ -60,7 +73,7 @@ func withSecurity(next http.Handler) http.Handler {
 func withMaxBody(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Body != nil {
-			r.Body = http.MaxBytesReader(w, r.Body, 50<<20)
+			r.Body = http.MaxBytesReader(w, r.Body, 100<<20)
 		}
 		next.ServeHTTP(w, r)
 	})

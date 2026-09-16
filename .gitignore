@@ -10,6 +10,16 @@ coverage/
 .env*
 !.env.example
 
+# Google Cloud service account keys (never commit)
+secrets/
+*service-account*.json
+basket-*-*.json
+client_secret*.json
+*.apps.googleusercontent.com.json
+
+# Uploaded practice videos (not in git)
+data/uploads/
+
 # Temporary code generation scripts
 *.py
 *.cjs

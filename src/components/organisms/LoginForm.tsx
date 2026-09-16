@@ -33,8 +33,13 @@ export const LoginForm: React.FC = () => {
     
     try {
       await authService.login(email, password);
-      // Force reload or go to home to update global auth state
-      window.location.href = '/';
+      const next = new URLSearchParams(window.location.search).get('next');
+      // Only allow same-origin relative paths (Drive auth, etc.)
+      if (next && next.startsWith('/') && !next.startsWith('//')) {
+        window.location.href = next;
+      } else {
+        window.location.href = '/';
+      }
     } catch (err: any) {
       setError(err.message || 'Login gagal. Silakan coba lagi.');
     } finally {

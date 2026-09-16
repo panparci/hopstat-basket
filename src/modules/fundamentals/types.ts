@@ -77,10 +77,15 @@ export interface DrillSubmission {
   drillId: string;
   drillName: string;
   workoutDayId?: string;
-  videoUrl: string; // YouTube, Google Drive, or video link
+  videoUrl: string; // YouTube / Drive link, or /api/media/... for upload
+  mediaFile?: string;
+  mediaType?: 'video' | 'image' | 'link';
+  source?: 'link' | 'upload' | 'drive';
+  driveFileId?: string;
   athleteNotes: string;
   status: 'submitted' | 'reviewed' | 'needs_revision';
   submittedAt: string;
+  submittedBy?: string;
   coachFeedback?: CoachFeedback;
 }
 

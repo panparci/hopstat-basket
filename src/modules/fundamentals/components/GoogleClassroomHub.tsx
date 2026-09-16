@@ -21,6 +21,7 @@ interface GoogleClassroomHubProps {
   drillsLibrary: FundamentalDrill[];
   isCoach: boolean;
   onAddSubmission: (submission: { drillId: string; drillName: string; videoUrl: string; athleteNotes: string }) => Promise<void>;
+  onUploadSubmission: (submission: { drillId: string; drillName: string; file: File; athleteNotes: string }) => Promise<void>;
   onAddCoachFeedback: (submissionId: string, feedback: { coachName: string; rating: number; comments: string; timestampNotes?: { time: string; note: string }[] }) => Promise<void>;
   onAddQAQuestion: (question: string, category: string, drillName?: string) => Promise<void>;
   onAddQAReply: (threadId: string, message: string) => Promise<void>;
@@ -32,6 +33,7 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
   drillsLibrary,
   isCoach,
   onAddSubmission,
+  onUploadSubmission,
   onAddCoachFeedback,
   onAddQAQuestion,
   onAddQAReply,
@@ -40,9 +42,13 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
   
   // Submission Form Modal state
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submitMode, setSubmitMode] = useState<'link' | 'upload'>('upload');
   const [submitDrillId, setSubmitDrillId] = useState(drillsLibrary[0]?.id || '');
   const [submitVideoUrl, setSubmitVideoUrl] = useState('');
+  const [submitFile, setSubmitFile] = useState<File | null>(null);
   const [submitNotes, setSubmitNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // Coach Feedback state
   const [reviewingSubId, setReviewingSubId] = useState<string | null>(null);
@@ -61,17 +67,42 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
 
   const handleCreateSubmission = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!submitVideoUrl.trim()) return;
+    setSubmitError('');
     const drill = drillsLibrary.find(d => d.id === submitDrillId);
-    await onAddSubmission({
-      drillId: submitDrillId,
-      drillName: drill?.name || 'Drill Fundamental',
-      videoUrl: submitVideoUrl,
-      athleteNotes: submitNotes,
-    });
-    setSubmitVideoUrl('');
-    setSubmitNotes('');
-    setShowSubmitModal(false);
+    setSubmitting(true);
+    try {
+      if (submitMode === 'upload') {
+        if (!submitFile) {
+          setSubmitError('Pilih file video dulu.');
+          return;
+        }
+        await onUploadSubmission({
+          drillId: submitDrillId,
+          drillName: drill?.name || 'Drill Fundamental',
+          file: submitFile,
+          athleteNotes: submitNotes,
+        });
+      } else {
+        if (!submitVideoUrl.trim()) {
+          setSubmitError('Link video wajib diisi.');
+          return;
+        }
+        await onAddSubmission({
+          drillId: submitDrillId,
+          drillName: drill?.name || 'Drill Fundamental',
+          videoUrl: submitVideoUrl,
+          athleteNotes: submitNotes,
+        });
+      }
+      setSubmitVideoUrl('');
+      setSubmitFile(null);
+      setSubmitNotes('');
+      setShowSubmitModal(false);
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Gagal mengirim setoran');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleSaveCoachFeedback = async (subId: string) => {
@@ -199,11 +230,22 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                     className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
                       sub.status === 'reviewed'
                         ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30'
+                        : sub.status === 'needs_revision'
+                        ? 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30'
                         : 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30'
                     }`}
                   >
-                    {sub.status === 'reviewed' ? '✓ Sudah Direview Coach' : '⏳ Menunggu Review'}
+                    {sub.status === 'reviewed'
+                      ? '✓ Sudah Direview Coach'
+                      : sub.status === 'needs_revision'
+                      ? '↻ Perlu Revisi'
+                      : '⏳ Menunggu Review'}
                   </span>
+                  {sub.source && (
+                    <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-zinc-800 text-slate-500">
+                      {sub.source === 'drive' ? 'Drive' : sub.source === 'upload' ? 'File' : 'Link'}
+                    </span>
+                  )}
                   <a
                     href={sub.videoUrl}
                     target="_blank"
@@ -221,8 +263,24 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                 <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-zinc-500 block mb-1">
                   Catatan Athlete:
                 </span>
-                <p>{sub.athleteNotes}</p>
+                <p>{sub.athleteNotes || '—'}</p>
               </div>
+
+              {sub.source === 'upload' && sub.videoUrl?.startsWith('/api/media/') && (
+                sub.mediaType === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(sub.videoUrl) ? (
+                  <img
+                    src={sub.videoUrl}
+                    alt={sub.drillName}
+                    className="w-full max-h-64 object-contain rounded-2xl bg-black border border-slate-200 dark:border-zinc-800"
+                  />
+                ) : (
+                  <video
+                    src={sub.videoUrl}
+                    controls
+                    className="w-full max-h-64 rounded-2xl bg-black border border-slate-200 dark:border-zinc-800"
+                  />
+                )
+              )}
 
               {/* Coach Review Result (If Reviewed) */}
               {sub.coachFeedback && (
@@ -492,17 +550,48 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                 </select>
               </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 block mb-1">Link Video YouTube / Loom / Drive</label>
-                <input
-                  type="url"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={submitVideoUrl}
-                  onChange={(e) => setSubmitVideoUrl(e.target.value)}
-                  required
-                  className="w-full p-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs text-slate-900 dark:text-white"
-                />
+              <div className="flex gap-2 p-1 bg-slate-100 dark:bg-zinc-900 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setSubmitMode('upload')}
+                  className={`flex-1 py-2 text-xs font-black uppercase rounded-lg cursor-pointer ${submitMode === 'upload' ? 'bg-amber-500 text-zinc-950' : 'text-slate-500'}`}
+                >
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSubmitMode('link')}
+                  className={`flex-1 py-2 text-xs font-black uppercase rounded-lg cursor-pointer ${submitMode === 'link' ? 'bg-amber-500 text-zinc-950' : 'text-slate-500'}`}
+                >
+                  Paste Link
+                </button>
               </div>
+
+              {submitMode === 'upload' ? (
+                <div>
+                  <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 block mb-1">File Video / Gambar (max 100MB)</label>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/quicktime,video/webm,image/jpeg,image/png,image/webp,.mp4,.mov,.webm,.jpg,.jpeg,.png,.webp"
+                    onChange={(e) => setSubmitFile(e.target.files?.[0] || null)}
+                    className="w-full text-xs text-slate-700 dark:text-zinc-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500 file:text-zinc-950 file:font-bold"
+                  />
+                  {submitFile && (
+                    <p className="text-[11px] text-slate-500 mt-1 truncate">{submitFile.name} ({Math.round(submitFile.size / 1024)} KB)</p>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 block mb-1">Link Video YouTube / Loom / Drive</label>
+                  <input
+                    type="url"
+                    placeholder="https://www.youtube.com/watch?v=... atau Drive"
+                    value={submitVideoUrl}
+                    onChange={(e) => setSubmitVideoUrl(e.target.value)}
+                    className="w-full p-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs text-slate-900 dark:text-white"
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-bold text-slate-600 dark:text-zinc-400 block mb-1">Catatan Latihan & Pertanyaan untuk Coach</label>
@@ -515,6 +604,10 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                 />
               </div>
 
+              {submitError && (
+                <p className="text-xs text-red-500 font-bold">{submitError}</p>
+              )}
+
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -525,9 +618,10 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 text-zinc-950 font-black text-xs uppercase rounded-xl"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-amber-500 text-zinc-950 font-black text-xs uppercase rounded-xl disabled:opacity-60"
                 >
-                  Kirim Setoran Video
+                  {submitting ? 'Mengirim...' : 'Kirim Setoran Video'}
                 </button>
               </div>
             </form>

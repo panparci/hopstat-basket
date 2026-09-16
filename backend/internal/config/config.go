@@ -8,10 +8,15 @@ import (
 )
 
 type Config struct {
-	Addr          string
-	DatabaseURL   string
-	GeminiAPIKey  string
-	SessionSecret string
+	Addr              string
+	DatabaseURL       string
+	GeminiAPIKey      string
+	SessionSecret     string
+	UploadDir         string
+	GoogleOAuthClient string
+	GoogleOAuthToken  string
+	GoogleDriveFolder string
+	GoogleOAuthRedirect string
 }
 
 func Load() Config {
@@ -25,11 +30,32 @@ func Load() Config {
 	if secret == "" && os.Getenv("HOOPSTAT_ENV") != "production" {
 		secret = os.Getenv("DATABASE_URL")
 	}
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "data/uploads"
+	}
+	oauthClient := os.Getenv("GOOGLE_OAUTH_CLIENT")
+	if oauthClient == "" {
+		oauthClient = "secrets/oauth_web.json"
+	}
+	oauthToken := os.Getenv("GOOGLE_OAUTH_TOKEN")
+	if oauthToken == "" {
+		oauthToken = "secrets/drive_token.json"
+	}
+	redirect := os.Getenv("GOOGLE_OAUTH_REDIRECT")
+	if redirect == "" {
+		redirect = "https://hoopstats.kognifx.com/api/drive/callback"
+	}
 	return Config{
-		Addr:          addr,
-		DatabaseURL:   os.Getenv("DATABASE_URL"),
-		GeminiAPIKey:  key,
-		SessionSecret: secret,
+		Addr:                addr,
+		DatabaseURL:         os.Getenv("DATABASE_URL"),
+		GeminiAPIKey:        key,
+		SessionSecret:       secret,
+		UploadDir:           uploadDir,
+		GoogleOAuthClient:   oauthClient,
+		GoogleOAuthToken:    oauthToken,
+		GoogleDriveFolder:   os.Getenv("GOOGLE_DRIVE_FOLDER_ID"),
+		GoogleOAuthRedirect: redirect,
 	}
 }
 

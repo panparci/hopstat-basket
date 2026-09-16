@@ -16,7 +16,6 @@ import { initDB } from '../../../lib/db';
 const DRILLS_STORE = 'fundamental_drills';
 const PROFILE_STORE = 'fundamental_profiles';
 const SCHEDULE_STORE = 'workout_schedules';
-const SUBMISSIONS_STORE = 'drill_submissions';
 const QA_STORE = 'classroom_qa';
 
 class FundamentalService {
@@ -298,40 +297,70 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
     ];
   }
 
-  // --- SUBMISSIONS (GOOGLE CLASSROOM STYLE) ---
-  async getSubmissions(): Promise<DrillSubmission[]> {
-    const db = await initDB();
-    return db.getAll(SUBMISSIONS_STORE);
+  // --- SUBMISSIONS (link YouTube/Drive ATAU upload file) ---
+  async getSubmissions(params?: { status?: string; athleteId?: string }): Promise<DrillSubmission[]> {
+    const q = new URLSearchParams();
+    if (params?.status) q.set('status', params.status);
+    if (params?.athleteId) q.set('athleteId', params.athleteId);
+    const qs = q.toString();
+    const res = await fetch(`/api/drill-submissions${qs ? `?${qs}` : ''}`, { credentials: 'include' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `list submissions ${res.status}`);
+    return (data.items || []) as DrillSubmission[];
   }
 
   async addSubmission(submission: Omit<DrillSubmission, 'id' | 'submittedAt' | 'status'>): Promise<DrillSubmission[]> {
-    const db = await initDB();
-    const newEntry: DrillSubmission = {
-      ...submission,
-      id: `sub-${Date.now()}`,
-      status: 'submitted',
-      submittedAt: new Date().toISOString()
-    };
-    await db.put(SUBMISSIONS_STORE, newEntry);
+    const res = await fetch('/api/drill-submissions', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submission),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `submit link ${res.status}`);
     return this.getSubmissions();
   }
 
-  async addCoachFeedback(submissionId: string, feedback: { coachName: string; rating: number; comments: string; timestampNotes?: { time: string; note: string }[] }): Promise<DrillSubmission[]> {
-    const db = await initDB();
-    const current = await this.getSubmissions();
-    const index = current.findIndex(s => s.id === submissionId);
-    if (index >= 0) {
-      current[index] = {
-        ...current[index],
-        status: 'reviewed',
-        coachFeedback: {
-          ...feedback,
-          reviewedAt: new Date().toISOString()
-        }
-      };
-      await db.put(SUBMISSIONS_STORE, current[index]);
-    }
-    return current;
+  async uploadSubmission(input: {
+    file: File;
+    athleteId: string;
+    athleteName: string;
+    drillId: string;
+    drillName: string;
+    athleteNotes: string;
+  }): Promise<DrillSubmission[]> {
+    const fd = new FormData();
+    fd.append('file', input.file);
+    fd.append('athleteId', input.athleteId);
+    fd.append('athleteName', input.athleteName);
+    fd.append('drillId', input.drillId);
+    fd.append('drillName', input.drillName);
+    fd.append('athleteNotes', input.athleteNotes);
+    const res = await fetch('/api/drill-submissions/upload', {
+      method: 'POST',
+      credentials: 'include',
+      body: fd,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `upload ${res.status}`);
+    return this.getSubmissions();
+  }
+
+  async addCoachFeedback(submissionId: string, feedback: { coachName: string; rating: number; comments: string; timestampNotes?: { time: string; note: string }[]; status?: 'reviewed' | 'needs_revision' }): Promise<DrillSubmission[]> {
+    const res = await fetch(`/api/drill-submissions/${encodeURIComponent(submissionId)}/review`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rating: feedback.rating,
+        comments: feedback.comments,
+        timestampNotes: feedback.timestampNotes,
+        status: feedback.status || 'reviewed',
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `review ${res.status}`);
+    return this.getSubmissions();
   }
 
   // --- CLASSROOM Q&A THREADS ---

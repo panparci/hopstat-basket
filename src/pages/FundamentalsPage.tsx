@@ -54,12 +54,10 @@ export const FundamentalsPage: React.FC = () => {
   const [showAdminModal, setShowAdminModal] = useState(false);
   const [showUploadExcelModal, setShowUploadExcelModal] = useState(false);
   const [editingDrill, setEditingDrill] = useState<FundamentalDrill | null>(null);
-  const [isCoachView, setIsCoachView] = useState(true);
+  const [isCoachView, setIsCoachView] = useState(false);
 
   useEffect(() => {
-    if (isAdminUser) {
-      setIsCoachView(true);
-    }
+    setIsCoachView(isAdminUser);
   }, [isAdminUser]);
 
   // Load initial data
@@ -147,8 +145,20 @@ export const FundamentalsPage: React.FC = () => {
   const handleAddSubmission = async (sub: { drillId: string; drillName: string; videoUrl: string; athleteNotes: string }) => {
     const updated = await fundamentalService.addSubmission({
       ...sub,
-      athleteId: 'current-athlete',
-      athleteName: profile?.name || 'Pemain Basket',
+      athleteId: profile?.id || user?.id || 'current-athlete',
+      athleteName: profile?.name || user?.name || 'Pemain Basket',
+    });
+    setSubmissions(updated);
+  };
+
+  const handleUploadSubmission = async (sub: { drillId: string; drillName: string; file: File; athleteNotes: string }) => {
+    const updated = await fundamentalService.uploadSubmission({
+      file: sub.file,
+      drillId: sub.drillId,
+      drillName: sub.drillName,
+      athleteNotes: sub.athleteNotes,
+      athleteId: profile?.id || user?.id || 'current-athlete',
+      athleteName: profile?.name || user?.name || 'Pemain Basket',
     });
     setSubmissions(updated);
   };
@@ -324,6 +334,7 @@ export const FundamentalsPage: React.FC = () => {
           drillsLibrary={drills}
           isCoach={isCoachView}
           onAddSubmission={handleAddSubmission}
+          onUploadSubmission={handleUploadSubmission}
           onAddCoachFeedback={handleAddCoachFeedback}
           onAddQAQuestion={handleAddQAQuestion}
           onAddQAReply={handleAddQAReply}

@@ -11,7 +11,9 @@ import (
 
 	"hoopstat/internal/config"
 	"hoopstat/internal/db"
+	"hoopstat/internal/gdrive"
 	"hoopstat/internal/httpapi"
+	"hoopstat/internal/media"
 )
 
 func main() {
@@ -27,7 +29,25 @@ func main() {
 	}
 	defer pool.Close()
 
-	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret)
+	mediaStore, err := media.New(cfg.UploadDir)
+	if err != nil {
+		log.Fatalf("upload dir: %v", err)
+	}
+
+	var driveClient *gdrive.Client
+	if _, err := os.Stat(cfg.GoogleOAuthClient); err == nil {
+		driveClient, err = gdrive.New(cfg.GoogleOAuthClient, cfg.GoogleOAuthToken, cfg.GoogleDriveFolder, cfg.GoogleOAuthRedirect)
+		if err != nil {
+			log.Printf("drive oauth disabled: %v", err)
+			driveClient = nil
+		} else if driveClient.Ready() {
+			log.Printf("Google Drive linked (uploads → Drive)")
+		} else {
+			log.Printf("Google Drive OAuth ready — link via GET /api/drive/auth (admin)")
+		}
+	}
+
+	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, driveClient)
 	if dir := httpapi.FindDist(); dir != "" {
 		h = httpapi.WithSPA(h, dir)
 		log.Printf("serving UI from %s", dir)
