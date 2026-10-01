@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	Scope     = drive.DriveFileScope
+	Scope      = drive.DriveFileScope
 	folderName = "HoopStat Latihan"
 )
 

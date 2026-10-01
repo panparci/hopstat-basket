@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
-import { UserAccount } from '../../core/types/serviceRequests';
+import { usePermissions } from '../../core/contexts/PermissionsContext';
 
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<UserAccount | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const user = await authService.getCurrentUser();
-      setSession(user);
-      setLoading(false);
-    };
-    checkAuth();
-  }, []);
+  const { user: session, loading } = usePermissions();
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">

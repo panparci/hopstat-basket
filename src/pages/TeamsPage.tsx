@@ -22,7 +22,7 @@ export const TeamsPage: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [profiles, setProfiles] = useState<ChildProfile[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(() => new URLSearchParams(window.location.search).has('new'));
   const [isClubModalOpen, setIsClubModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [editingClub, setEditingClub] = useState<Club | null>(null);
@@ -310,7 +310,7 @@ export const TeamsPage: React.FC = () => {
           onSave={() => { 
             setIsModalOpen(false); 
             loadData(); 
-            showToast('Tim berhasil disimpan! Lanjutkan ke langkah berikutnya.', 'success');
+            showToast('Tim berhasil disimpan.', 'success');
           }} 
           refreshClubs={loadData}
         />

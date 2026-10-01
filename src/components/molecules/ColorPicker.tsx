@@ -10,7 +10,7 @@ interface ColorPickerProps {
   label?: string;
 }
 
-const COLOR_GROUPS = [
+export const COLOR_GROUPS = [
   {
     name: 'Classic',
     colors: [

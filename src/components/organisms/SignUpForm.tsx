@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InputField } from '../molecules/InputField';
+import { GoogleButton } from '../molecules/GoogleButton';
 import { authService } from '../../services/authService';
 import { useToast } from '../../core/contexts/ToastContext';
 
@@ -109,6 +110,7 @@ export const SignUpForm: React.FC = () => {
       >
         {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
       </button>
+      <GoogleButton label="Daftar dengan Google" />
     </form>
   );
 };

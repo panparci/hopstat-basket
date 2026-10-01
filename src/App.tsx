@@ -4,54 +4,54 @@
  */
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { LoginPage } from './pages/LoginPage';
-import { SignUpPage } from './pages/SignUpPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { LandingPage } from './pages/LandingPage';
-import { HomePage } from './pages/HomePage';
-import { RoleBasedDashboard } from './components/RoleBasedDashboard';
-import { GamesPage } from './pages/GamesPage';
-import { PlayersPage } from './pages/PlayersPage';
-import { StatsPage } from './pages/StatsPage';
-import { TeamsPage } from './pages/TeamsPage';
-import { TrackingPage } from './pages/TrackingPage';
-import { MatchDetailsPage } from './pages/MatchDetailsPage';
-import { ProfilesPage } from './pages/ProfilesPage';
-import { GalleryPage } from './pages/GalleryPage';
-import { PlayerProfilePage } from './pages/PlayerProfilePage';
-import { AdminDashboard } from './modules/admin/pages/AdminDashboard';
-import { PromptFlowEditor } from './modules/admin/pages/PromptFlowEditor';
-import { CrmPage } from './pages/admin/CrmPage';
-import { CmsPage } from './pages/admin/CmsPage';
 import { AdminLayout } from './widgets/admin-layout/AdminLayout';
 import { AppShellLayout } from './widgets/app-shell/AppShell';
-import { RolePermissionsPage } from './pages/admin/RolePermissionsPage';
-import { UserManagementPage } from './pages/admin/UserManagementPage';
-import { ApplicationsPage } from './pages/admin/ApplicationsPage';
-import { ClaimReviewPage } from './pages/admin/ClaimReviewPage';
-import { AthletesPage } from './pages/admin/AthletesPage';
-import { AdminGamesPage } from './pages/admin/GamesPage';
-import { CurationsPage } from './pages/admin/CurationsPage';
-import AICoachPage from './pages/AICoachPage';
-import { RequestStatsPage } from './pages/services/RequestStatsPage';
-import { AdminStatRequestsPage } from './pages/services/AdminStatRequestsPage';
-import { StatTasksPage } from './pages/services/StatTasksPage';
-import { ClaimAthletePage } from './pages/ClaimAthletePage';
-import { ClaimStatusPage } from './pages/ClaimStatusPage';
-import { QAReviewPage } from './pages/QAReviewPage';
-import { CoachAnalysisPage } from './pages/CoachAnalysisPage';
-import { MatchStoryPage } from './pages/MatchStoryPage';
-import { ApplyRolePage } from './pages/ApplyRolePage';
-import { WorkspacePage } from './pages/WorkspacePage';
-import { FundamentalsPage } from './pages/FundamentalsPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { PermissionsProvider, usePermissions } from './core/contexts/PermissionsContext';
 import { RequirePermission } from './components/auth/RequirePermission';
 import { useTheme } from './core/hooks/useTheme';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { authService } from './services/authService';
-import { useEffect, useState } from 'react';
-import { UserAccount } from './core/types/serviceRequests';
+import { lazy, Suspense, useEffect } from 'react';
+
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const SignUpPage = lazy(() => import('./pages/SignUpPage').then(m => ({ default: m.SignUpPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const RoleBasedDashboard = lazy(() => import('./components/RoleBasedDashboard').then(m => ({ default: m.RoleBasedDashboard })));
+const GamesPage = lazy(() => import('./pages/GamesPage').then(m => ({ default: m.GamesPage })));
+const StatsPage = lazy(() => import('./pages/StatsPage').then(m => ({ default: m.StatsPage })));
+const TrackingPage = lazy(() => import('./pages/TrackingPage').then(m => ({ default: m.TrackingPage })));
+const MatchDetailsPage = lazy(() => import('./pages/MatchDetailsPage').then(m => ({ default: m.MatchDetailsPage })));
+const ProfilesPage = lazy(() => import('./pages/ProfilesPage').then(m => ({ default: m.ProfilesPage })));
+const GalleryPage = lazy(() => import('./pages/GalleryPage').then(m => ({ default: m.GalleryPage })));
+const PlayerProfilePage = lazy(() => import('./pages/PlayerProfilePage').then(m => ({ default: m.PlayerProfilePage })));
+const AdminDashboard = lazy(() => import('./modules/admin/pages/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const PromptFlowEditor = lazy(() => import('./modules/admin/pages/PromptFlowEditor').then(m => ({ default: m.PromptFlowEditor })));
+const CrmPage = lazy(() => import('./pages/admin/CrmPage').then(m => ({ default: m.CrmPage })));
+const CmsPage = lazy(() => import('./pages/admin/CmsPage').then(m => ({ default: m.CmsPage })));
+const RolePermissionsPage = lazy(() => import('./pages/admin/RolePermissionsPage').then(m => ({ default: m.RolePermissionsPage })));
+const UserManagementPage = lazy(() => import('./pages/admin/UserManagementPage').then(m => ({ default: m.UserManagementPage })));
+const ApplicationsPage = lazy(() => import('./pages/admin/ApplicationsPage').then(m => ({ default: m.ApplicationsPage })));
+const ClaimReviewPage = lazy(() => import('./pages/admin/ClaimReviewPage').then(m => ({ default: m.ClaimReviewPage })));
+const AthletesPage = lazy(() => import('./pages/admin/AthletesPage').then(m => ({ default: m.AthletesPage })));
+const AdminGamesPage = lazy(() => import('./pages/admin/GamesPage').then(m => ({ default: m.AdminGamesPage })));
+const CurationsPage = lazy(() => import('./pages/admin/CurationsPage').then(m => ({ default: m.CurationsPage })));
+const RequestStatsPage = lazy(() => import('./pages/services/RequestStatsPage').then(m => ({ default: m.RequestStatsPage })));
+const AdminStatRequestsPage = lazy(() => import('./pages/services/AdminStatRequestsPage').then(m => ({ default: m.AdminStatRequestsPage })));
+const StatTasksPage = lazy(() => import('./pages/services/StatTasksPage').then(m => ({ default: m.StatTasksPage })));
+const QAReviewPage = lazy(() => import('./pages/QAReviewPage').then(m => ({ default: m.QAReviewPage })));
+const CoachAnalysisPage = lazy(() => import('./pages/CoachAnalysisPage').then(m => ({ default: m.CoachAnalysisPage })));
+const MatchStoryPage = lazy(() => import('./pages/MatchStoryPage').then(m => ({ default: m.MatchStoryPage })));
+const ApplyRolePage = lazy(() => import('./pages/ApplyRolePage').then(m => ({ default: m.ApplyRolePage })));
+const WorkspacePage = lazy(() => import('./pages/WorkspacePage').then(m => ({ default: m.WorkspacePage })));
+const FundamentalsPage = lazy(() => import('./pages/FundamentalsPage').then(m => ({ default: m.FundamentalsPage })));
+
+const PageSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+    <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 import { ToastProvider, useToast } from './core/contexts/ToastContext';
 import { claimService } from './services/claimService';
 
@@ -65,13 +65,9 @@ const AdaptiveAppShellLayout = () => {
 
 const GuestOrShell = () => {
   const loc = useLocation();
-  const [session, setSession] = useState<UserAccount | null | undefined>(undefined);
+  const { user: session, loading } = usePermissions();
 
-  useEffect(() => {
-    void authService.getCurrentUser().then(setSession);
-  }, []);
-
-  if (session === undefined) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
         <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
@@ -135,6 +131,7 @@ const AppContent = () => {
   }, [showToast]);
 
   return (
+    <Suspense fallback={<PageSpinner />}>
     <Routes>
       <Route path="/welcome" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<LoginPage />} />
@@ -305,6 +302,7 @@ const AppContent = () => {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 };
 

@@ -37,6 +37,9 @@ func WithSPA(api http.Handler, dir string) http.Handler {
 		fp := filepath.Join(root, rel)
 		if rel != "" && strings.HasPrefix(fp, root+string(os.PathSeparator)) {
 			if st, err := os.Stat(fp); err == nil && !st.IsDir() {
+				if strings.HasPrefix(rel, "assets/") {
+					w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+				}
 				http.ServeFile(w, r, fp)
 				return
 			}

@@ -14,6 +14,9 @@ import (
 	"hoopstat/internal/gdrive"
 	"hoopstat/internal/httpapi"
 	"hoopstat/internal/media"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 func main() {
@@ -35,7 +38,14 @@ func main() {
 	}
 
 	var driveClient *gdrive.Client
-	if _, err := os.Stat(cfg.GoogleOAuthClient); err == nil {
+	var googleLogin *oauth2.Config
+	if b, err := os.ReadFile(cfg.GoogleOAuthClient); err == nil {
+		if googleLogin, err = google.ConfigFromJSON(b, "openid", "email", "profile"); err == nil {
+			googleLogin.RedirectURL = cfg.GoogleLoginRedirect
+			log.Printf("Google sign-in enabled (%s)", googleLogin.RedirectURL)
+		} else {
+			log.Printf("google sign-in disabled: %v", err)
+		}
 		driveClient, err = gdrive.New(cfg.GoogleOAuthClient, cfg.GoogleOAuthToken, cfg.GoogleDriveFolder, cfg.GoogleOAuthRedirect)
 		if err != nil {
 			log.Printf("drive oauth disabled: %v", err)
@@ -47,7 +57,7 @@ func main() {
 		}
 	}
 
-	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, driveClient)
+	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, driveClient, googleLogin)
 	if dir := httpapi.FindDist(); dir != "" {
 		h = httpapi.WithSPA(h, dir)
 		log.Printf("serving UI from %s", dir)

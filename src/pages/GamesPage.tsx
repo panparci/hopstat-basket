@@ -24,7 +24,7 @@ export const GamesPage: React.FC = () => {
   const [seriesList, setSeriesList] = useState<Series[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(() => new URLSearchParams(window.location.search).has('new'));
   const [activeTab, setActiveTab] = useState<'adhoc' | 'series'>('adhoc');
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   
@@ -626,9 +626,24 @@ export const GamesPage: React.FC = () => {
       </header>
 
       {/* Desktop Header Title */}
-      <div className="hidden md:block px-4 mt-8 max-w-7xl mx-auto lg:px-8">
-        <h1 className="text-3xl font-display font-black text-[#1A1A1A] dark:text-white uppercase tracking-tight">ALL MATCHES</h1>
-        <p className="text-sm text-zinc-500 font-medium">Montserrat</p>
+      <div className="hidden md:flex items-end justify-between gap-4 px-4 mt-8 max-w-7xl mx-auto lg:px-8">
+        <h1 className="text-3xl font-display font-black text-[#1A1A1A] dark:text-white uppercase tracking-tight">Semua Pertandingan</h1>
+        {can('track_match') && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleImportClick}
+              className="px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-200 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
+            >
+              <Upload size={16} /> Import
+            </button>
+            <button
+              onClick={() => activeTab === 'series' ? setShowSeriesModal(true) : setShowPlanModal(true)}
+              className="px-4 py-2.5 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+            >
+              <Plus size={16} /> {activeTab === 'series' ? 'Buat Series' : 'Buat Pertandingan'}
+            </button>
+          </div>
+        )}
       </div>
 
       <main className="px-4 mt-6 max-w-7xl mx-auto lg:px-8 space-y-4">

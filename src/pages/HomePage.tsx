@@ -139,15 +139,17 @@ export const HomePage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const user = await authService.getCurrentUser();
-      setCurrentUser(user);
-
-      const m = await statsService.getMatches();
-      const pList = await statsService.getProfiles();
-      const evs = await statsService.getAllEvents();
-      const rst = await statsService.getAllMatchRosters();
       const db = await initDB();
-      const payments = await db.getAll('payments');
+      const [user, m, pList, evs, rst, payments, teams] = await Promise.all([
+        authService.getCurrentUser(),
+        statsService.getMatches(),
+        statsService.getProfiles(),
+        statsService.getAllEvents(),
+        statsService.getAllMatchRosters(),
+        db.getAll('payments'),
+        statsService.getTeams(),
+      ]);
+      setCurrentUser(user);
       const activeMatches = filterViewableMatches(
         user,
         m.filter((match) => match.status !== 'aborted'),
@@ -159,7 +161,6 @@ export const HomePage: React.FC = () => {
       setProfiles(pList);
       setHasProfiles(pList.length > 0);
 
-      const teams = await statsService.getTeams();
       setHasTeams(teams.length > 0);
       setAllEvents(evs);
       setAllMatchRosters(rst);

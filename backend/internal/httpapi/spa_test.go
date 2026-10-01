@@ -33,6 +33,14 @@ func TestWithSPA(t *testing.T) {
 		t.Fatalf("asset: %s", rec.Body.String())
 	}
 
+	_ = os.MkdirAll(filepath.Join(dir, "assets"), 0o755)
+	_ = os.WriteFile(filepath.Join(dir, "assets", "index-abc.js"), []byte("js"), 0o644)
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/assets/index-abc.js", nil))
+	if cc := rec.Header().Get("Cache-Control"); cc == "" {
+		t.Fatal("hashed assets must be cacheable")
+	}
+
 	rec = httptest.NewRecorder()
 	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/games", nil))
 	if rec.Body.String() != "SPA" {

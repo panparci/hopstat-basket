@@ -3,16 +3,19 @@ import { Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InputField } from '../molecules/InputField';
 import { authService } from '../../services/authService';
+import { GoogleButton } from '../molecules/GoogleButton';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('error') === 'suspended'
-      ? 'Akun Anda ditangguhkan (suspended). Silakan hubungi admin.'
-      : null;
+    const code = new URLSearchParams(window.location.search).get('error');
+    if (code === 'suspended') return 'Akun Anda ditangguhkan (suspended). Silakan hubungi admin.';
+    if (code === 'google_cancel') return 'Login Google dibatalkan.';
+    if (code === 'google_email') return 'Email Google belum terverifikasi.';
+    if (code?.startsWith('google')) return 'Login Google gagal. Silakan coba lagi.';
+    return null;
   });
   const [loading, setLoading] = useState(false);
 
@@ -89,6 +92,11 @@ export const LoginForm: React.FC = () => {
         >
           {loading ? 'SIGNING IN...' : 'SIGN IN'}
         </button>
+
+        <div className="flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+          <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" /> atau <span className="h-px flex-1 bg-zinc-200 dark:bg-zinc-800" />
+        </div>
+        <GoogleButton />
       </form>
     </div>
   );

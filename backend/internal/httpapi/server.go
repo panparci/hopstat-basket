@@ -18,6 +18,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/oauth2"
 )
 
 type Server struct {
@@ -26,12 +27,13 @@ type Server struct {
 	sessionSecret string
 	media         *media.Store
 	drive         *gdrive.Client
+	googleLogin   *oauth2.Config
 	aiLimit       hitLimiter
 	authLimit     hitLimiter
 }
 
-func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, driveClient *gdrive.Client) http.Handler {
-	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, drive: driveClient}
+func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, driveClient *gdrive.Client, googleLogin *oauth2.Config) http.Handler {
+	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, drive: driveClient, googleLogin: googleLogin}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
 	mux.HandleFunc("GET /api/audit/roles", s.auditRoles)
@@ -39,6 +41,8 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("POST /api/auth/login", s.login)
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
 	mux.HandleFunc("GET /api/auth/me", s.me)
+	mux.HandleFunc("GET /api/auth/google", s.googleLoginStart)
+	mux.HandleFunc("GET /api/auth/google/callback", s.googleLoginCallback)
 	mux.HandleFunc("GET /api/drive/status", s.requireAuth(s.driveStatus))
 	mux.HandleFunc("GET /api/drive/auth", s.requireDriveAdmin(s.driveAuthStart))
 	mux.HandleFunc("GET /api/drive/callback", s.driveAuthCallback)

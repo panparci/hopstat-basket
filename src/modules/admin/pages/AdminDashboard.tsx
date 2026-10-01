@@ -12,7 +12,8 @@ import {
   Shield,
   UserCheck,
   Award,
-  Target
+  Target,
+  Trophy
 } from 'lucide-react';
 import { BottomNav } from '../../../components/atoms/BottomNav';
 import { Card } from '../../../components/atoms/Card';
@@ -176,7 +177,19 @@ export const AdminDashboard: React.FC = () => {
             Pusat tata kelola operasional, verifikasi peran, kurasi data, dan manajemen platform HoopStats.
           </p>
         </div>
-        <div className="relative z-10 flex items-center gap-3 shrink-0">
+        <div className="relative z-10 flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            onClick={() => navigate('/games?new=1')}
+            className="px-4 py-2.5 bg-white hover:bg-teal-50 text-slate-950 text-xs font-black rounded-2xl uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center gap-2"
+          >
+            <Trophy size={16} /> Buat Pertandingan
+          </button>
+          <button
+            onClick={() => navigate('/profiles?tab=teams&new=1')}
+            className="px-4 py-2.5 bg-white hover:bg-teal-50 text-slate-950 text-xs font-black rounded-2xl uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center gap-2"
+          >
+            <Users size={16} /> Buat Tim
+          </button>
           <button
             onClick={() => navigate('/admin/claims')}
             className="px-4 py-2.5 bg-amber-300 hover:bg-amber-400 text-slate-950 text-xs font-black rounded-2xl uppercase tracking-wider shadow-md transition-all cursor-pointer flex items-center gap-2"

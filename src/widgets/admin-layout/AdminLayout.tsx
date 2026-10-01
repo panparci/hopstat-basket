@@ -48,6 +48,7 @@ export const AdminLayout: React.FC = () => {
         { label: 'Beranda Publik', path: '/', icon: Home },
         { label: 'Dashboard Control', path: '/admin', icon: Layout },
         { label: 'Pertandingan', path: '/games', icon: Trophy },
+        { label: 'Tim & Atlet', path: '/profiles', icon: Users },
         { label: 'Statistik', path: '/stats', icon: ClipboardList }
       ]
     },
