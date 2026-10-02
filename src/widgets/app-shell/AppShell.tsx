@@ -104,7 +104,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
     );
   }
 
-  if (!user) {
+  // Inside the HoopStats mobile app the native tab bar is the navigation.
+  if (!user || navigator.userAgent.includes('HoopStatApp')) {
     return <>{children}</>;
   }
 
