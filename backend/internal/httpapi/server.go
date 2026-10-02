@@ -43,6 +43,7 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("GET /api/auth/me", s.me)
 	mux.HandleFunc("GET /api/auth/google", s.googleLoginStart)
 	mux.HandleFunc("GET /api/auth/google/callback", s.googleLoginCallback)
+	mux.HandleFunc("GET /api/auth/app", s.appLogin)
 	mux.HandleFunc("GET /api/drive/status", s.requireAuth(s.driveStatus))
 	mux.HandleFunc("GET /api/drive/auth", s.requireDriveAdmin(s.driveAuthStart))
 	mux.HandleFunc("GET /api/drive/callback", s.driveAuthCallback)

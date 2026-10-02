@@ -2,6 +2,7 @@ package httpapi
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -24,6 +25,17 @@ func safeNext(next string) string {
 	return next
 }
 
+// appRedirect accepts only the mobile app's deep-link schemes (exp:// is Expo Go during development).
+func appRedirect(u string) bool {
+	return strings.HasPrefix(u, "hoopstat://") || strings.HasPrefix(u, "exp://")
+}
+
+// appTokenSecret binds a handoff token to the app's PKCE-style challenge, so it is useless without the verifier
+// and can never pass as a session cookie.
+func (s *Server) appTokenSecret(challenge string) string {
+	return s.sessionSecret + "|app|" + challenge
+}
+
 func (s *Server) googleLoginStart(w http.ResponseWriter, r *http.Request) {
 	if s.googleLogin == nil {
 		http.Redirect(w, r, "/login?error=google_off", http.StatusFound)
@@ -32,10 +44,14 @@ func (s *Server) googleLoginStart(w http.ResponseWriter, r *http.Request) {
 	b := make([]byte, 16)
 	_, _ = rand.Read(b)
 	state := hex.EncodeToString(b)
-	next := base64.RawURLEncoding.EncodeToString([]byte(safeNext(r.URL.Query().Get("next"))))
+	q := r.URL.Query()
+	value := state + "." + base64.RawURLEncoding.EncodeToString([]byte(safeNext(q.Get("next"))))
+	if challenge, redirect := q.Get("app"), q.Get("redirect"); len(challenge) == 43 && appRedirect(redirect) {
+		value += "." + challenge + "." + base64.RawURLEncoding.EncodeToString([]byte(redirect))
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     googleStateCookie,
-		Value:    state + "." + next,
+		Value:    value,
 		Path:     "/api/auth/google",
 		HttpOnly: true,
 		Secure:   r.TLS != nil || strings.EqualFold(r.Header.Get("X-Forwarded-Proto"), "https"),
@@ -46,20 +62,39 @@ func (s *Server) googleLoginStart(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) googleLoginCallback(w http.ResponseWriter, r *http.Request) {
-	fail := func(code string) { http.Redirect(w, r, "/login?error="+code, http.StatusFound) }
+	var state, nextB64, challenge, appURL string
+	if c, err := r.Cookie(googleStateCookie); err == nil {
+		parts := strings.Split(c.Value, ".")
+		state, nextB64 = parts[0], parts[len(parts)-1]
+		if len(parts) == 4 {
+			nextB64, challenge = parts[1], parts[2]
+			if b, err := base64.RawURLEncoding.DecodeString(parts[3]); err == nil && appRedirect(string(b)) {
+				appURL = string(b)
+			}
+		}
+	}
+	appBack := func(query string) {
+		sep := "?"
+		if strings.Contains(appURL, "?") {
+			sep = "&"
+		}
+		http.Redirect(w, r, appURL+sep+query, http.StatusFound)
+	}
+	fail := func(code string) {
+		if appURL != "" {
+			appBack("error=" + code)
+			return
+		}
+		http.Redirect(w, r, "/login?error="+code, http.StatusFound)
+	}
 	if s.googleLogin == nil {
 		fail("google_off")
 		return
 	}
-	c, err := r.Cookie(googleStateCookie)
 	http.SetCookie(w, &http.Cookie{Name: googleStateCookie, Path: "/api/auth/google", MaxAge: -1})
 	if r.URL.Query().Get("error") != "" {
 		fail("google_cancel")
 		return
-	}
-	var state, nextB64 string
-	if err == nil {
-		state, nextB64, _ = strings.Cut(c.Value, ".")
 	}
 	if state == "" || r.URL.Query().Get("state") != state {
 		fail("google_state")
@@ -132,10 +167,27 @@ func (s *Server) googleLoginCallback(w http.ResponseWriter, r *http.Request) {
 		fail("suspended")
 		return
 	}
+	if appURL != "" {
+		appBack("token=" + signSession(s.appTokenSecret(challenge), fmt.Sprint(user["id"]), time.Now().Add(2*time.Minute)))
+		return
+	}
 	s.setSession(w, r, fmt.Sprint(user["id"]))
 	next := "/"
 	if b, err := base64.RawURLEncoding.DecodeString(nextB64); err == nil {
 		next = safeNext(string(b))
 	}
 	http.Redirect(w, r, next, http.StatusFound)
+}
+
+// appLogin runs inside the app's WebView: trades the handoff token + verifier for a session cookie.
+func (s *Server) appLogin(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	sum := sha256.Sum256([]byte(q.Get("verifier")))
+	uid, ok := parseSession(s.appTokenSecret(base64.RawURLEncoding.EncodeToString(sum[:])), q.Get("token"))
+	if q.Get("verifier") == "" || !ok {
+		http.Redirect(w, r, "/login?error=google", http.StatusFound)
+		return
+	}
+	s.setSession(w, r, uid)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
