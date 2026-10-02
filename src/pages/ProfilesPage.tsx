@@ -417,14 +417,14 @@ export const ProfilesPage: React.FC = () => {
 
       <main className="p-4 mt-2 space-y-6">
         {currentUser && (
-          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="bg-white dark:bg-zinc-900 p-5 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-650 dark:text-zinc-400">
                 <User size={20} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h3 className="font-bold text-sm text-zinc-900 dark:text-white leading-none mb-1">{currentUser.name}</h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 break-all">
                   {currentUser.email} • <span className="capitalize font-semibold text-xs text-brand-navy dark:text-brand-orange">{currentUser.role}</span>
                 </p>
               </div>
