@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -129,14 +130,18 @@ func (s *Server) createDrillSubmissionUpload(w http.ResponseWriter, r *http.Requ
 
 	if s.drive != nil && s.drive.Ready() {
 		res, err := s.drive.Upload(r.Context(), gdrive.SafeFileName(hdr.Filename), ct, file)
-		if err != nil {
+		if err == nil {
+			publicPath = res.ViewURL
+			driveID = res.FileID
+			source = "drive"
+		} else if _, seekErr := file.Seek(0, io.SeekStart); seekErr != nil || s.media == nil {
 			writeJSON(w, http.StatusBadGateway, map[string]string{"error": "upload Drive gagal: " + err.Error()})
 			return
+		} else {
+			log.Printf("drive upload failed, saved locally instead (re-link via /api/drive/auth): %v", err)
 		}
-		publicPath = res.ViewURL
-		driveID = res.FileID
-		source = "drive"
-	} else {
+	}
+	if source != "drive" {
 		if s.media == nil {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]string{
 				"error": "Drive belum di-link. Admin buka /api/drive/auth (login dulu), atau set UPLOAD_DIR untuk fallback lokal.",
