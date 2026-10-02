@@ -484,7 +484,7 @@ export const ActionContent: React.FC<ActionContentProps> = ({
                 }}
                 className={`py-2 rounded-xl text-xs font-black uppercase tracking-wider border transition-all ${
                   ftState.numFTs === opt
-                    ? "bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-brand-navy dark:border-brand-orange"
+                    ? "bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-white dark:border-brand-orange"
                     : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700"
                 }`}
               >
@@ -697,7 +697,7 @@ export const ActionContent: React.FC<ActionContentProps> = ({
                       !lastFtMiss
                         ? "opacity-30 cursor-not-allowed bg-zinc-100 dark:bg-zinc-800 border-zinc-200"
                         : ftState.lastBallOutcome === p.id
-                          ? "bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-brand-navy"
+                          ? "bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-white"
                           : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 shadow-sm"
                     }`}
                   >

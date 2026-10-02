@@ -480,7 +480,7 @@ const AICoachPage: React.FC = () => {
                 <button
                   onClick={() => generateInsight(activeAgent)}
                   disabled={loadingAgent !== null}
-                  className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto disabled:opacity-50"
+                  className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto disabled:opacity-50"
                 >
                   {loadingAgent === activeAgent ? (
                     <><Loader2 className="animate-spin" size={18} /> MENGANALISA...</>

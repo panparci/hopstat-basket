@@ -148,7 +148,7 @@ export const ClaimStatusPage: React.FC = () => {
             </p>
             <button
               onClick={() => navigate('/claim')}
-              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase shadow-sm transition-transform hover:scale-[1.02]"
+              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-6 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase shadow-sm transition-transform hover:scale-[1.02]"
             >
               Cari Atlet Sekarang
             </button>
@@ -241,7 +241,7 @@ export const ClaimStatusPage: React.FC = () => {
                     <div className="pt-1 flex justify-end">
                       <button
                         onClick={() => navigate(`/gallery/${claim.profileId}`)}
-                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all hover:opacity-90"
+                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-sm transition-all hover:opacity-90"
                       >
                         <ExternalLink size={14} />
                         Lihat Profil Atlet Terverifikasi

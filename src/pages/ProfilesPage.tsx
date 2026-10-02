@@ -319,7 +319,7 @@ export const ProfilesPage: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
-      className="min-h-screen bg-[#F8F9FA] dark:bg-zinc-950 pb-24 transition-colors font-sans"
+      className="pb-24 transition-colors font-sans"
     >
       <header className="flex justify-between items-center p-4 bg-white dark:bg-zinc-950 sticky top-0 z-30 border-b border-zinc-100 dark:border-zinc-800 md:hidden">
         <div className="flex items-center gap-2">
@@ -338,7 +338,7 @@ export const ProfilesPage: React.FC = () => {
           </button>
           <button 
             onClick={openAddModal}
-            className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy p-2 rounded-xl transition-colors flex items-center justify-center shadow-sm hover:opacity-90 border-none cursor-pointer"
+            className="bg-brand-orange text-white p-2 rounded-xl transition-colors flex items-center justify-center shadow-sm hover:opacity-90 border-none cursor-pointer"
             title="Tambah Atlet"
           >
             <Plus size={20} strokeWidth={2.5} />
@@ -347,7 +347,7 @@ export const ProfilesPage: React.FC = () => {
       </header>
 
       {/* Sub-tab navigation & Desktop Actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 md:top-16 z-20 px-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-zinc-200 dark:border-zinc-800 px-4">
         <div className="flex flex-1 overflow-x-auto scrollbar-none gap-2">
           <button
             onClick={() => setActiveTab('mine')}
@@ -468,7 +468,7 @@ export const ProfilesPage: React.FC = () => {
               <p className="text-zinc-500 dark:text-zinc-400 text-sm mb-6">Tambahkan profil atlet Anda untuk mulai melacak pertandingan dan statistik mereka secara personal.</p>
               <button 
                 onClick={openAddModal}
-                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-5 py-2.5 rounded-xl font-bold tracking-wide uppercase text-xs flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity cursor-pointer shadow-md border-none"
+                className="bg-brand-orange text-white px-5 py-2.5 rounded-xl font-bold tracking-wide uppercase text-xs flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity cursor-pointer shadow-md border-none"
               >
                 <Plus size={18} strokeWidth={2.5} />
                 TAMBAH PROFIL
@@ -603,7 +603,7 @@ export const ProfilesPage: React.FC = () => {
               <div className="bg-zinc-50 dark:bg-zinc-800/40 p-4 rounded-2xl border border-zinc-150 dark:border-zinc-800 space-y-3.5">
                 <div className="flex items-center gap-4">
                   {/* Circular Preview */}
-                  <div className="w-16 h-16 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy flex items-center justify-center font-display font-black text-sm border-2 border-brand-orange/30 overflow-hidden shrink-0 relative shadow-inner group">
+                  <div className="w-16 h-16 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white flex items-center justify-center font-display font-black text-sm border-2 border-brand-orange/30 overflow-hidden shrink-0 relative shadow-inner group">
                     {avatar ? (
                       <>
                         <img src={avatar} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -901,7 +901,7 @@ export const ProfilesPage: React.FC = () => {
               <button
                 onClick={handleSaveProfile}
                 disabled={!name.trim()}
-                className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-brand-navy dark:bg-brand-orange dark:text-brand-navy hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 transition-colors disabled:opacity-50"
+                className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-brand-navy dark:bg-brand-orange dark:text-white hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 transition-colors disabled:opacity-50"
               >
                 Simpan
               </button>
@@ -966,7 +966,7 @@ export const ProfilesPage: React.FC = () => {
               <button
                 onClick={handleTransfer}
                 disabled={!newMainTeamId}
-                className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy py-3 rounded-xl font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-sm"
+                className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white py-3 rounded-xl font-bold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-sm"
               >
                 Simpan Kepindahan
               </button>
@@ -1084,7 +1084,7 @@ export const ProfilesPage: React.FC = () => {
               type="submit"
               variant="primary"
               disabled={submittingApp || !motivation.trim()}
-              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-bold px-4 py-2 border-none text-xs disabled:opacity-50"
+              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-bold px-4 py-2 border-none text-xs disabled:opacity-50"
             >
               {submittingApp ? 'Mengirim...' : 'Kirim Pengajuan'}
             </Button>
@@ -1130,7 +1130,7 @@ export const ProfilesPage: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleClaimProfile}
-              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-bold px-4 py-2 border-none text-xs"
+              className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-bold px-4 py-2 border-none text-xs"
             >
               Klaim & Hubungkan
             </Button>

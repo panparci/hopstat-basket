@@ -233,7 +233,7 @@ export const SinglePlayerActions: React.FC<SinglePlayerActionsProps> = ({
                 }}
                 className={`py-2 rounded-lg text-xs font-black uppercase tracking-wider border transition-all ${
                   ftState.numFTs === opt
-                    ? "bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-brand-navy dark:border-brand-orange"
+                    ? "bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-white dark:border-brand-orange"
                     : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700"
                 }`}
               >

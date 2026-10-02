@@ -235,7 +235,7 @@ export const PlayerSelectionGrid: React.FC<PlayerSelectionGridGridProps> = ({
                 onClick={() => setShowStarterModal(true)}
                 className="col-span-3 flex flex-col items-center justify-center p-6 rounded-xl border-2 border-dashed border-brand-navy dark:border-brand-orange bg-blue-50 dark:bg-blue-900/10 text-brand-navy dark:text-brand-orange hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-all group"
               >
-                <div className="w-12 h-12 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                   <Users size={20} />
                 </div>
                 <span className="text-sm font-black italic uppercase tracking-wider">Get Starters</span>

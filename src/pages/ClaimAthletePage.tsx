@@ -431,7 +431,7 @@ export const ClaimAthletePage: React.FC = () => {
                 <div className="flex flex-col items-center">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
                     isCompleted ? 'bg-emerald-500 text-white' :
-                    isActive ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' :
+                    isActive ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' :
                     'bg-zinc-200 dark:bg-zinc-800 text-zinc-400'
                   }`}>
                     {isCompleted ? '✓' : i + 1}

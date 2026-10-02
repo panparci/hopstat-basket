@@ -100,7 +100,7 @@ export const AITeamSetupModal: React.FC<AITeamSetupModalProps> = ({ isOpen, onCl
             <button 
               onClick={handleTextSubmit}
               disabled={isProcessing || !textInput.trim()}
-              className="w-full py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-bold tracking-wide disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-bold tracking-wide disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isProcessing ? <><Loader2 size={20} className="animate-spin" /> Memproses...</> : 'EKSTRAK LINEUP'}
             </button>
@@ -143,7 +143,7 @@ export const AITeamSetupModal: React.FC<AITeamSetupModalProps> = ({ isOpen, onCl
             <button 
               onClick={handleImageSubmit}
               disabled={isProcessing || !imagePreview}
-              className="w-full py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-bold tracking-wide disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-bold tracking-wide disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isProcessing ? <><Loader2 size={20} className="animate-spin" /> Memproses...</> : 'EKSTRAK DARI FOTO'}
             </button>

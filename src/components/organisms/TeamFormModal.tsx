@@ -191,7 +191,7 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
                       key={ku}
                       type="button"
                       onClick={() => setAgeGroup(ageGroup === ku ? '' : ku)}
-                      className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${ageGroup === ku ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent' : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${ageGroup === ku ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent' : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'}`}
                     >
                       {ku}
                     </button>
@@ -330,7 +330,7 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
             type="button"
             onClick={() => (isLast ? handleSave() : setStep(step + 1))}
             disabled={!name.trim() || saving}
-            className="w-2/3 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all shadow-sm cursor-pointer"
+            className="w-2/3 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all shadow-sm cursor-pointer"
           >
             {saving ? 'Menyimpan...' : isLast ? (team ? 'Simpan Perubahan' : 'Simpan Tim') : 'Lanjut'}
           </button>

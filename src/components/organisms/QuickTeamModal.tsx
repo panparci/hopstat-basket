@@ -146,7 +146,7 @@ export const QuickTeamModal: React.FC<QuickTeamModalProps> = ({ isOpen, onClose,
           <button 
             onClick={handleSave}
             disabled={!name}
-            className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-500 text-white dark:text-brand-navy rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
+            className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-500 text-white dark:text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
           >
             <Save size={14} /> Simpan Tim
           </button>

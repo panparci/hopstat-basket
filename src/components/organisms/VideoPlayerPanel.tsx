@@ -731,7 +731,7 @@ const VideoPlayerPanelComponent: React.FC<VideoPlayerPanelProps> = ({
                 </button>
                 <button
                   onClick={handleLoad}
-                  className="flex-[2] py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black uppercase tracking-widest rounded-2xl hover:opacity-90 transition-all shadow-lg text-sm"
+                  className="flex-[2] py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black uppercase tracking-widest rounded-2xl hover:opacity-90 transition-all shadow-lg text-sm"
                 >
                   Load Video
                 </button>

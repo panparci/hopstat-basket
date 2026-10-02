@@ -223,7 +223,7 @@ export const CurationsPage: React.FC = () => {
           onClick={() => { setActiveTab('organizations'); setActiveStatus('pending'); }}
           className={`flex-1 py-3 text-sm font-black uppercase italic tracking-wider rounded-xl transition-all ${
             activeTab === 'organizations' 
-              ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy shadow-md' 
+              ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white shadow-md' 
               : 'text-zinc-500 hover:text-zinc-800'
           }`}
         >
@@ -233,7 +233,7 @@ export const CurationsPage: React.FC = () => {
           onClick={() => { setActiveTab('teams'); setActiveStatus('pending'); }}
           className={`flex-1 py-3 text-sm font-black uppercase italic tracking-wider rounded-xl transition-all ${
             activeTab === 'teams' 
-              ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy shadow-md' 
+              ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white shadow-md' 
               : 'text-zinc-500 hover:text-zinc-800'
           }`}
         >

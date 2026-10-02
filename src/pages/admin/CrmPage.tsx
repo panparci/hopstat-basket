@@ -232,7 +232,7 @@ export const CrmPage: React.FC = () => {
           onClick={() => setIsCreateModalOpen(true)}
           variant="primary"
           size="sm"
-          className="bg-brand-navy text-white hover:opacity-90 dark:bg-brand-orange dark:text-brand-navy flex items-center gap-1.5 px-4 py-2 text-xs border-none rounded-xl font-extrabold cursor-pointer"
+          className="bg-brand-navy text-white hover:opacity-90 dark:bg-brand-orange dark:text-white flex items-center gap-1.5 px-4 py-2 text-xs border-none rounded-xl font-extrabold cursor-pointer"
         >
           <Plus size={14} />
           <span>Tambah Prospek / Lead</span>
@@ -616,7 +616,7 @@ export const CrmPage: React.FC = () => {
                     type="submit"
                     variant="primary"
                     size="sm"
-                    className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy text-xs border-none"
+                    className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white text-xs border-none"
                     disabled={!newNoteText.trim()}
                   >
                     Simpan Catatan
@@ -734,7 +734,7 @@ export const CrmPage: React.FC = () => {
             <Button
               type="submit"
               variant="primary"
-              className="bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-brand-navy border-none"
+              className="bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-white border-none"
             >
               Daftarkan
             </Button>

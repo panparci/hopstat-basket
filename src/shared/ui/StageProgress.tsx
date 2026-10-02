@@ -49,7 +49,7 @@ export const StageProgress: React.FC<StageProgressProps> = ({ stage, id }) => {
               <div 
                 className={`w-11 h-11 rounded-full flex items-center justify-center border-2 transition-all duration-350 shadow-sm ${
                   isCompleted 
-                    ? 'bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-brand-navy' 
+                    ? 'bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-white' 
                     : isActive 
                       ? 'bg-white border-brand-navy dark:bg-zinc-900 dark:border-brand-orange text-brand-navy dark:text-brand-orange ring-4 ring-brand-navy/10 dark:ring-brand-orange/10 scale-105' 
                       : 'bg-zinc-50 border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800 text-zinc-400'

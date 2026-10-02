@@ -194,7 +194,7 @@ export const EventEnrichmentModal: React.FC<EventEnrichmentModalProps> = ({
                   onClick={() => setGameContext(ctx as GameContext)}
                   className={`p-2 text-xs font-bold rounded-xl border transition-all ${
                     gameContext === ctx 
-                      ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-brand-navy dark:border-brand-orange' 
+                      ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-white dark:border-brand-orange' 
                       : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'
                   }`}
                 >
@@ -402,7 +402,7 @@ export const EventEnrichmentModal: React.FC<EventEnrichmentModalProps> = ({
           <button 
             onClick={() => handleSave(true)}
             disabled={isSaving}
-            className="w-full py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
           >
             <Save size={14} /> {isSaving ? 'Saving...' : 'Save and Next Event'}
           </button>

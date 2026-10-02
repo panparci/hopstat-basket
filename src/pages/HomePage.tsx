@@ -592,7 +592,7 @@ export const HomePage: React.FC = () => {
               <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-zinc-100 dark:bg-zinc-800 -z-10" />
               
               <div className={`flex gap-4 items-start relative z-10 transition-opacity ${hasProfiles ? 'opacity-60' : ''}`}>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasProfiles ? 'bg-emerald-500 text-white' : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasProfiles ? 'bg-emerald-500 text-white' : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white'}`}>
                   {hasProfiles ? <Check size={20} strokeWidth={3} /> : '1'}
                 </div>
                 <div className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
@@ -605,7 +605,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               <div className={`flex gap-4 items-start relative z-10 transition-opacity ${hasTeams ? 'opacity-60' : !hasProfiles ? 'opacity-40' : ''}`}>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasTeams ? 'bg-emerald-500 text-white' : hasProfiles ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasTeams ? 'bg-emerald-500 text-white' : hasProfiles ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                   {hasTeams ? <Check size={20} strokeWidth={3} /> : '2'}
                 </div>
                 <div className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
@@ -618,7 +618,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               <div className={`flex gap-4 items-start relative z-10 transition-opacity ${!(hasProfiles && hasTeams) ? 'opacity-40' : ''}`}>
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasProfiles && hasTeams ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black flex-shrink-0 border-4 border-white dark:border-zinc-900 ${hasProfiles && hasTeams ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'}`}>
                   3
                 </div>
                 <div className="flex-1 bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">

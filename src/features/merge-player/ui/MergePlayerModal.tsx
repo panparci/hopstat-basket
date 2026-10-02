@@ -229,7 +229,7 @@ export const MergePlayerModal: React.FC<MergePlayerModalProps> = ({
             onClick={() => setSelectedFields(prev => ({ ...prev, [fieldName]: 'primary' }))}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-left ${
               selectedFields[fieldName] === 'primary'
-                ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-brand-navy dark:border-brand-orange font-bold shadow-sm'
+                ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-white dark:border-brand-orange font-bold shadow-sm'
                 : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
             }`}
           >
@@ -247,7 +247,7 @@ export const MergePlayerModal: React.FC<MergePlayerModalProps> = ({
             onClick={() => setSelectedFields(prev => ({ ...prev, [fieldName]: 'secondary' }))}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all text-left ${
               selectedFields[fieldName] === 'secondary'
-                ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-brand-navy dark:border-brand-orange font-bold shadow-sm'
+                ? 'bg-brand-navy text-white border-brand-navy dark:bg-brand-orange dark:text-white dark:border-brand-orange font-bold shadow-sm'
                 : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
             }`}
           >
@@ -440,7 +440,7 @@ export const MergePlayerModal: React.FC<MergePlayerModalProps> = ({
               <Button
                 onClick={handleExecuteMerge}
                 disabled={isSubmitting}
-                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-bold uppercase tracking-wide text-xs"
+                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-bold uppercase tracking-wide text-xs"
               >
                 {isSubmitting ? 'Menggabungkan...' : 'Konfirmasi & Gabungkan'}
               </Button>

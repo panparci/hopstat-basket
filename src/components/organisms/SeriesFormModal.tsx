@@ -105,7 +105,7 @@ export const SeriesFormModal: React.FC<SeriesFormModalProps> = ({ isOpen, onClos
         <button 
           onClick={handleSave}
           disabled={!name || !teamId}
-          className="w-full mt-6 py-4 bg-brand-navy dark:bg-brand-orange disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-500 text-white dark:text-brand-navy rounded-2xl font-bold tracking-wide transition-all shadow-sm hover:opacity-90"
+          className="w-full mt-6 py-4 bg-brand-navy dark:bg-brand-orange disabled:bg-zinc-200 dark:disabled:bg-zinc-800 disabled:text-zinc-400 dark:disabled:text-zinc-500 text-white dark:text-white rounded-2xl font-bold tracking-wide transition-all shadow-sm hover:opacity-90"
         >
           SIMPAN PERUBAHAN
         </button>

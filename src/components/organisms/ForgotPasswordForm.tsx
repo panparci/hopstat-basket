@@ -36,7 +36,7 @@ export const ForgotPasswordForm: React.FC = () => {
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full py-4 mt-4 rounded-2xl font-bold tracking-wide text-white dark:text-brand-navy bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all disabled:opacity-50"
+        className="w-full py-4 mt-4 rounded-2xl font-bold tracking-wide text-white dark:text-white bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all disabled:opacity-50"
       >
         {loading ? 'SENDING...' : 'SEND RESET LINK'}
       </button>

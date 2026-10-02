@@ -607,7 +607,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 >
                   <div className={`w-12 h-12 mb-4 rounded-2xl flex items-center justify-center transition-all ${
                     mode === 'single' 
-                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy' 
+                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-white' 
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:bg-brand-navy/10 group-hover:text-brand-navy'
                   }`}>
                     <User size={24} />
@@ -626,7 +626,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 >
                   <div className={`w-12 h-12 mb-4 rounded-2xl flex items-center justify-center transition-all ${
                     mode === 'team' 
-                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy' 
+                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-white' 
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:bg-brand-navy/10 group-hover:text-brand-navy'
                   }`}>
                     <Users size={24} />
@@ -645,7 +645,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 >
                   <div className={`w-12 h-12 mb-4 rounded-2xl flex items-center justify-center transition-all ${
                     mode === 'full' 
-                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy' 
+                      ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-white' 
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:bg-brand-navy/10 group-hover:text-brand-navy'
                   }`}>
                     <Globe size={24} />
@@ -659,7 +659,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 <div className="flex flex-col sm:flex-row gap-3 mt-8 animate-in fade-in slide-in-from-bottom-2">
                   <button 
                     onClick={() => { setSetupPath('quick'); setStep(2); }}
-                    className="flex-[3] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2"
+                    className="flex-[3] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2"
                   >
                     MULAI CEPAT <FastForward size={18} />
                   </button>
@@ -792,7 +792,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                  <button 
                    disabled={!selectedProfileId || !opponent}
                    onClick={() => handleStartTracking('ongoing')}
-                   className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                   className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                  >
                    MULAI RECORD <Wand2 size={18} />
                  </button>
@@ -937,7 +937,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 <button 
                   disabled={!selectedProfileId || !ourOrgId || !theirOrgId}
                   onClick={handleNextStepFromTeamSetup}
-                  className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   LANJUT
                 </button>
@@ -1167,7 +1167,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                 </button>
                 <button 
                   onClick={() => setStep(4)}
-                  className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20"
+                  className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20"
                 >
                   LANJUT
                 </button>
@@ -1273,7 +1273,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                   </button>
                   <button 
                     onClick={() => setStep(5)}
-                    className="flex-1 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center shadow-md shadow-blue-900/10 dark:shadow-yellow-900/10"
+                    className="flex-1 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center shadow-md shadow-blue-900/10 dark:shadow-yellow-900/10"
                   >
                     LANJUT
                   </button>
@@ -1309,7 +1309,7 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                    </button>
                    <button 
                      onClick={() => handleStartTracking('ongoing')}
-                     className="flex-1 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2"
+                     className="flex-1 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black italic uppercase tracking-wider hover:opacity-90 transition-all shadow-xl shadow-blue-900/20 dark:shadow-yellow-900/20 flex items-center justify-center gap-2"
                    >
                      MULAI RECORD <Wand2 size={18} />
                    </button>

@@ -2360,7 +2360,7 @@ export const GalleryPage: React.FC = () => {
                                 Playing UP
                               </span>
                             )}
-                            <span className="bg-brand-navy text-brand-orange dark:bg-brand-orange dark:text-brand-navy text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
+                            <span className="bg-brand-navy text-brand-orange dark:bg-brand-orange dark:text-white text-[9px] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
                               {stats.position}
                             </span>
                           </div>

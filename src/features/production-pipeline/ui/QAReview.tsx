@@ -608,7 +608,7 @@ export const QAReview: React.FC = () => {
                         {issue.suggestion && isCurrentQA && (
                           <button
                             onClick={() => handleApplyQuickFix(issue)}
-                            className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-sm"
+                            className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide bg-brand-navy dark:bg-brand-orange text-white dark:text-white hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-sm"
                           >
                             ⚡ Perbaikan Cepat
                           </button>
@@ -763,7 +763,7 @@ export const QAReview: React.FC = () => {
                   <button
                     onClick={handleSaveEventDetails}
                     disabled={isSavingEvent}
-                    className="w-full mt-2 py-2.5 bg-zinc-800 hover:bg-zinc-900 text-white dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90 rounded-xl transition-all font-bold uppercase tracking-wider text-[11px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    className="w-full mt-2 py-2.5 bg-zinc-800 hover:bg-zinc-900 text-white dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90 rounded-xl transition-all font-bold uppercase tracking-wider text-[11px] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
                   >
                     <Save size={13} />
                     <span>{isSavingEvent ? 'Menyimpan...' : 'Simpan Detail Pengayaan'}</span>
@@ -854,7 +854,7 @@ export const QAReview: React.FC = () => {
                 disabled={!checkedScore || !checkedAnomalies || !checkedLineup}
                 className={`py-3 px-4 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 rounded-2xl transition-all shadow-sm cursor-pointer ${
                   checkedScore && checkedAnomalies && checkedLineup
-                    ? 'bg-brand-navy hover:bg-brand-navy/90 text-white dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90'
+                    ? 'bg-brand-navy hover:bg-brand-navy/90 text-white dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90'
                     : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-850 dark:text-zinc-600 cursor-not-allowed'
                 }`}
               >

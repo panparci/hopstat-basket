@@ -435,7 +435,7 @@ export const CoachAnalysis: React.FC = () => {
           </button>
           <button
             onClick={handleAdvanceStage}
-            className="px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90 rounded-2xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5"
+            className="px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90 rounded-2xl transition-all shadow-sm cursor-pointer flex items-center gap-1.5"
           >
             <Check size={14} /> Publikasikan
           </button>
@@ -482,7 +482,7 @@ export const CoachAnalysis: React.FC = () => {
                   />
                   <button
                     onClick={handleSaveVideoUrl}
-                    className="px-4 py-2 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
+                    className="px-4 py-2 bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-bold text-xs rounded-xl hover:opacity-90 transition-opacity"
                   >
                     Simpan
                   </button>
@@ -513,7 +513,7 @@ export const CoachAnalysis: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={togglePlay}
-                      className="p-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-full shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      className="p-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-full shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
                     >
                       {isPlaying ? <Pause size={18} strokeWidth={2.5} /> : <Play size={18} strokeWidth={2.5} className="ml-0.5" />}
                     </button>
@@ -559,7 +559,7 @@ export const CoachAnalysis: React.FC = () => {
                         onClick={() => changePlaybackRate(rate)}
                         className={`px-2.5 py-1 text-xs font-extrabold rounded-lg transition-colors cursor-pointer ${
                           playbackRate === rate
-                            ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy shadow-sm'
+                            ? 'bg-brand-navy text-white dark:bg-brand-orange dark:text-white shadow-sm'
                             : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-150 dark:hover:bg-zinc-700'
                         }`}
                       >
@@ -681,11 +681,11 @@ export const CoachAnalysis: React.FC = () => {
                       onClick={() => setCategory(cat.id as any)}
                       className={`flex items-center gap-2 p-2.5 rounded-2xl text-xs font-bold transition-all border cursor-pointer ${
                         isSelected
-                          ? 'bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-brand-navy shadow-sm'
+                          ? 'bg-brand-navy border-brand-navy text-white dark:bg-brand-orange dark:border-brand-orange dark:text-white shadow-sm'
                           : 'bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50'
                       }`}
                     >
-                      <CatIcon size={14} className={isSelected ? 'text-white dark:text-brand-navy' : 'text-zinc-450'} />
+                      <CatIcon size={14} className={isSelected ? 'text-white dark:text-white' : 'text-zinc-450'} />
                       <span>{cat.label}</span>
                     </button>
                   );
@@ -757,7 +757,7 @@ export const CoachAnalysis: React.FC = () => {
             {/* Action submit */}
             <button
               onClick={handleAddAnnotation}
-              className="w-full py-3 bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:hover:bg-brand-orange/95 dark:text-brand-navy font-bold text-xs uppercase tracking-wider text-white rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-3 bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:hover:bg-brand-orange/95 dark:text-white font-bold text-xs uppercase tracking-wider text-white rounded-2xl transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Plus size={14} /> Simpan Anotasi Ke Timeline
             </button>

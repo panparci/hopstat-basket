@@ -504,7 +504,7 @@ export const StatsPage: React.FC = () => {
                     {tm.name}
                   </h3>
                   {tm.isChild && (
-                    <span className="bg-[#0B1E36] dark:bg-brand-orange text-white dark:text-brand-navy text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap">
+                    <span className="bg-[#0B1E36] dark:bg-brand-orange text-white dark:text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full whitespace-nowrap">
                       Profil Anda
                     </span>
                   )}

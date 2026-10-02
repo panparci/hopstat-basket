@@ -25,7 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onSignupClick }) =
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="bg-brand-navy dark:bg-brand-orange p-1.5 rounded-lg text-white dark:text-brand-navy flex items-center justify-center shadow-sm">
+            <div className="bg-brand-navy dark:bg-brand-orange p-1.5 rounded-lg text-white dark:text-white flex items-center justify-center shadow-sm">
               <Trophy size={18} className="stroke-[2.5]" />
             </div>
             <span className="font-display text-xl font-extrabold tracking-wider text-brand-navy dark:text-white uppercase italic">
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onSignupClick }) =
             <Button variant="ghost" size="sm" onClick={onLoginClick}>
               Masuk
             </Button>
-            <Button variant="primary" size="sm" className="bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy" onClick={onSignupClick}>
+            <Button variant="primary" size="sm" className="bg-brand-navy text-white dark:bg-brand-orange dark:text-white" onClick={onSignupClick}>
               Coba Gratis
             </Button>
           </div>
@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onLoginClick, onSignupClick }) =
               <Button variant="ghost" size="md" className="w-full justify-center" onClick={() => { setIsOpen(false); onLoginClick(); }}>
                 Masuk
               </Button>
-              <Button variant="primary" size="md" className="w-full justify-center bg-brand-navy text-white dark:bg-brand-orange dark:text-brand-navy" onClick={() => { setIsOpen(false); onSignupClick(); }}>
+              <Button variant="primary" size="md" className="w-full justify-center bg-brand-navy text-white dark:bg-brand-orange dark:text-white" onClick={() => { setIsOpen(false); onSignupClick(); }}>
                 Coba Gratis
               </Button>
             </div>

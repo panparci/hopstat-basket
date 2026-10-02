@@ -137,7 +137,7 @@ export const PlayerFormModal: React.FC<PlayerFormModalProps> = ({ isOpen, onClos
 
         <button 
           type="submit"
-          className="w-full mt-6 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-bold tracking-wide hover:opacity-90 transition-all shadow-sm"
+          className="w-full mt-6 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-bold tracking-wide hover:opacity-90 transition-all shadow-sm"
         >
           {initialData ? 'SIMPAN PERUBAHAN' : 'TAMBAH PEMAIN'}
         </button>

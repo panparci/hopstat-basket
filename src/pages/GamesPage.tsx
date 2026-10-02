@@ -532,7 +532,7 @@ export const GamesPage: React.FC = () => {
           {displayMatch.status === 'completed' ? (
             <button
               onClick={() => navigate(`/match/${displayMatch.id}`)}
-              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black text-sm py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 hover:opacity-95 shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black text-sm py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 hover:opacity-95 shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
             >
               Buka Analisis & Shot Chart
               <ChevronRight size={16} />
@@ -541,7 +541,7 @@ export const GamesPage: React.FC = () => {
             can('track_match') && (
               <button
                 onClick={() => navigate(`/track/${displayMatch.id}`)}
-                className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black text-sm py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 hover:opacity-95 shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
+                className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black text-sm py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 hover:opacity-95 shadow-md active:scale-[0.98] transition-all cursor-pointer uppercase tracking-wider"
               >
                 Mulai / Lanjutkan Catat
                 <ChevronRight size={16} />
@@ -616,7 +616,7 @@ export const GamesPage: React.FC = () => {
             </button>
             <button 
               onClick={() => activeTab === 'series' ? setShowSeriesModal(true) : setShowPlanModal(true)}
-              className="p-2 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-full hover:opacity-90 transition-opacity cursor-pointer"
+              className="p-2 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-full hover:opacity-90 transition-opacity cursor-pointer"
               title={activeTab === 'series' ? 'Buat Series' : 'Buat Pertandingan'}
             >
               <Plus size={20} />
@@ -638,7 +638,7 @@ export const GamesPage: React.FC = () => {
             </button>
             <button
               onClick={() => activeTab === 'series' ? setShowSeriesModal(true) : setShowPlanModal(true)}
-              className="px-4 py-2.5 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
+              className="px-4 py-2.5 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 hover:opacity-90 transition-opacity cursor-pointer"
             >
               <Plus size={16} /> {activeTab === 'series' ? 'Buat Series' : 'Buat Pertandingan'}
             </button>
@@ -797,7 +797,7 @@ export const GamesPage: React.FC = () => {
                     can('track_match') && (
                       <button 
                         onClick={() => setShowPlanModal(true)}
-                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto cursor-pointer"
+                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto cursor-pointer"
                       >
                         <Plus size={18} strokeWidth={2.5} />
                         BUAT PERTANDINGAN
@@ -903,7 +903,7 @@ export const GamesPage: React.FC = () => {
                     can('track_match') && (
                       <button 
                         onClick={() => setShowSeriesModal(true)}
-                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto cursor-pointer"
+                        className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide mx-auto cursor-pointer"
                       >
                         <Plus size={18} strokeWidth={2.5} />
                         BUAT SERIES

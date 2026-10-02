@@ -76,7 +76,7 @@ export const CommentaryValidator: React.FC<CommentaryValidatorProps> = ({
 
               {draft.parsedData?.type ? (
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="px-2 py-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-md text-xs font-black uppercase tracking-wider">
+                  <span className="px-2 py-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-md text-xs font-black uppercase tracking-wider">
                     {draft.parsedData.type.replace('_', ' ')}
                   </span>
                   {draft.parsedData.playerId ? (
@@ -109,7 +109,7 @@ export const CommentaryValidator: React.FC<CommentaryValidatorProps> = ({
                   className={`flex-[2] py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg ${
                     isHighConfidence 
                       ? 'bg-green-500 text-white hover:bg-green-600 shadow-green-500/20' 
-                      : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy hover:opacity-90 shadow-brand-navy/20 dark:shadow-brand-orange/20'
+                      : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white hover:opacity-90 shadow-brand-navy/20 dark:shadow-brand-orange/20'
                   }`}
                 >
                   {isHighConfidence ? <Zap size={14} /> : <CheckCircle2 size={14} />} 

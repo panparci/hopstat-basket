@@ -106,7 +106,7 @@ export const BottomNav: React.FC = () => {
     return (
       <button 
         onClick={handleTap}
-        className={`w-full flex items-center justify-between p-4 rounded-xl mb-2 transition-colors cursor-pointer text-left ${active ? 'bg-brand-navy text-brand-orange dark:bg-brand-orange dark:text-brand-navy' : 'bg-[#F4F4F5] dark:bg-zinc-800/50 text-[#1A1A1A] dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'} ${className}`}
+        className={`w-full flex items-center justify-between p-4 rounded-xl mb-2 transition-colors cursor-pointer text-left ${active ? 'bg-brand-navy text-brand-orange dark:bg-brand-orange dark:text-white' : 'bg-[#F4F4F5] dark:bg-zinc-800/50 text-[#1A1A1A] dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800'} ${className}`}
       >
         <div className="flex items-center gap-3">
           <Icon size={20} strokeWidth={active ? 2.5 : 2} />

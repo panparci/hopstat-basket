@@ -88,7 +88,7 @@ export const Hero: React.FC<HeroProps> = ({ onSignupClick, onDemoClick, hero }) 
                 variant="primary"
                 size="lg"
                 onClick={onSignupClick}
-                className="w-full sm:w-auto bg-brand-navy text-white hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90 flex items-center gap-2 group"
+                className="w-full sm:w-auto bg-brand-navy text-white hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90 flex items-center gap-2 group"
               >
                 {hero?.ctaPrimary || "Coba Gratis Sekarang"}
                 <ChevronRight size={16} className="transition-transform group-hover:translate-x-1" />

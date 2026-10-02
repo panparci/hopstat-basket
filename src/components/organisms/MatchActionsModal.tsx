@@ -267,7 +267,7 @@ export const MatchActionsModal: React.FC<MatchActionsModalProps> = ({ match, ser
                 className="w-full bg-zinc-50 dark:bg-zinc-950 border-2 border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:border-brand-navy dark:focus:border-brand-orange outline-none transition-colors"
               />
             </div>
-            <button type="submit" className="w-full py-4 mt-2 rounded-2xl font-bold tracking-wide text-white dark:text-brand-navy bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
+            <button type="submit" className="w-full py-4 mt-2 rounded-2xl font-bold tracking-wide text-white dark:text-white bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all flex items-center justify-center gap-2">
               <Save size={18} /> SAVE CHANGES
             </button>
           </form>

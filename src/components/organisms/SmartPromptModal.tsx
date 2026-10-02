@@ -267,7 +267,7 @@ export const SmartPromptModal: React.FC<SmartPromptModalProps> = ({
                         })}
                         className={`py-1.5 px-3.5 rounded-lg border transition-all text-xs font-bold shadow-sm leading-tight h-8 flex items-center justify-center select-none ${
                           isSelected 
-                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent scale-105 shadow'
+                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent scale-105 shadow'
                             : 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700/50 hover:bg-zinc-100 dark:hover:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300'
                         }`}
                       >
@@ -308,7 +308,7 @@ export const SmartPromptModal: React.FC<SmartPromptModalProps> = ({
                         })}
                         className={`w-full py-2 px-2 rounded-lg border transition-all flex items-center justify-center text-xs font-bold shadow-sm leading-tight text-center h-10 ${
                           isSelected 
-                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent'
+                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent'
                             : 'bg-zinc-50 dark:bg-zinc-800/80 border-zinc-200 dark:border-zinc-700/80 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
                         }`}
                       >
@@ -333,7 +333,7 @@ export const SmartPromptModal: React.FC<SmartPromptModalProps> = ({
                         })}
                         className={`${isLastOdd ? 'col-span-2' : ''} py-2.5 px-3 rounded-xl border transition-all flex items-center gap-2.5 justify-start text-sm font-black shadow-sm leading-tight group h-[52px] select-none ${
                           isSelected 
-                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent scale-[1.01] z-10 shadow-md font-black'
+                            ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent scale-[1.01] z-10 shadow-md font-black'
                             : 'bg-white dark:bg-zinc-850/90 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 active:scale-[0.98]'
                         }`}
                       >
@@ -361,7 +361,7 @@ export const SmartPromptModal: React.FC<SmartPromptModalProps> = ({
                         className={`w-full py-6 rounded-2xl border transition-all flex flex-col items-center justify-center group ${
                           isSelected 
                             ? (group.color ? 'shadow-lg ring-4 ring-offset-2 ring-zinc-900 dark:ring-zinc-100 scale-105 z-10' : 'bg-brand-orange text-white border-brand-orange shadow-lg shadow-orange-500/20 scale-105 z-10')
-                            : (group.color ? 'opacity-50 hover:opacity-100 hover:scale-[1.02]' : (group.team === 'home' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent opacity-60 hover:opacity-100' : group.team === 'away' ? 'bg-red-600 dark:bg-red-500 text-white border-transparent opacity-60 hover:opacity-100' : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 opacity-60 hover:opacity-100'))
+                            : (group.color ? 'opacity-50 hover:opacity-100 hover:scale-[1.02]' : (group.team === 'home' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent opacity-60 hover:opacity-100' : group.team === 'away' ? 'bg-red-600 dark:bg-red-500 text-white border-transparent opacity-60 hover:opacity-100' : 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 opacity-60 hover:opacity-100'))
                         }`}
                         style={
                           isSelected && group.color
@@ -398,7 +398,7 @@ export const SmartPromptModal: React.FC<SmartPromptModalProps> = ({
                         inlineStyle = { backgroundColor: group.color, borderColor: 'transparent', color: group.theme === 'terang' ? '#000' : '#fff' };
                         btnClass += " opacity-50 hover:opacity-100 hover:scale-[1.02]";
                       } else {
-                        btnClass += "bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-transparent opacity-60 hover:opacity-100";
+                        btnClass += "bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-transparent opacity-60 hover:opacity-100";
                       }
                     } else if (group.team === 'away') {
                       if (group.color) {

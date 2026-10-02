@@ -294,7 +294,7 @@ export const PlayersPage: React.FC = () => {
           </button>
           <button 
             onClick={openAddModal}
-            className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy p-2 rounded-xl transition-colors flex items-center justify-center shadow-sm hover:opacity-90"
+            className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white p-2 rounded-xl transition-colors flex items-center justify-center shadow-sm hover:opacity-90"
             title="Tambah Pemain"
           >
             <Plus size={20} strokeWidth={2.5} />
@@ -306,25 +306,25 @@ export const PlayersPage: React.FC = () => {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
           <button 
             onClick={() => setFilter('semua')}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'semua' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'semua' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
           >
             Semua
           </button>
           <button 
             onClick={() => setFilter('anak')}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'anak' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'anak' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
           >
             Atlet Saya
           </button>
           <button 
             onClick={() => setFilter('rekan')}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'rekan' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'rekan' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
           >
             Rekan Setim
           </button>
           <button 
             onClick={() => setFilter('lawan')}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'lawan' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
+            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-colors ${filter === 'lawan' ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400'}`}
           >
             Lawan
           </button>
@@ -340,7 +340,7 @@ export const PlayersPage: React.FC = () => {
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <button 
                 onClick={openAddModal}
-                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide"
+                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity inline-flex items-center justify-center gap-2 text-sm tracking-wide"
               >
                 <Plus size={18} strokeWidth={2.5} />
                 TAMBAH PEMAIN
@@ -363,7 +363,7 @@ export const PlayersPage: React.FC = () => {
                 onClick={() => openStatsModal(player)}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-display font-black text-xl italic ${player.type === 'anak' ? 'bg-emerald-500 text-white' : player.type === 'lawan' ? 'bg-red-500 text-white' : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-display font-black text-xl italic ${player.type === 'anak' ? 'bg-emerald-500 text-white' : player.type === 'lawan' ? 'bg-red-500 text-white' : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white'}`}>
                     {player.jersey}
                   </div>
                   <div>

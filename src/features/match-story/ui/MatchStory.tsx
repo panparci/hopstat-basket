@@ -485,7 +485,7 @@ export const MatchStory: React.FC = () => {
           <div className="flex flex-col gap-2 w-full">
             <button 
               onClick={() => navigate('/games')}
-              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black text-sm py-3 px-4 rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer uppercase tracking-wider"
+              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black text-sm py-3 px-4 rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer uppercase tracking-wider"
             >
               Kembali ke Pertandingan
             </button>

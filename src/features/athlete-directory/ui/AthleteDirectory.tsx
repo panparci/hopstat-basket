@@ -693,7 +693,7 @@ export const AthleteDirectory: React.FC = () => {
                         setSelectedAthlete(p);
                         setIsLinkGuardianOpen(true);
                       }}
-                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-brand-navy hover:bg-opacity-90 dark:bg-brand-orange dark:text-brand-navy rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                      className="px-3.5 py-1.5 text-xs font-bold text-white bg-brand-navy hover:bg-opacity-90 dark:bg-brand-orange dark:text-white rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                     >
                       <UserCheck size={13} />
                       Klaim / Tautkan Wali

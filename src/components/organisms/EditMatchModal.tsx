@@ -583,7 +583,7 @@ export const EditMatchModal: React.FC<EditMatchModalProps> = ({
           </button>
           <button 
             onClick={handleSave}
-            className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
+            className="flex-[2] py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-black uppercase tracking-wider text-xs transition-all shadow-lg hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
           >
             <Save size={14} /> Update Match
           </button>

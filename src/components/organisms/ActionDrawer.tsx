@@ -56,7 +56,7 @@ export const ActionDrawer: React.FC<ActionDrawerProps> = ({
       >
         <div className="flex justify-between items-center p-4 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-3">
-             <div className="w-10 h-10 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy flex items-center justify-center font-display font-black italic text-xl">
+             <div className="w-10 h-10 rounded-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white flex items-center justify-center font-display font-black italic text-xl">
               {player.jersey}
             </div>
             <div>

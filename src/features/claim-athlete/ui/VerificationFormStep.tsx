@@ -91,7 +91,7 @@ export const VerificationFormStep: React.FC<VerificationFormStepProps> = ({
                 onClick={() => setRelationship(rel)}
                 className={`py-3 rounded-xl text-xs font-bold border capitalize transition-all ${
                   relationship === rel 
-                    ? 'bg-brand-navy dark:bg-brand-orange border-brand-navy dark:border-brand-orange text-white dark:text-brand-navy' 
+                    ? 'bg-brand-navy dark:bg-brand-orange border-brand-navy dark:border-brand-orange text-white dark:text-white' 
                     : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'
                 }`}
               >

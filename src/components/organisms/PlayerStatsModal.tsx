@@ -20,7 +20,7 @@ export const PlayerStatsModal: React.FC<PlayerStatsModalProps> = ({ isOpen, onCl
       maxWidth="max-w-md"
     >
       <div className="flex items-center gap-4 mb-6 -mt-4">
-        <div className="w-16 h-16 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-full flex items-center justify-center font-display font-black text-2xl italic flex-shrink-0">
+        <div className="w-16 h-16 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-full flex items-center justify-center font-display font-black text-2xl italic flex-shrink-0">
           {player.jersey || '-'}
         </div>
         <div>

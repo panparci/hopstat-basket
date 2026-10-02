@@ -106,7 +106,7 @@ export const SignUpForm: React.FC = () => {
       <button 
         type="submit" 
         disabled={loading}
-        className="w-full py-4 mt-2 rounded-2xl font-bold tracking-wide text-white dark:text-brand-navy bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all disabled:opacity-50 active:scale-95 duration-150 cursor-pointer"
+        className="w-full py-4 mt-2 rounded-2xl font-bold tracking-wide text-white dark:text-white bg-brand-navy dark:bg-brand-orange shadow-sm hover:opacity-90 transition-all disabled:opacity-50 active:scale-95 duration-150 cursor-pointer"
       >
         {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
       </button>

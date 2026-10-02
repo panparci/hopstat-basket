@@ -1910,7 +1910,7 @@ export const TrackingPage: React.FC = () => {
             isListening 
               ? 'bg-red-500 text-white shadow-inner scale-95' 
               : supported 
-                ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy shadow-sm hover:opacity-90'
+                ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white shadow-sm hover:opacity-90'
                 : 'bg-zinc-300 dark:bg-zinc-700 text-zinc-500 cursor-not-allowed'
           }`}
           disabled={!supported}

@@ -102,7 +102,7 @@ export const PlayerCorrectionModal: React.FC<PlayerCorrectionModalProps> = ({
                     {player.name.split(' ')[0]}{player.isGuest && '*'}
                   </span>
                   {isSelected && (
-                    <span className="absolute -top-1 -right-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-full p-0.5">
+                    <span className="absolute -top-1 -right-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-full p-0.5">
                       <Check size={8} strokeWidth={4} />
                     </span>
                   )}
@@ -139,7 +139,7 @@ export const PlayerCorrectionModal: React.FC<PlayerCorrectionModalProps> = ({
                       {player.name.split(' ')[0]}{player.isGuest && '*'}
                     </span>
                     {isSelected && (
-                      <span className="absolute -top-1 -right-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-full p-0.5">
+                      <span className="absolute -top-1 -right-1 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-full p-0.5">
                         <Check size={8} strokeWidth={4} />
                       </span>
                     )}

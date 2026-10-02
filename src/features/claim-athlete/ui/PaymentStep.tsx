@@ -96,7 +96,7 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
               onClick={() => setPaymentMethod(method)}
               className={`py-3.5 rounded-xl text-xs font-bold border capitalize transition-all flex flex-col items-center justify-center gap-1 ${
                 paymentMethod === method 
-                  ? 'bg-brand-navy dark:bg-brand-orange border-brand-navy dark:border-brand-orange text-white dark:text-brand-navy' 
+                  ? 'bg-brand-navy dark:bg-brand-orange border-brand-navy dark:border-brand-orange text-white dark:text-white' 
                   : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'
               }`}
             >

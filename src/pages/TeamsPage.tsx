@@ -473,7 +473,7 @@ const ClubFormModal: React.FC<ClubFormModalProps> = ({ club, onClose, onSave }) 
           <button 
             onClick={handleSave}
             disabled={!name.trim()}
-            className="w-2/3 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-2xl font-bold tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all shadow-sm"
+            className="w-2/3 py-4 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-2xl font-bold tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all shadow-sm"
           >
             SIMPAN
           </button>

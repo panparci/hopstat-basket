@@ -309,7 +309,7 @@ export const ClaimReviewPage: React.FC = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
                   isActive 
-                    ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy' 
+                    ? 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white' 
                     : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
                 }`}
               >
@@ -317,7 +317,7 @@ export const ClaimReviewPage: React.FC = () => {
                 {count > 0 && (
                   <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-black ${
                     isActive 
-                      ? 'bg-white/25 text-white dark:bg-brand-navy/20 dark:text-brand-navy' 
+                      ? 'bg-white/25 text-white dark:bg-brand-navy/20 dark:text-white' 
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                   }`}>
                     {count}

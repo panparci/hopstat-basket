@@ -143,7 +143,7 @@ export const PlayerEditModal: React.FC<PlayerEditModalProps> = ({
         <button
           onClick={handleSave}
           disabled={!name.trim() || !jersey.trim()}
-          className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-brand-navy dark:bg-brand-orange dark:text-brand-navy hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 transition-colors disabled:opacity-50"
+          className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-brand-navy dark:bg-brand-orange dark:text-white hover:bg-brand-navy/90 dark:hover:bg-brand-orange/90 transition-colors disabled:opacity-50"
         >
           Save Changes
         </button>

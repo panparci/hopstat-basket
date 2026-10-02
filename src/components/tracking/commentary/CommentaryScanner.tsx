@@ -47,7 +47,7 @@ export const CommentaryScanner: React.FC<CommentaryScannerProps> = ({
             ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 cursor-not-allowed'
             : isListening 
               ? 'bg-red-500 text-white animate-pulse shadow-red-500/50 scale-105' 
-              : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy shadow-brand-navy/30 dark:shadow-brand-orange/20 hover:scale-105 cursor-pointer'
+              : 'bg-brand-navy dark:bg-brand-orange text-white dark:text-white shadow-brand-navy/30 dark:shadow-brand-orange/20 hover:scale-105 cursor-pointer'
         }`}
       >
         {isListening && (

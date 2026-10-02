@@ -194,7 +194,7 @@ export const ApplyRolePage: React.FC = () => {
                 type="submit"
                 variant="primary"
                 disabled={submitting || !motivation.trim()}
-                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl disabled:opacity-50 flex items-center gap-2 shadow-md hover:scale-[1.02] duration-150"
+                className="bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl disabled:opacity-50 flex items-center gap-2 shadow-md hover:scale-[1.02] duration-150"
               >
                 <Send size={14} />
                 {submitting ? 'Mengirim...' : 'Kirim Pengajuan'}

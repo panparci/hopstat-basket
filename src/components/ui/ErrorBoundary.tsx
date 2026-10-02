@@ -59,7 +59,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
             <button
               onClick={() => window.location.reload()}
-              className="w-full py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy rounded-xl font-bold hover:opacity-90 transition-opacity"
+              className="w-full py-3 bg-brand-navy dark:bg-brand-orange text-white dark:text-white rounded-xl font-bold hover:opacity-90 transition-opacity"
             >
               Reload Application
             </button>

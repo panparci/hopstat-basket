@@ -344,7 +344,7 @@ export const UserManagementPage: React.FC = () => {
                           {user.name}
                         </span>
                         {isSelf && (
-                          <span className="text-[9px] bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy px-1.5 py-0.5 rounded-lg font-black uppercase tracking-wider">
+                          <span className="text-[9px] bg-brand-navy dark:bg-brand-orange text-white dark:text-white px-1.5 py-0.5 rounded-lg font-black uppercase tracking-wider">
                             Anda
                           </span>
                         )}
@@ -482,7 +482,7 @@ export const UserManagementPage: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleConfirmRoleChange}
-              className="rounded-xl text-xs bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy border-none font-bold"
+              className="rounded-xl text-xs bg-brand-navy dark:bg-brand-orange text-white dark:text-white border-none font-bold"
             >
               Ya, Ubah Peran
             </Button>

@@ -265,7 +265,7 @@ export const MatchDetailsPage: React.FC = () => {
           <div className="flex flex-col gap-2 w-full">
             <button 
               onClick={() => navigate(-1)}
-              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-brand-navy font-black text-sm py-3 px-4 rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer uppercase tracking-wider"
+              className="w-full bg-brand-navy dark:bg-brand-orange text-white dark:text-white font-black text-sm py-3 px-4 rounded-xl hover:opacity-95 shadow-md transition-all cursor-pointer uppercase tracking-wider"
             >
               Kembali
             </button>
@@ -1328,7 +1328,7 @@ export const MatchDetailsPage: React.FC = () => {
                   {match.productionStage !== 'published' && (
                     <button
                       onClick={handleAdvanceStage}
-                      className="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1"
+                      className="px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white bg-brand-navy hover:bg-brand-navy/90 dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90 rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1"
                     >
                       {match.productionStage === 'tracking' && 'Kirim ke QA 🚀'}
                       {match.productionStage === 'qa_review' && 'Setujui & Kirim ke Coach ✅'}

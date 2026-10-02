@@ -208,7 +208,7 @@ export const StatTasksPage: React.FC = () => {
                       </div>
                       <Button 
                         onClick={() => handleClaim(task)}
-                        className="rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white dark:bg-brand-orange dark:text-brand-navy dark:hover:bg-brand-orange/90 font-bold text-sm px-6 whitespace-nowrap"
+                        className="rounded-xl bg-brand-navy hover:bg-brand-navy/90 text-white dark:bg-brand-orange dark:text-white dark:hover:bg-brand-orange/90 font-bold text-sm px-6 whitespace-nowrap"
                       >
                         <Hand size={16} className="mr-2 inline" /> Klaim Tugas
                       </Button>

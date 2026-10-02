@@ -246,7 +246,7 @@ export const CmsPage: React.FC = () => {
                 size="sm"
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-xs bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-brand-navy border-none"
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 text-xs bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-white border-none"
               >
                 <Save size={14} /> {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
               </Button>

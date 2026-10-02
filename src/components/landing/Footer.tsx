@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
           
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="bg-brand-navy dark:bg-brand-orange p-1.5 rounded-lg text-white dark:text-brand-navy flex items-center justify-center">
+            <div className="bg-brand-navy dark:bg-brand-orange p-1.5 rounded-lg text-white dark:text-white flex items-center justify-center">
               <Trophy size={16} className="stroke-[2.5]" />
             </div>
             <span className="font-display text-lg font-extrabold tracking-wider text-brand-navy dark:text-white uppercase italic">

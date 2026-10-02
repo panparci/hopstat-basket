@@ -161,7 +161,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         <Button
           type="submit"
           variant="primary"
-          className="w-full bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-brand-navy"
+          className="w-full bg-brand-navy hover:opacity-90 dark:bg-brand-orange dark:text-white"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Mengirim...' : 'Kirim Sekarang'}

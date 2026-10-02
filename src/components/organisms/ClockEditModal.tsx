@@ -215,7 +215,7 @@ export const ClockEditModal: React.FC<ClockEditModalProps> = ({
       <div className="mt-6 shrink-0">
         <button
           onClick={handleSave}
-          className="w-full py-4 rounded-xl font-bold text-white bg-brand-navy dark:bg-brand-orange dark:text-brand-navy hover:opacity-90 transition-opacity shadow-lg"
+          className="w-full py-4 rounded-xl font-bold text-white bg-brand-navy dark:bg-brand-orange dark:text-white hover:opacity-90 transition-opacity shadow-lg"
         >
           SIMPAN WAKTU
         </button>
