@@ -17,6 +17,24 @@ func TestStageAllowed(t *testing.T) {
 	}
 }
 
+func TestLockReviewAndVisibility(t *testing.T) {
+	fresh := map[string]any{"status": "reviewed", "coachFeedback": map[string]any{"rating": 5}, "submittedBy": "victim"}
+	lockReview(nil, fresh, "u1")
+	if fresh["status"] != "submitted" || fresh["coachFeedback"] != nil || fresh["submittedBy"] != "u1" {
+		t.Fatalf("create: %v", fresh)
+	}
+	stored := map[string]any{"status": "submitted", "submittedBy": "u1"}
+	edit := map[string]any{"status": "reviewed", "coachFeedback": map[string]any{"rating": 5}, "submittedBy": "u2", "athleteNotes": "ok"}
+	lockReview(stored, edit, "u1")
+	if edit["status"] != "submitted" || edit["coachFeedback"] != nil || edit["submittedBy"] != "u1" || edit["athleteNotes"] != "ok" {
+		t.Fatalf("update: %v", edit)
+	}
+	sub := map[string]any{"submittedBy": "u1", "athleteId": "kid"}
+	if !submissionVisible(sub, "u1", nil) || !submissionVisible(sub, "u9", map[string]bool{"kid": true}) || submissionVisible(sub, "u9", nil) {
+		t.Fatal("visibility")
+	}
+}
+
 func TestHasPerm(t *testing.T) {
 	if !hasPerm([]string{"*"}, "track_match") || hasPerm([]string{"view_home"}, "track_match") {
 		t.Fatal("perm")

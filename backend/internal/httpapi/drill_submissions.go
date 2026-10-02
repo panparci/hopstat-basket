@@ -28,6 +28,7 @@ func (s *Server) listDrillSubmissions(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
+	items = s.filterList(r.Context(), userFrom(r), "drill_submissions", items)
 	status := strings.TrimSpace(r.URL.Query().Get("status"))
 	athleteID := strings.TrimSpace(r.URL.Query().Get("athleteId"))
 	out := make([]map[string]any, 0, len(items))
@@ -51,6 +52,10 @@ func (s *Server) getDrillSubmission(w http.ResponseWriter, r *http.Request) {
 	}
 	if item == nil {
 		writeErr(w, http.StatusNotFound, errors.New("not found"))
+		return
+	}
+	if len(s.filterList(r.Context(), userFrom(r), "drill_submissions", []map[string]any{item})) == 0 {
+		writeForbidden(w)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"item": publicDoc("drill_submissions", item)})
@@ -214,8 +219,7 @@ type drillReviewBody struct {
 
 func (s *Server) reviewDrillSubmission(w http.ResponseWriter, r *http.Request) {
 	user := userFrom(r)
-	role := fmt.Sprint(user["role"])
-	if role != "admin" && role != "coach" && role != "scout" {
+	if !s.can(r.Context(), user, "do_coach_analysis") {
 		writeJSON(w, http.StatusForbidden, map[string]string{"error": "hanya coach/admin yang bisa review"})
 		return
 	}

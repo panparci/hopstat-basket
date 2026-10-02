@@ -51,7 +51,7 @@ var writeAny = map[string][]string{
 	"merge_logs":              {"manage_athletes", "manage_profiles"},
 	"knowledge_entries":       {"track_match", "do_stat_tasks", "manage_cms"},
 	"token_logs":              {"view_own_stats", "track_match", "do_stat_tasks", "do_coach_analysis"},
-	"fundamental_drills":      {"view_home"},
+	"fundamental_drills":      {"manage_cms", "do_coach_analysis"},
 	"fundamental_profiles":    {"view_home"},
 	"workout_schedules":       {"view_home"},
 	"drill_submissions":       {"view_home"},
@@ -200,7 +200,47 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		}
 		return errForbidden
 	case "payments":
-		if s.can(ctx, u, "approve_applications") || s.can(ctx, u, "request_stats") {
+		if s.can(ctx, u, "approve_applications") {
+			return nil
+		}
+		doc := incoming
+		if existing != nil {
+			doc = existing
+		}
+		if s.can(ctx, u, "request_stats") && s.paymentTargetOwned(ctx, id, asString(doc["requestId"])) {
+			return nil
+		}
+		return errForbidden
+	case "teams":
+		if !s.can(ctx, u, "manage_teams") && !s.can(ctx, u, "manage_profiles") {
+			return errForbidden
+		}
+		if existing == nil || asString(existing["createdBy"]) == id || s.can(ctx, u, "manage_athletes") {
+			return nil
+		}
+		return errForbidden
+	case "profiles":
+		if !s.can(ctx, u, "manage_profiles") && !s.can(ctx, u, "manage_athletes") {
+			return errForbidden
+		}
+		if existing == nil || guardianOf(existing, id) || asString(existing["createdBy"]) == id || s.can(ctx, u, "manage_athletes") {
+			return nil
+		}
+		return errForbidden
+	case "workout_schedules", "fundamental_profiles":
+		doc := incoming
+		if existing != nil {
+			doc = existing
+		}
+		if s.can(ctx, u, "view_home") && asString(doc["id"]) == id {
+			return nil
+		}
+		return errForbidden
+	case "drill_submissions":
+		if !s.can(ctx, u, "view_home") {
+			return errForbidden
+		}
+		if existing == nil || asString(existing["submittedBy"]) == id || s.can(ctx, u, "do_coach_analysis") {
 			return nil
 		}
 		return errForbidden
@@ -313,6 +353,18 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 				return nil, errForbidden
 			}
 		}
+	case "teams", "profiles":
+		if !admin && !s.can(ctx, u, "manage_athletes") {
+			if existing == nil {
+				incoming["createdBy"] = uidOf(u)
+			} else {
+				keep(existing, incoming, "createdBy")
+			}
+		}
+	case "drill_submissions":
+		if !admin && !s.can(ctx, u, "do_coach_analysis") {
+			lockReview(existing, incoming, uidOf(u))
+		}
 	case "role_applications":
 		if existing == nil {
 			incoming["userId"] = uidOf(u)
@@ -355,6 +407,59 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 		}
 	}
 	return incoming, nil
+}
+
+// keep copies fields from the stored doc, dropping any the caller tried to add.
+func keep(existing, incoming map[string]any, keys ...string) {
+	for _, k := range keys {
+		if v, ok := existing[k]; ok {
+			incoming[k] = v
+		} else {
+			delete(incoming, k)
+		}
+	}
+}
+
+// lockReview: review fields only change through POST /api/drill-submissions/{id}/review.
+func lockReview(existing, incoming map[string]any, uid string) {
+	if existing == nil {
+		incoming["status"] = "submitted"
+		incoming["submittedBy"] = uid
+		delete(incoming, "coachFeedback")
+		return
+	}
+	keep(existing, incoming, "status", "coachFeedback", "submittedBy")
+}
+
+func submissionVisible(sub map[string]any, uid string, guarded map[string]bool) bool {
+	return asString(sub["submittedBy"]) == uid || guarded[asString(sub["athleteId"])]
+}
+
+// ponytail: scans all profiles per call; index links.accountId if the profile table grows large.
+func (s *Server) guardedProfileIDs(ctx context.Context, uid string) map[string]bool {
+	profiles, _ := s.listDocs(ctx, "profiles", "", "")
+	out := map[string]bool{}
+	for _, p := range profiles {
+		if guardianOf(p, uid) {
+			out[asString(p["id"])] = true
+		}
+	}
+	return out
+}
+
+// A payment points at the caller's own stat request or claim, or at a match (Verified Match Pack, DP-16).
+func (s *Server) paymentTargetOwned(ctx context.Context, uid, rid string) bool {
+	if rid == "" {
+		return false
+	}
+	if r, _ := s.getDoc(ctx, "stat_requests", rid); r != nil {
+		return asString(r["customerId"]) == uid
+	}
+	if c, _ := s.getDoc(ctx, "claim_requests", rid); c != nil {
+		return asString(c["claimantAccountId"]) == uid
+	}
+	m, _ := s.getDoc(ctx, "matches", rid)
+	return m != nil
 }
 
 func stageAllowed(from, to string) bool {
@@ -599,6 +704,27 @@ func (s *Server) filterList(ctx context.Context, u map[string]any, store string,
 		return out
 	case "role_permissions":
 		return items
+	case "drill_submissions":
+		if s.can(ctx, u, "do_coach_analysis") || s.can(ctx, u, "manage_cms") {
+			return items
+		}
+		guarded := s.guardedProfileIDs(ctx, id)
+		for _, it := range items {
+			if submissionVisible(it, id, guarded) {
+				out = append(out, it)
+			}
+		}
+		return out
+	case "workout_schedules", "fundamental_profiles":
+		if s.can(ctx, u, "do_coach_analysis") {
+			return items
+		}
+		for _, it := range items {
+			if asString(it["id"]) == id {
+				out = append(out, it)
+			}
+		}
+		return out
 	}
 	if matchChildStores[store] {
 		ok := map[string]bool{}

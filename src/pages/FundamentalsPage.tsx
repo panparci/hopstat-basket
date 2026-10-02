@@ -61,16 +61,19 @@ export const FundamentalsPage: React.FC = () => {
   }, [isAdminUser]);
 
   // Load initial data
+  // Schedule + training profile are per account (the backend only lets an account write its own id).
+  const me = user?.id ?? '';
+
   useEffect(() => {
-    loadAllData();
-  }, []);
+    if (me) loadAllData();
+  }, [me]);
 
   const loadAllData = async () => {
     setLoading(true);
     try {
       const fetchedDrills = await fundamentalService.getDrills();
-      const fetchedProfile = await fundamentalService.getAthleteProfile();
-      const fetchedSchedule = await fundamentalService.getWorkoutSchedule('current-athlete');
+      const fetchedProfile = await fundamentalService.getAthleteProfile(me);
+      const fetchedSchedule = await fundamentalService.getWorkoutSchedule(me);
       const fetchedSubmissions = await fundamentalService.getSubmissions();
       const fetchedQA = await fundamentalService.getQAThreads();
 
@@ -85,7 +88,7 @@ export const FundamentalsPage: React.FC = () => {
         // Generate default schedule on first visit
         const defaultSched = await fundamentalService.generateAISchedule('PG', 'menengah', 'half_court', 4);
         setSchedule(defaultSched);
-        await fundamentalService.saveWorkoutSchedule('current-athlete', defaultSched);
+        await fundamentalService.saveWorkoutSchedule(me, defaultSched);
       }
     } catch (err) {
       console.error('Error loading fundamentals data:', err);
@@ -95,7 +98,7 @@ export const FundamentalsPage: React.FC = () => {
   };
 
   const handleToggleDrillCompletion = async (dayId: string, drillId: string) => {
-    const updated = await fundamentalService.toggleDrillCompletion('current-athlete', dayId, drillId);
+    const updated = await fundamentalService.toggleDrillCompletion(me, dayId, drillId);
     setSchedule(updated);
   };
 
@@ -107,10 +110,10 @@ export const FundamentalsPage: React.FC = () => {
   ) => {
     const newSchedule = await fundamentalService.generateAISchedule(position, skillLevel, facility, goalDays);
     setSchedule(newSchedule);
-    await fundamentalService.saveWorkoutSchedule('current-athlete', newSchedule);
+    await fundamentalService.saveWorkoutSchedule(me, newSchedule);
 
     const newProfile: AthleteProfile = {
-      id: 'current-athlete',
+      id: me,
       name: 'Pemain Basket',
       position,
       skillLevel,

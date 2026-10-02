@@ -70,10 +70,9 @@ class FundamentalService {
   }
 
   // --- ATHLETE PROFILE ---
-  async getAthleteProfile(): Promise<AthleteProfile | null> {
+  async getAthleteProfile(accountId: string): Promise<AthleteProfile | null> {
     const db = await initDB();
-    const all = await db.getAll(PROFILE_STORE);
-    return all[0] || null;
+    return (await db.get(PROFILE_STORE, accountId)) || null;
   }
 
   async saveAthleteProfile(profile: AthleteProfile): Promise<AthleteProfile> {
