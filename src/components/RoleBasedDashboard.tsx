@@ -14,7 +14,8 @@ export const RoleBasedDashboard: React.FC = () => {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (can('manage_users')) return <Navigate to="/admin" replace />;
-  if (can('do_stat_tasks')) return <Navigate to="/services/tasks" replace />;
+  // Admin "Beranda Publik" must land here — do not bounce to /admin (that broke the sidebar link).
+  // Admin console remains at /admin via Dashboard Control.
+  if (can('do_stat_tasks') && !can('manage_users')) return <Navigate to="/services/tasks" replace />;
   return <HomePage />;
 };

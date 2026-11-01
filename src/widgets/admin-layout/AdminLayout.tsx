@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link, Outlet, Navigate } from 'react-router-dom';
 import { 
   Menu, X, ChevronLeft, ChevronRight, LogOut, Home, 
-  FileCheck, UserPlus, Users, Inbox, ClipboardList, Layout, Bot, UserCheck, Shield, Lock, Bell, Contact, Trophy, Video, Target, Database
+  FileCheck, UserPlus, Users, Inbox, ClipboardList, Layout, Bot, UserCheck, Shield, Lock, Bell, Contact, Trophy, Video, Target, Database, AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePermissions } from '../../core/contexts/PermissionsContext';
@@ -61,6 +61,8 @@ export const AdminLayout: React.FC = () => {
         { label: 'Klaim Profil Atlet', path: '/admin/claims', icon: FileCheck, badgeKey: 'claims' },
         { label: 'Persetujuan Peran', path: '/admin/applications', icon: UserPlus, badgeKey: 'applications' },
         { label: 'Kurasi Tim & Organisasi', path: '/admin/curations', icon: Database },
+        { label: 'Master Data & Golden Record', path: '/admin/master-data', icon: Database },
+        { label: 'Pisahkan Laga Profil', path: '/admin/match-exclusions', icon: AlertCircle },
         { label: 'CRM Prospek', path: '/admin/crm', icon: Users },
         { label: 'Direktori Atlet', path: '/admin/athletes', icon: Contact },
         { label: 'Manajemen Games', path: '/admin/games', icon: Trophy }
@@ -228,6 +230,9 @@ export const AdminLayout: React.FC = () => {
     return <Navigate to="/" replace />;
   }
 
+  // Keep full admin chrome in the mobile WebView — stripping it left pages without nav.
+  // Expo Stack header is hidden for /admin* in hopstat-mobile web.tsx instead.
+
   const isAdmin = can('manage_users');
 
   // If NOT Admin, render page with standard AppShell (Standard consumer layout wrapper)
@@ -239,59 +244,61 @@ export const AdminLayout: React.FC = () => {
     );
   }
 
-  // Sidebar Component for Desktop & Drawer Mobile
-  const SidebarContent = () => {
+  // Desktop rail may collapse; mobile drawer is always expanded (collapsed+white active = unreadable labels).
+  const SidebarContent = ({ mode }: { mode: 'rail' | 'drawer' }) => {
+    const railCollapsed = mode === 'rail' && isCollapsed;
     return (
-      <div className="flex flex-col h-full bg-[#243440]/90 dark:bg-[#182630]/95 backdrop-blur-md text-slate-100 select-none border-r border-white/10">
-        {/* Brand Logo Header & Toggle Button in Navigation Bar itself */}
-        <div className={`p-4 flex items-center justify-between h-16 border-b border-white/10 ${isCollapsed ? 'justify-center px-2' : ''}`}>
-          {!isCollapsed ? (
+      <div className="flex flex-col h-full bg-[#1C2B35] text-slate-100 select-none border-r border-white/10">
+        <div className={`pt-safe flex items-center justify-between h-16 border-b border-white/10 shrink-0 ${railCollapsed ? 'justify-center px-2' : 'px-4'}`}>
+          {!railCollapsed ? (
             <>
-              <Link to="/admin" className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center shrink-0 shadow-sm">
-                  <svg className="w-5 h-5 text-white fill-white shrink-0" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none" />
-                    <path d="M6.2 6.2 C 9.5 9.5, 9.5 14.5, 6.2 17.8" fill="none" />
-                    <path d="M17.8 6.2 C 14.5 9.5, 14.5 14.5, 17.8 17.8" fill="none" />
-                    <path d="M2 12 H 22" fill="none" />
-                    <path d="M12 2 V 22" fill="none" />
-                  </svg>
+              <Link to="/admin" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+                  <Shield size={18} className="text-amber-300" />
                 </div>
-                <div>
-                  <span className="text-base font-black text-white uppercase tracking-wider block leading-none">
+                <div className="min-w-0">
+                  <span className="text-base font-black text-white uppercase tracking-wider block leading-none truncate">
                     HOOP<span className="text-amber-300">STATS</span>
                   </span>
-                  <span className="text-[8px] bg-amber-300 text-slate-950 font-black px-1.5 py-0.2 rounded uppercase mt-0.5 inline-block tracking-wider">
+                  <span className="text-[8px] bg-amber-300 text-slate-950 font-black px-1.5 py-0.5 rounded uppercase mt-0.5 inline-block tracking-wider">
                     SUPERADMIN
                   </span>
                 </div>
               </Link>
-
-              {/* Auto Hide Button inside Navigation Bar */}
-              <button
-                onClick={toggleSidebar}
-                className="hidden md:flex p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border border-white/15"
-                title="Minimize Navigation Bar"
-              >
-                <ChevronLeft size={16} />
-              </button>
+              {mode === 'rail' ? (
+                <button
+                  type="button"
+                  onClick={toggleSidebar}
+                  className="hidden md:flex p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border border-white/15"
+                  title="Minimize Navigation Bar"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsMobileOpen(false)}
+                  className="p-2 rounded-xl bg-white/10 text-white"
+                  aria-label="Tutup menu"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </>
           ) : (
-            <div className="flex flex-col items-center gap-1">
-              <button
-                onClick={toggleSidebar}
-                className="p-1.5 rounded-xl bg-amber-300 text-slate-950 hover:bg-amber-400 transition-colors cursor-pointer shadow-md flex items-center justify-center"
-                title="Expand Navigation Bar"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="p-1.5 rounded-xl bg-amber-300 text-slate-950 hover:bg-amber-400 transition-colors cursor-pointer shadow-md flex items-center justify-center"
+              title="Expand Navigation Bar"
+            >
+              <ChevronRight size={18} />
+            </button>
           )}
         </div>
 
-        {/* Level 1 Primary Sidebar Navigation Only */}
-        <div className="flex-1 overflow-y-auto px-2 sm:px-3 py-3 space-y-2 scrollbar-none">
-          {!isCollapsed && (
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5 scrollbar-none">
+          {!railCollapsed && (
             <div className="text-[10px] font-black uppercase text-amber-300/80 tracking-wider px-3 mb-2">
               Modul Utama
             </div>
@@ -299,16 +306,16 @@ export const AdminLayout: React.FC = () => {
           {menuGroups.map((group, groupIndex) => {
             const Icon = group.icon;
             const isGroupActive = activeGroupIndex === groupIndex;
-            // Target path: if user is on a path in this group, stay on that path; otherwise target first item
-            const targetPath = group.items.some(i => isItemActive(i.path))
+            const targetPath = group.items.some((i) => isItemActive(i.path))
               ? location.pathname
               : group.items[0]?.path || '/admin';
 
-            const shortName = group.id === 'utama' ? 'UTAMA' 
-              : group.id === 'operasional' ? 'OPERASI' 
-              : group.id === 'layanan' ? 'LAYANAN' 
-              : group.id === 'konten' ? 'KONTEN' 
-              : 'AKSES';
+            const shortName =
+              group.id === 'utama' ? 'UTAMA'
+                : group.id === 'operasional' ? 'OPERASI'
+                  : group.id === 'layanan' ? 'LAYANAN'
+                    : group.id === 'konten' ? 'KONTEN'
+                      : 'AKSES';
 
             return (
               <Link
@@ -318,37 +325,40 @@ export const AdminLayout: React.FC = () => {
                   setActiveGroupIndex(groupIndex);
                   setIsMobileOpen(false);
                 }}
-                className={`flex transition-all relative ${
-                  isCollapsed
-                    ? 'flex-col items-center justify-center py-2.5 px-1 rounded-[16px] text-center gap-1 min-h-[58px]'
-                    : 'items-center gap-3 px-3.5 py-3 rounded-[18px] text-xs font-bold'
+                className={`flex relative transition-colors ${
+                  railCollapsed
+                    ? 'flex-col items-center justify-center py-2.5 px-1 rounded-2xl text-center gap-1 min-h-[58px]'
+                    : 'items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold'
                 } ${
                   isGroupActive
-                    ? 'bg-white text-[#2B889B] dark:bg-zinc-800 dark:text-teal-400 font-black shadow-lg scale-[1.02]'
+                    ? 'bg-amber-300 text-slate-950 font-black shadow-md'
                     : 'text-slate-200 hover:text-white hover:bg-white/10'
                 }`}
                 title={group.title}
               >
-                <Icon size={18} className={`flex-shrink-0 ${isGroupActive ? 'text-[#2B889B] dark:text-teal-400' : 'text-slate-200'}`} />
-                
-                {/* Minimized label text underneath icon when collapsed */}
-                {isCollapsed ? (
-                  <span className="text-[9px] font-extrabold uppercase tracking-tight text-center leading-none text-slate-200 scale-95">
+                <Icon
+                  size={18}
+                  className={`flex-shrink-0 ${isGroupActive ? 'text-slate-950' : 'text-slate-200'}`}
+                />
+                {railCollapsed ? (
+                  <span className={`text-[9px] font-extrabold uppercase tracking-tight text-center leading-none scale-95 ${
+                    isGroupActive ? 'text-slate-950' : 'text-slate-200'
+                  }`}>
                     {shortName}
                   </span>
                 ) : (
                   <span className="flex-1 truncate uppercase tracking-wider">{group.title}</span>
                 )}
 
-                {!isCollapsed && group.badgeCount && group.badgeCount > 0 ? (
+                {!railCollapsed && group.badgeCount && group.badgeCount > 0 ? (
                   <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${
-                    isGroupActive ? 'bg-[#2B889B] text-white' : 'bg-amber-400 text-slate-950'
+                    isGroupActive ? 'bg-slate-950 text-amber-300' : 'bg-amber-400 text-slate-950'
                   }`}>
                     {group.badgeCount}
                   </span>
                 ) : null}
 
-                {isCollapsed && group.badgeCount && group.badgeCount > 0 ? (
+                {railCollapsed && group.badgeCount && group.badgeCount > 0 ? (
                   <div className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border border-slate-900" />
                 ) : null}
               </Link>
@@ -356,35 +366,47 @@ export const AdminLayout: React.FC = () => {
           })}
         </div>
 
-        {/* Footer info/controls */}
-        <div className="p-2.5 space-y-1 border-t border-white/10">
+        <div className="p-2.5 space-y-1 border-t border-white/10 pb-safe">
+          {!railCollapsed && (
+            <div className="px-3.5 py-2 mb-1 rounded-2xl bg-white/5 border border-white/10">
+              <div className="text-[9px] font-black uppercase tracking-wider text-amber-300/80">Akun</div>
+              <div className="text-xs font-bold text-white truncate mt-0.5">{user.name}</div>
+              <div className="text-[10px] text-slate-300/80 truncate">{user.email}</div>
+            </div>
+          )}
           <Link
             to="/"
-            className={`flex transition-all ${
-              isCollapsed
-                ? 'flex-col items-center justify-center p-2 rounded-[16px] text-center gap-1'
-                : 'items-center gap-3 px-3.5 py-2.5 rounded-[18px] text-xs font-bold'
-            } text-slate-200 hover:text-white hover:bg-white/10 transition-colors uppercase tracking-wider`}
+            onClick={() => setIsMobileOpen(false)}
+            className={`flex transition-colors ${
+              railCollapsed
+                ? 'flex-col items-center justify-center p-2 rounded-2xl text-center gap-1'
+                : 'items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold'
+            } ${
+              location.pathname === '/'
+                ? 'bg-white/15 text-white'
+                : 'text-slate-200 hover:text-white hover:bg-white/10'
+            } uppercase tracking-wider`}
             title="Beranda Publik"
           >
             <Home size={16} />
-            {isCollapsed ? (
+            {railCollapsed ? (
               <span className="text-[8px] font-bold text-center leading-none">BERANDA</span>
             ) : (
               <span>Beranda Publik</span>
             )}
           </Link>
           <button
+            type="button"
             onClick={handleLogout}
-            className={`w-full flex transition-all ${
-              isCollapsed
-                ? 'flex-col items-center justify-center p-2 rounded-[16px] text-center gap-1'
-                : 'items-center gap-3 px-3.5 py-2.5 rounded-[18px] text-xs font-bold'
-            } text-red-300 hover:text-white hover:bg-red-500/20 transition-colors cursor-pointer uppercase tracking-wider`}
+            className={`w-full flex transition-colors ${
+              railCollapsed
+                ? 'flex-col items-center justify-center p-2 rounded-2xl text-center gap-1'
+                : 'items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold'
+            } text-red-300 hover:text-white hover:bg-red-500/20 cursor-pointer uppercase tracking-wider`}
             title="Keluar"
           >
             <LogOut size={16} />
-            {isCollapsed ? (
+            {railCollapsed ? (
               <span className="text-[8px] font-bold text-center leading-none">KELUAR</span>
             ) : (
               <span>Keluar</span>
@@ -396,57 +418,45 @@ export const AdminLayout: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1E2D38] via-[#283C4A] to-[#1C3A42] text-zinc-900 dark:text-zinc-100 flex overflow-hidden p-0 sm:p-2 md:p-3">
+    <div className="min-h-[100dvh] max-w-[100vw] overflow-x-hidden bg-[#FAF9F5] dark:bg-[#121920] text-zinc-900 dark:text-zinc-100 flex md:bg-gradient-to-br md:from-[#1E2D38] md:via-[#283C4A] md:to-[#1C3A42] md:p-3">
       {/* Sidebar Desktop */}
-      <aside 
-        className={`hidden md:flex md:flex-col h-[calc(100vh-1.5rem)] flex-shrink-0 transition-all duration-300 ${
+      <aside
+        className={`hidden md:flex md:flex-col h-[calc(100dvh-1.5rem)] flex-shrink-0 transition-all duration-300 rounded-2xl overflow-hidden border border-white/10 ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
-        <SidebarContent />
+        <SidebarContent mode="rail" />
       </aside>
 
-      {/* Main Panel */}
-      <div className="flex-1 flex flex-col h-screen md:h-[calc(100vh-1.5rem)] overflow-hidden">
-        {/* Header Bar */}
-        <header className="bg-[#243440]/80 dark:bg-[#182630]/90 backdrop-blur-md z-30 shrink-0 border-b border-white/10">
-          <div className="h-14 px-4 sm:px-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsMobileOpen(true)}
-                className="md:hidden p-2 rounded-full bg-white/10 text-white cursor-pointer"
-              >
-                <Menu size={18} />
-              </button>
-
-              {/* Module Brand / Context indicator */}
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-amber-300/20 text-amber-300 flex items-center justify-center font-black text-xs border border-amber-300/30">
-                  <Shield size={14} />
-                </div>
-                <span className="text-xs font-black text-white uppercase tracking-wider">
-                  {menuGroups[activeGroupIndex]?.title || 'HoopStats Admin'}
-                </span>
+      {/* Main Panel — solid fullscreen on phone (no floating card / no “ngambang”) */}
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 h-[100dvh] md:h-[calc(100dvh-1.5rem)] overflow-hidden">
+        <header className="bg-[#1C2B35] z-30 shrink-0 border-b border-white/10 pt-safe">
+          {/* Phone: title only — Menu tab + drawer hold hamburger/akun (no floating chrome) */}
+          <div className="h-12 md:h-14 px-3 sm:px-6 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-xl bg-amber-300/20 text-amber-300 flex items-center justify-center shrink-0 border border-amber-300/30">
+                <Shield size={14} />
               </div>
+              <span className="text-xs font-black text-white uppercase tracking-wider truncate">
+                {menuGroups[activeGroupIndex]?.title || 'HoopStats Admin'}
+              </span>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Superadmin pill tag */}
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-300 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm">
+            <div className="hidden md:flex items-center gap-2 shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-300 text-slate-950 text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm">
                 <Shield size={12} /> Mode Superadmin
               </span>
-
-              {/* Profile Avatar */}
               <div className="relative">
                 <button
+                  type="button"
                   onClick={() => setIsAvatarOpen(!isAvatarOpen)}
                   className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/20 p-1.5 rounded-full transition-all cursor-pointer text-white"
+                  aria-label="Akun admin"
                 >
                   <div className="w-7 h-7 rounded-full bg-amber-300 text-slate-950 font-black flex items-center justify-center text-xs">
                     {user.name.charAt(0)}
                   </div>
                 </button>
-
                 <AnimatePresence>
                   {isAvatarOpen && (
                     <motion.div
@@ -454,7 +464,7 @@ export const AdminLayout: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-11 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl p-4 space-y-3 z-50 text-left"
+                      className="absolute right-0 top-11 w-64 max-w-[calc(100vw-2rem)] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xl p-4 space-y-3 z-50 text-left"
                     >
                       <div className="border-b border-zinc-100 dark:border-zinc-800 pb-2">
                         <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Akun Admin</div>
@@ -479,6 +489,7 @@ export const AdminLayout: React.FC = () => {
                           Kembali ke Beranda
                         </Link>
                         <button
+                          type="button"
                           onClick={handleLogout}
                           className="w-full flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors text-left cursor-pointer"
                         >
@@ -493,17 +504,16 @@ export const AdminLayout: React.FC = () => {
             </div>
           </div>
 
-          {/* Level 2 Submenu Horizontal Text Tabs Navigation */}
-          <div className="px-4 sm:px-6 flex items-center gap-6 overflow-x-auto scrollbar-none border-t border-white/10 pt-1">
+          {/* Level 2 tabs — intentional horizontal scroll */}
+          <div className="px-3 sm:px-6 flex items-center gap-4 sm:gap-6 overflow-x-auto scrollbar-none border-t border-white/10">
             {menuGroups[activeGroupIndex]?.items.map((item, itemIndex) => {
               const active = isItemActive(item.path);
               const badgeValue = getBadgeValue(item.badgeKey);
-
               return (
                 <Link
                   key={itemIndex}
                   to={item.path}
-                  className={`py-2.5 text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-all border-b-2 cursor-pointer ${
+                  className={`py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider flex items-center gap-2 whitespace-nowrap transition-colors border-b-2 shrink-0 ${
                     active
                       ? 'text-amber-300 font-extrabold border-amber-300'
                       : 'text-slate-200/80 hover:text-white font-semibold border-transparent'
@@ -511,7 +521,7 @@ export const AdminLayout: React.FC = () => {
                 >
                   <span>{item.label}</span>
                   {badgeValue !== undefined && (
-                    <span className={`px-1.5 py-0.2 text-[9px] font-black rounded-full ${
+                    <span className={`px-1.5 py-0.5 text-[9px] font-black rounded-full ${
                       active ? 'bg-amber-300 text-slate-950' : 'bg-white/20 text-white'
                     }`}>
                       {badgeValue}
@@ -523,77 +533,59 @@ export const AdminLayout: React.FC = () => {
           </div>
         </header>
 
-        {/* Floating Rounded Canvas Container */}
-        <main className="flex-1 bg-[#FAF9F5] dark:bg-[#121920] rounded-t-[28px] md:rounded-[32px] p-4 sm:p-6 md:p-8 overflow-y-auto shadow-2xl border border-white/30 dark:border-zinc-800/80 relative mb-0 md:mb-2 mr-0 md:mr-2">
+        {/* Tab bar clearance matches native app (~62px + home indicator), not a huge empty void */}
+        <main className="flex-1 min-h-0 bg-[#EEF1F5] dark:bg-[#121920] px-3 pt-3 sm:p-6 md:p-8 overflow-y-auto overflow-x-hidden relative md:rounded-[32px] md:bg-[#FAF9F5] md:border md:border-white/30 md:dark:border-zinc-800/80 md:shadow-2xl md:mb-2 md:mr-2 pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))] md:pb-8">
           <Outlet />
         </main>
       </div>
 
-      {/* Admin Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#3D5A6C]/95 dark:bg-[#1C2B35]/95 backdrop-blur-md border-t border-white/15 flex justify-around items-center h-16 z-40 px-2 md:hidden text-white shadow-2xl">
-        <button
-          onClick={() => navigate('/admin')}
-          className={`flex flex-col items-center justify-center w-14 h-12 cursor-pointer transition-colors ${
-            location.pathname === '/admin' ? 'text-amber-300 font-black' : 'text-slate-200 hover:text-white'
-          }`}
-        >
-          <Layout size={18} />
-          <span className="text-[9px] mt-1 font-bold uppercase tracking-tight">Admin</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/admin/claims')}
-          className={`flex flex-col items-center justify-center w-14 h-12 relative cursor-pointer transition-colors ${
-            location.pathname.startsWith('/admin/claims') || location.pathname.startsWith('/admin/applications') 
-              ? 'text-amber-300 font-black' 
-              : 'text-slate-200 hover:text-white'
-          }`}
-        >
-          <FileCheck size={18} />
-          <span className="text-[9px] mt-1 font-bold uppercase tracking-tight">Klaim</span>
-          {(pendingClaimsCount + pendingAppsCount) > 0 && (
-            <span className="absolute top-1 right-1 bg-amber-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
-              {pendingClaimsCount + pendingAppsCount}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={() => navigate('/fundamentals')}
-          className={`flex flex-col items-center justify-center w-14 h-12 cursor-pointer transition-colors ${
-            location.pathname.startsWith('/fundamentals') ? 'text-amber-300 font-black' : 'text-slate-200 hover:text-white'
-          }`}
-        >
-          <Target size={18} />
-          <span className="text-[9px] mt-1 font-bold uppercase tracking-tight">Drill</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/services/admin')}
-          className={`flex flex-col items-center justify-center w-14 h-12 cursor-pointer transition-colors ${
-            location.pathname.startsWith('/services') ? 'text-amber-300 font-black' : 'text-slate-200 hover:text-white'
-          }`}
-        >
-          <Inbox size={18} />
-          <span className="text-[9px] mt-1 font-bold uppercase tracking-tight">Order</span>
-        </button>
-
-        <button
-          onClick={() => setIsMobileOpen(true)}
-          className={`flex flex-col items-center justify-center w-14 h-12 cursor-pointer transition-colors ${
-            isMobileOpen ? 'text-amber-300 font-black' : 'text-slate-200 hover:text-white'
-          }`}
-        >
-          <Menu size={18} />
-          <span className="text-[9px] mt-1 font-bold uppercase tracking-tight">Menu</span>
-        </button>
+      {/* Native-style bottom tabs (same idea as mobile Home/Teams/Games bar) */}
+      {/* Same navy as admin header/sidebar — amber active (not consumer white tabs) */}
+      <nav
+        data-hoopstat-admin-nav="1"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[#1C2B35]/98 backdrop-blur-md border-t border-white/10 pb-safe"
+      >
+        <div className="flex h-[62px] items-stretch justify-around px-1 pt-1">
+          {([
+            { label: 'Admin', icon: Layout, go: () => navigate('/admin'), on: location.pathname === '/admin' },
+            {
+              label: 'Klaim',
+              icon: FileCheck,
+              go: () => navigate('/admin/claims'),
+              on: location.pathname.startsWith('/admin/claims') || location.pathname.startsWith('/admin/applications'),
+              badge: pendingClaimsCount + pendingAppsCount,
+            },
+            { label: 'Drill', icon: Target, go: () => navigate('/fundamentals'), on: location.pathname.startsWith('/fundamentals') },
+            { label: 'Order', icon: Inbox, go: () => navigate('/services/admin'), on: location.pathname.startsWith('/services') },
+            { label: 'Menu', icon: Menu, go: () => setIsMobileOpen(true), on: isMobileOpen },
+          ] as const).map((tab) => {
+            const Icon = tab.icon;
+            const badge = 'badge' in tab ? tab.badge : 0;
+            return (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={tab.go}
+                className={`relative flex flex-1 flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors ${
+                  tab.on ? 'text-amber-300 font-semibold' : 'text-slate-400'
+                }`}
+              >
+                <Icon size={22} strokeWidth={tab.on ? 2.4 : 2} />
+                <span className="text-[11px] leading-none uppercase tracking-tight">{tab.label}</span>
+                {!!badge && badge > 0 && (
+                  <span className="absolute top-1 right-[18%] min-w-[16px] h-4 px-1 rounded-full bg-amber-300 text-slate-950 text-[9px] font-black flex items-center justify-center">
+                    {badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </nav>
 
-      {/* Mobile Sidebar Overlay Drawer */}
       <AnimatePresence>
         {isMobileOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
@@ -601,23 +593,14 @@ export const AdminLayout: React.FC = () => {
               onClick={() => setIsMobileOpen(false)}
               className="fixed inset-0 bg-black z-40 md:hidden"
             />
-            {/* Drawer */}
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed inset-y-0 left-0 w-72 bg-[#3D5A6C] dark:bg-[#1C2B35] z-50 md:hidden flex flex-col h-full shadow-2xl"
+              className="fixed inset-y-0 left-0 w-[min(20rem,88vw)] z-50 md:hidden flex flex-col h-full shadow-2xl overflow-hidden"
             >
-              <div className="absolute top-4 right-4 z-50">
-                <button
-                  onClick={() => setIsMobileOpen(false)}
-                  className="p-1.5 hover:bg-white/10 rounded-lg text-slate-200 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <SidebarContent />
+              <SidebarContent mode="drawer" />
             </motion.div>
           </>
         )}

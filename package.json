@@ -13,7 +13,8 @@
     "prod": "vite build && go -C backend run ./cmd/api",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/features/visual-clock-sync/lib/captureStatus.test.ts"
   },
   "dependencies": {
     "fuse.js": "^7.3.0",

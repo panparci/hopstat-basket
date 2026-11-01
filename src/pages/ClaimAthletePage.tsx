@@ -13,6 +13,7 @@ import { TeaserStep } from '../features/claim-athlete/ui/TeaserStep';
 import { VerificationFormStep } from '../features/claim-athlete/ui/VerificationFormStep';
 import { PaymentStep } from '../features/claim-athlete/ui/PaymentStep';
 import { SuccessStep } from '../features/claim-athlete/ui/SuccessStep';
+import { evaluateAthleteKuMatching, type ClaimCandidate } from '../features/claim-athlete/model/kuMatchingService';
 
 interface StatsSummary {
   ppg: string;
@@ -28,11 +29,12 @@ export const ClaimAthletePage: React.FC = () => {
   
   // Search state
   const [searchName, setSearchName] = useState('');
-  const [searchDob, setSearchDob] = useState('');
+  const [searchKU, setSearchKU] = useState(12);
   const [searchClub, setSearchClub] = useState('');
   const [searchError, setSearchError] = useState('');
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [candidates, setCandidates] = useState<ClaimCandidate[]>([]);
 
   // Found Profile details
   const [matchedProfile, setMatchedProfile] = useState<ChildProfile | null>(null);
@@ -106,6 +108,69 @@ export const ClaimAthletePage: React.FC = () => {
     }
   };
 
+  const openTeaser = async (foundProfile: ChildProfile, allTeams: Team[], allClubs: Club[], allMatches: any[], allRosters: MatchRoster[], allEvents: GameEvent[]) => {
+    setMatchedProfile(foundProfile);
+    const team =
+      allTeams.find((t) => t.id === (foundProfile.mainTeamId || foundProfile.teamId)) ||
+      (foundProfile.teamId ? allTeams.find((t) => t.id === foundProfile.teamId) : undefined);
+    if (team) {
+      setMatchedTeam(team);
+      const club = team.clubId ? allClubs.find((c) => c.id === team.clubId) : undefined;
+      if (club) setMatchedClub(club);
+    } else {
+      setMatchedTeam(null);
+      setMatchedClub(null);
+    }
+
+    const profileRosterMatchIds = new Set(
+      allRosters.filter((r: MatchRoster) => r.profileId === foundProfile.id).map((r: MatchRoster) => r.matchId),
+    );
+    const profileMatches = allMatches.filter((m) => m.childId === foundProfile.id || profileRosterMatchIds.has(m.id));
+    let totalPoints = 0;
+    let totalRebounds = 0;
+    let totalAssists = 0;
+    allEvents
+      .filter((e: GameEvent) => e.playerId === foundProfile.id)
+      .forEach((e: GameEvent) => {
+        if (e.type === '1pt_make') totalPoints += 1;
+        else if (e.type === '2pt_make') totalPoints += 2;
+        else if (e.type === '3pt_make') totalPoints += 3;
+        else if (e.type === 'free_throw' && e.result === 'make') totalPoints += 1;
+        else if (e.type === 'shot' && e.result === 'make') totalPoints += e.points || 2;
+        if (e.type === 'oreb' || e.type === 'dreb' || e.type === 'rebound') totalRebounds += 1;
+        if (e.type === 'ast') totalAssists += 1;
+      });
+    const matchCount = profileMatches.length;
+    setStatsSummary({
+      ppg: matchCount > 0 ? (totalPoints / matchCount).toFixed(1) : '0.0',
+      rpg: matchCount > 0 ? (totalRebounds / matchCount).toFixed(1) : '0.0',
+      apg: matchCount > 0 ? (totalAssists / matchCount).toFixed(1) : '0.0',
+      matchCount,
+    });
+
+    const dbInstance = await initDB();
+    const profileClaims = await dbInstance.getAllFromIndex('claim_requests', 'by-profile', foundProfile.id).catch(async () => {
+      const all = await dbInstance.getAll('claim_requests');
+      return all.filter((c: ClaimRequest) => c.profileId === foundProfile.id);
+    });
+    const hasUserPending = profileClaims.some((c: ClaimRequest) => c.claimantAccountId === currentUser?.id && c.status === 'pending');
+    const hasUserApproved =
+      profileClaims.some((c: ClaimRequest) => c.claimantAccountId === currentUser?.id && c.status === 'approved') ||
+      !!foundProfile.links?.some((l) => l.accountId === (currentUser?.id || '') && l.verified);
+    setUserPending(hasUserPending);
+    setUserApproved(hasUserApproved);
+    setOthersVerified(foundProfile.claimStatus === 'verified' && !hasUserApproved);
+    setOthersPending(foundProfile.claimStatus === 'claim_pending' && !hasUserPending);
+    setExistingClaim(profileClaims.find((c: ClaimRequest) => c.claimantAccountId === currentUser?.id) || profileClaims[0] || null);
+    setChildName(foundProfile.name);
+    setChildDob(foundProfile.birthDate || '');
+    setChildGender(foundProfile.gender || 'L');
+    setChildClub(team ? team.name : searchClub);
+    setChildJerseyNumber(foundProfile.jerseyNumber || '');
+    setChildEvents(Array.from(new Set(profileMatches.map((m) => m.eventName).filter(Boolean))) as string[]);
+    setActiveStep('teaser');
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearchError('');
@@ -115,141 +180,62 @@ export const ClaimAthletePage: React.FC = () => {
     setMatchedTeam(null);
     setMatchedClub(null);
     setExistingClaim(null);
+    setCandidates([]);
 
-    if (!searchName.trim() || !searchDob || !searchClub.trim()) {
-      setSearchError('Semua kolom pencarian wajib diisi!');
+    if (!searchName.trim() || !searchClub.trim() || !searchKU) {
+      setSearchError('Nama, klub/tim, dan KU wajib diisi.');
       setSearching(false);
       return;
     }
 
     try {
       const dbInstance = await initDB();
-      const allProfiles = await dbInstance.getAll('profiles');
-      const allTeams = await dbInstance.getAll('teams');
-      const allClubs = await dbInstance.getAll('clubs');
-
-      // Find profile by exact-match: Name + DOB + Club/Team
-      const foundProfile = allProfiles.find(profile => {
-        const nameMatch = profile.name.trim().toLowerCase() === searchName.trim().toLowerCase();
-        const dobMatch = profile.birthDate === searchDob;
-        
-        // Find club or team matching searchClub (supports partial matching for SBA Harimau etc)
-        let clubOrTeamMatch = false;
-        
-        // If profile is linked to a team
-        if (profile.teamId) {
-          const team = allTeams.find(t => t.id === profile.teamId);
-          if (team) {
-            // Check team name
-            if (team.name.trim().toLowerCase().includes(searchClub.trim().toLowerCase())) {
-              clubOrTeamMatch = true;
-            }
-            // Check club name
-            if (team.clubId) {
-              const club = allClubs.find(c => c.id === team.clubId);
-              if (club && club.name.trim().toLowerCase().includes(searchClub.trim().toLowerCase())) {
-                clubOrTeamMatch = true;
-              }
-            }
-          }
-        }
-
-        // Alternative check: mainTeamId or custom fields
-        return nameMatch && dobMatch && clubOrTeamMatch;
+      const [allProfiles, allTeams, allClubs, allMatches, allRosters] = await Promise.all([
+        dbInstance.getAll('profiles'),
+        dbInstance.getAll('teams'),
+        dbInstance.getAll('clubs'),
+        dbInstance.getAll('matches'),
+        dbInstance.getAll('match_rosters'),
+      ]);
+      const found = evaluateAthleteKuMatching({
+        profiles: allProfiles,
+        teams: allTeams,
+        clubs: allClubs,
+        matches: allMatches,
+        rosters: allRosters,
+        searchName,
+        searchClub,
+        searchKU,
       });
-
-      if (foundProfile) {
-        setMatchedProfile(foundProfile);
-
-        // Fetch matched team & club for displaying
-        const team = foundProfile.teamId ? allTeams.find(t => t.id === foundProfile.teamId) : undefined;
-        if (team) {
-          setMatchedTeam(team);
-          const club = team.clubId ? allClubs.find(c => c.id === team.clubId) : undefined;
-          if (club) setMatchedClub(club);
-        }
-
-        // Calculate Stats Teaser and Match count
-        const allMatches = await dbInstance.getAll('matches');
-        const allRosters = await dbInstance.getAll('match_rosters');
+      setCandidates(found);
+      setSearched(true);
+      if (found.length === 1) {
         const allEvents = await dbInstance.getAll('events');
-
-        const profileRosterMatchIds = new Set(
-          allRosters.filter((r: MatchRoster) => r.profileId === foundProfile.id).map((r: MatchRoster) => r.matchId)
-        );
-
-        const profileMatches = allMatches.filter(m => m.childId === foundProfile.id || profileRosterMatchIds.has(m.id));
-        const matchCount = profileMatches.length;
-
-        // Calculate PPG, RPG, APG
-        let totalPoints = 0;
-        let totalRebounds = 0;
-        let totalAssists = 0;
-
-        const profileEvents = allEvents.filter((e: GameEvent) => e.playerId === foundProfile.id);
-        profileEvents.forEach((e: GameEvent) => {
-          if (e.type === '1pt_make') totalPoints += 1;
-          else if (e.type === '2pt_make') totalPoints += 2;
-          else if (e.type === '3pt_make') totalPoints += 3;
-          else if (e.type === 'free_throw' && e.result === 'make') totalPoints += 1;
-          else if (e.type === 'shot' && e.result === 'make') totalPoints += (e.points || 2);
-
-          if (e.type === 'oreb' || e.type === 'dreb' || e.type === 'rebound') {
-            totalRebounds += 1;
-          }
-          if (e.type === 'ast') {
-            totalAssists += 1;
-          }
-        });
-
-        const finalMatchCount = matchCount;
-        const finalPoints = totalPoints;
-        const finalRebounds = totalRebounds;
-        const finalAssists = totalAssists;
-
-        setStatsSummary({
-          ppg: finalMatchCount > 0 ? (finalPoints / finalMatchCount).toFixed(1) : '0.0',
-          rpg: finalMatchCount > 0 ? (finalRebounds / finalMatchCount).toFixed(1) : '0.0',
-          apg: finalMatchCount > 0 ? (finalAssists / finalMatchCount).toFixed(1) : '0.0',
-          matchCount: finalMatchCount
-        });
-
-        // Check if there are claims for this profile
-        const profileClaims = await dbInstance.getAllFromIndex('claim_requests', 'by-profile', foundProfile.id);
-        const hasUserPending = profileClaims.some(c => c.claimantAccountId === currentUser?.id && c.status === 'pending');
-        const hasUserApproved = profileClaims.some(c => c.claimantAccountId === currentUser?.id && c.status === 'approved') || 
-                             (foundProfile.links !== undefined && foundProfile.links.some(l => l.accountId === (currentUser?.id || '') && l.verified));
-        const hasOthersVerified = foundProfile.claimStatus === 'verified' && !hasUserApproved;
-        const hasOthersPending = foundProfile.claimStatus === 'claim_pending' && !hasUserPending;
-
-        setUserPending(hasUserPending);
-        setUserApproved(hasUserApproved);
-        setOthersVerified(hasOthersVerified);
-        setOthersPending(hasOthersPending);
-
-        const activeClaim = profileClaims.find(c => c.claimantAccountId === currentUser?.id) || profileClaims[0];
-        if (activeClaim) {
-          setExistingClaim(activeClaim);
-        }
-
-        // Pre-fill child confirmation fields
-        setChildName(foundProfile.name);
-        setChildDob(foundProfile.birthDate || '');
-        setChildGender('L'); // default
-        setChildClub(team ? team.name : '');
-        setChildJerseyNumber(foundProfile.jerseyNumber || '');
-        
-        // Find recognized events
-        const eventsList = Array.from(new Set(profileMatches.map(m => m.eventName).filter(Boolean))) as string[];
-        setChildEvents(eventsList);
-
-        setActiveStep('teaser');
-      } else {
-        setSearched(true);
+        await openTeaser(found[0].profile, allTeams, allClubs, allMatches, allRosters, allEvents);
+      } else if (!found.length) {
+        setSearchError('Tidak ada kandidat. Coba ejaan nama lain, atau pastikan KU dan klub sesuai laga yang pernah dicatat.');
       }
     } catch (err) {
       console.error(err);
       setSearchError('Terjadi kesalahan saat memproses pencarian.');
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const pickCandidate = async (c: ClaimCandidate) => {
+    setSearching(true);
+    try {
+      const dbInstance = await initDB();
+      const [allTeams, allClubs, allMatches, allRosters, allEvents] = await Promise.all([
+        dbInstance.getAll('teams'),
+        dbInstance.getAll('clubs'),
+        dbInstance.getAll('matches'),
+        dbInstance.getAll('match_rosters'),
+        dbInstance.getAll('events'),
+      ]);
+      setMatchScore(c.score);
+      await openTeaser(c.profile, allTeams, allClubs, allMatches, allRosters, allEvents);
     } finally {
       setSearching(false);
     }
@@ -410,7 +396,7 @@ export const ClaimAthletePage: React.FC = () => {
             {activeStep === 'success' && 'Pengajuan Dikirim'}
           </h1>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto leading-relaxed">
-            {activeStep === 'search' && 'Keamanan anak WAJIB: masukkan pencarian kecocokan exact untuk memverifikasi hubungan keluarga.'}
+            {activeStep === 'search' && 'Cari nama + klub + KU kalender. Tanggal lahir dan dokumen dilengkapi saat verifikasi.'}
             {activeStep === 'teaser' && 'Tinjau teaser statistik terbatas di bawah sebelum melanjutkan proses klaim.'}
             {activeStep === 'form' && 'Lengkapi informasi keluarga dan unggah Kartu Keluarga untuk membuktikan wali resmi.'}
             {activeStep === 'payment' && 'Pilih paket statistik Anda dan selesaikan transaksi aman.'}
@@ -454,17 +440,41 @@ export const ClaimAthletePage: React.FC = () => {
 
         {/* Dynamic Steps based on FSD ui elements */}
         {activeStep === 'search' && (
-          <SearchStep
-            searchName={searchName}
-            setSearchName={setSearchName}
-            searchDob={searchDob}
-            setSearchDob={setSearchDob}
-            searchClub={searchClub}
-            setSearchClub={setSearchClub}
-            searchError={searchError}
-            searching={searching}
-            onSearch={handleSearch}
-          />
+          <>
+            <SearchStep
+              searchName={searchName}
+              setSearchName={setSearchName}
+              searchKU={searchKU}
+              setSearchKU={setSearchKU}
+              searchClub={searchClub}
+              setSearchClub={setSearchClub}
+              searchError={searchError}
+              searching={searching}
+              onSearch={handleSearch}
+            />
+            {searched && candidates.length > 1 && (
+              <div className="space-y-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">{candidates.length} kandidat — pilih yang benar</p>
+                {candidates.map((c) => (
+                  <button
+                    key={c.profile.id}
+                    type="button"
+                    onClick={() => pickCandidate(c)}
+                    className="w-full text-left p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-brand-navy dark:hover:border-brand-orange cursor-pointer"
+                  >
+                    <div className="flex justify-between gap-2">
+                      <span className="font-bold text-zinc-900 dark:text-white">{c.profile.name}</span>
+                      <span className="text-[10px] font-black uppercase text-brand-navy dark:text-brand-orange">{c.score}%</span>
+                    </div>
+                    <p className="text-xs text-zinc-500 mt-1">
+                      {c.teamName || 'Tim belum jelas'} · {c.matchCount} entri laga ·{' '}
+                      {c.kuStatus === 'exact' ? `KU-${c.athleteKU ?? searchKU}` : c.kuStatus === 'playing_up' ? 'Playing up (sah)' : 'KU dari riwayat laga'}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {activeStep === 'teaser' && matchedProfile && (

@@ -11,8 +11,8 @@ import (
 	"strconv"
 	"time"
 
+	"hoopstat/internal/bunny"
 	"hoopstat/internal/catalog"
-	"hoopstat/internal/gdrive"
 	"hoopstat/internal/media"
 
 	"github.com/jackc/pgx/v5"
@@ -26,17 +26,17 @@ type Server struct {
 	geminiKey     string
 	sessionSecret string
 	media         *media.Store
-	drive         *gdrive.Client
+	bunny         *bunny.Client
 	googleLogin   *oauth2.Config
 	aiLimit       hitLimiter
 	authLimit     hitLimiter
 }
 
-func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, driveClient *gdrive.Client, googleLogin *oauth2.Config) http.Handler {
-	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, drive: driveClient, googleLogin: googleLogin}
+func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, stream *bunny.Client, googleLogin *oauth2.Config) http.Handler {
+	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, bunny: stream, googleLogin: googleLogin}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
-	mux.HandleFunc("GET /api/audit/roles", s.auditRoles)
+	mux.HandleFunc("GET /api/audit/roles", s.requireAdmin(s.auditRoles))
 	mux.HandleFunc("POST /api/auth/register", s.register)
 	mux.HandleFunc("POST /api/auth/login", s.login)
 	mux.HandleFunc("POST /api/auth/logout", s.logout)
@@ -44,9 +44,6 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("GET /api/auth/google", s.googleLoginStart)
 	mux.HandleFunc("GET /api/auth/google/callback", s.googleLoginCallback)
 	mux.HandleFunc("GET /api/auth/app", s.appLogin)
-	mux.HandleFunc("GET /api/drive/status", s.requireAuth(s.driveStatus))
-	mux.HandleFunc("GET /api/drive/auth", s.requireDriveAdmin(s.driveAuthStart))
-	mux.HandleFunc("GET /api/drive/callback", s.driveAuthCallback)
 	mux.HandleFunc("POST /api/gemini/batch-ocr", s.requireAuth(s.rateLimitedOCR(s.batchOCR)))
 	mux.HandleFunc("POST /api/gemini/generate", s.requireAuth(s.generate))
 	mux.HandleFunc("POST /api/stores/batch", s.requireAuth(s.batch))
@@ -56,7 +53,10 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("POST /api/drill-submissions", s.requireAuth(s.createDrillSubmissionLink))
 	mux.HandleFunc("POST /api/drill-submissions/upload", s.requireAuth(s.createDrillSubmissionUpload))
 	mux.HandleFunc("POST /api/drill-submissions/{id}/review", s.requireAuth(s.reviewDrillSubmission))
+	mux.HandleFunc("POST /api/training-sessions/{id}/register", s.requireAuth(s.registerSession))
 	mux.HandleFunc("GET /api/media/{file}", s.serveMedia)
+	mux.HandleFunc("GET /api/media-config", s.requireAuth(s.mediaConfig))
+	mux.HandleFunc("POST /api/media/upload", s.requireAuth(s.uploadCatalogMedia))
 	mux.HandleFunc("GET /api/stores/{store}", s.publicReadOrAuth(s.list))
 	mux.HandleFunc("GET /api/stores/{store}/{id}", s.publicReadOrAuth(s.get))
 	mux.HandleFunc("PUT /api/stores/{store}/{id}", s.requireAuth(s.put))
@@ -229,6 +229,9 @@ func (s *Server) put(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
+	if store == "matches" {
+		s.notifyMatch(r.Context(), uidOf(user), existing, item)
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"item": item})
 }
 
@@ -254,6 +257,9 @@ func (s *Server) create(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
+	if store == "matches" {
+		s.notifyMatch(r.Context(), uidOf(user), nil, item)
+	}
 	writeJSON(w, http.StatusCreated, map[string]any{"item": item})
 }
 
@@ -266,6 +272,10 @@ func (s *Server) remove(w http.ResponseWriter, r *http.Request) {
 	existing, _ := s.getDoc(r.Context(), store, r.PathValue("id"))
 	if err := s.authorizeWrite(r.Context(), userFrom(r), store, existing, existing); err != nil {
 		writeForbidden(w)
+		return
+	}
+	if err := s.deleteBlocked(r.Context(), store, r.PathValue("id")); err != nil {
+		writeErr(w, http.StatusConflict, err)
 		return
 	}
 	if err := s.deleteDoc(r.Context(), s.pool, store, r.PathValue("id")); err != nil {
@@ -310,6 +320,7 @@ func (s *Server) batch(w http.ResponseWriter, r *http.Request) {
 	defer tx.Rollback(r.Context())
 
 	var lastPut map[string]any
+	var afterCommit []func()
 	user := userFrom(r)
 	for _, op := range payload.Ops {
 		if _, err := catalog.Assert(op.Store); err != nil {
@@ -329,10 +340,18 @@ func (s *Server) batch(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			lastPut, err = s.putDoc(r.Context(), tx, op.Store, op.Doc)
+			if op.Store == "matches" {
+				old, doc := existing, lastPut
+				afterCommit = append(afterCommit, func() { s.notifyMatch(r.Context(), uidOf(user), old, doc) })
+			}
 		case "delete":
 			existing, _ := s.getDoc(r.Context(), op.Store, fmt.Sprint(op.ID))
 			if err := s.authorizeWrite(r.Context(), user, op.Store, existing, existing); err != nil {
 				writeForbidden(w)
+				return
+			}
+			if err := s.deleteBlocked(r.Context(), op.Store, fmt.Sprint(op.ID)); err != nil {
+				writeErr(w, http.StatusConflict, err)
 				return
 			}
 			err = s.deleteDoc(r.Context(), tx, op.Store, fmt.Sprint(op.ID))
@@ -350,6 +369,9 @@ func (s *Server) batch(w http.ResponseWriter, r *http.Request) {
 	if err := tx.Commit(r.Context()); err != nil {
 		writeErr(w, http.StatusInternalServerError, err)
 		return
+	}
+	for _, f := range afterCommit {
+		f()
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true, "lastPut": lastPut})
 }

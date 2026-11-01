@@ -955,6 +955,53 @@ export const PlayerProfilePage: React.FC = () => {
         </div>
 
         {/* Statistical Trend graph */}
+        {/* Guardian: request to detach a wrongly-merged match (admin must approve). */}
+        {currentUser && profile && (
+          (profile.links?.some((l: any) => l.accountId === currentUser.id && l.verified) ||
+            profile.guardianAccountIds?.includes(currentUser.id))
+        ) && gameByGameStats && gameByGameStats.length > 0 && (
+          <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-amber-200 dark:border-amber-900/40 shadow-sm space-y-3">
+            <h2 className="text-sm font-display font-bold text-[#1A1A1A] dark:text-white uppercase tracking-wider">
+              Laga bukan milik anak ini?
+            </h2>
+            <p className="text-xs text-zinc-500 leading-relaxed">
+              Jika nama sama + KU sama membuat statistik laga orang lain ikut ter-merge, ajukan pengeluaran. Admin yang menyetujui — tidak bisa dipakai hanya untuk membuang laga jelek.
+            </p>
+            <div className="space-y-2 max-h-64 overflow-auto">
+              {gameByGameStats.map((g: any) => (
+                <div key={g.matchId} className="flex items-center justify-between gap-2 text-xs border-b border-zinc-100 dark:border-zinc-800 py-2">
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200 truncate">{g.label || g.opponent || g.matchId}</span>
+                  <button
+                    type="button"
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 font-black uppercase tracking-wider cursor-pointer"
+                    onClick={async () => {
+                      const reason = window.prompt('Alasan (wajib): kenapa laga ini bukan main anak Anda?');
+                      if (!reason?.trim()) return;
+                      try {
+                        const { exclusionService } = await import('../features/match-exclusion/model/exclusionService');
+                        await exclusionService.request({
+                          profileId: profile.id,
+                          profileName: profile.name,
+                          matchId: g.matchId,
+                          matchLabel: g.label || g.opponent || g.matchId,
+                          reason: reason.trim(),
+                          accountId: currentUser.id,
+                          accountName: currentUser.name || currentUser.email,
+                        });
+                        alert('Pengajuan masuk antrean admin.');
+                      } catch (e: any) {
+                        alert(e.message || 'Gagal mengajukan');
+                      }
+                    }}
+                  >
+                    Ajukan pisah
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {gameByGameStats && gameByGameStats.length >= 2 && (
           <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm">
             <div className="flex items-center gap-2 mb-4">

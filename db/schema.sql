@@ -41,7 +41,12 @@ DECLARE
     'fundamental_profiles',
     'workout_schedules',
     'drill_submissions',
-    'classroom_qa'
+    'classroom_qa',
+    'follows',
+    'reel_reactions',
+    'venues',
+    'training_sessions',
+    'session_registrations'
   ];
 BEGIN
   FOREACH t IN ARRAY tables LOOP
@@ -119,6 +124,14 @@ CREATE INDEX IF NOT EXISTS token_logs_by_timestamp ON token_logs (((doc->>'times
 CREATE INDEX IF NOT EXISTS matches_by_team ON matches ((doc->>'teamId'));
 CREATE INDEX IF NOT EXISTS matches_by_child ON matches ((doc->>'childId'));
 CREATE INDEX IF NOT EXISTS matches_by_stage ON matches ((doc->>'productionStage'));
+
+COMMENT ON TABLE session_registrations IS 'Created only via POST /api/training-sessions/{id}/register (quota + consent checked under an advisory lock).';
+CREATE INDEX IF NOT EXISTS follows_by_user ON follows ((doc->>'userId'));
+CREATE INDEX IF NOT EXISTS reel_reactions_by_user ON reel_reactions ((doc->>'userId'));
+CREATE INDEX IF NOT EXISTS reel_reactions_by_target ON reel_reactions ((doc->>'targetId'));
+CREATE INDEX IF NOT EXISTS training_sessions_by_coach ON training_sessions ((doc->>'coachId'));
+CREATE INDEX IF NOT EXISTS session_registrations_by_session ON session_registrations ((doc->>'sessionId'));
+CREATE INDEX IF NOT EXISTS session_registrations_by_account ON session_registrations ((doc->>'accountId'));
 
 -- Identity docs (KK/akta). Never keep data URLs in claim_requests.doc.
 CREATE TABLE IF NOT EXISTS claim_docs (

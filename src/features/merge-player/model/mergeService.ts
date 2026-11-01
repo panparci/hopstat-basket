@@ -80,12 +80,17 @@ export const mergeService = {
         // 1. Must have similar names
         if (!areNamesSimilar(p1.name, p2.name)) continue;
 
-        // 2. Must have close birth dates
-        if (!areDatesClose(p1.birthDate, p2.birthDate)) continue;
+        // 2. Birth dates close OR same calendar-year KU (same name + same KU is the accidental-merge case)
+        const dobClose = areDatesClose(p1.birthDate, p2.birthDate);
+        const y = new Date().getFullYear();
+        const ku1 = p1.birthDate ? y - new Date(p1.birthDate).getFullYear() : undefined;
+        const ku2 = p2.birthDate ? y - new Date(p2.birthDate).getFullYear() : undefined;
+        const sameKu = ku1 !== undefined && ku2 !== undefined && ku1 === ku2;
+        const bothMissingDob = !p1.birthDate && !p2.birthDate;
+        if (!dobClose && !sameKu && !bothMissingDob) continue;
 
-        // Determine who's primary/secondary based on completeness or alphabetical ID
-        const score1 = (p1.avatar ? 2 : 0) + (p1.displayName ? 1 : 0) + (p1.jerseyNumber ? 1 : 0);
-        const score2 = (p2.avatar ? 2 : 0) + (p2.displayName ? 1 : 0) + (p2.jerseyNumber ? 1 : 0);
+        const score1 = (p1.avatar ? 2 : 0) + (p1.displayName ? 1 : 0) + (p1.jerseyNumber ? 1 : 0) + (p1.birthDate ? 2 : 0);
+        const score2 = (p2.avatar ? 2 : 0) + (p2.displayName ? 1 : 0) + (p2.jerseyNumber ? 1 : 0) + (p2.birthDate ? 2 : 0);
 
         let primary = p1;
         let secondary = p2;
@@ -97,7 +102,7 @@ export const mergeService = {
         suggestions.push({
           primary,
           secondary,
-          score: 100 // High match score
+          score: dobClose ? 100 : sameKu ? 85 : 70,
         });
       }
     }

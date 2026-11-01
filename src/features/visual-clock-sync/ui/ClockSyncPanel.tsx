@@ -14,6 +14,11 @@ import { TimelineStorageService } from "../../automatic-clock-mapping/services/t
 import { ClockTimeline, RawClockScanPoint, ClockStateMarker } from "../../automatic-clock-mapping/types";
 import { generateClockTimeline } from "../../automatic-clock-mapping/services/timelineGenerationService";
 import { OnTheFlySyncToggle } from "../../on-the-fly-clock-sync/ui/OnTheFlySyncToggle";
+import {
+  isCaptureActive,
+  isEmbeddedAppShell,
+  shouldOpenExternalForCapture,
+} from "../lib/captureStatus";
 
 interface ClockSyncPanelProps {
   matchId: string;
@@ -179,13 +184,29 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
     showToast("Screen capture stream stopped.", "info");
   };
 
+  const openTrackingInBrowser = () => {
+    const url = window.location.href;
+    const rn = (window as { ReactNativeWebView?: { postMessage: (m: string) => void } }).ReactNativeWebView;
+    if (rn?.postMessage) {
+      rn.postMessage(JSON.stringify({ type: "open-external", url }));
+      showToast("Membuka tracking di browser untuk Screen Capture…", "info");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const enableCapture = async () => {
     try {
       setPermissionBlocked(false);
       setStatus("REQUESTING_CAPTURE");
-      
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        throw new Error("Screen capture is not supported in this browser context.");
+
+      const displayMediaOk = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+      if (shouldOpenExternalForCapture(isEmbeddedAppShell(), displayMediaOk)) {
+        setPermissionBlocked(true);
+        setStatus("ERROR");
+        showToast("Screen Capture tidak jalan di app — buka di browser.", "error");
+        openTrackingInBrowser();
+        return;
       }
 
       const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -216,11 +237,16 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
     } catch (err: any) {
       console.error("Failed to enable screen capture:", err);
       setStatus("ERROR");
-      
+
       const errStr = String(err?.message || err).toLowerCase();
-      if (errStr.includes("permissions policy") || errStr.includes("disallowed") || errStr.includes("notallowederror")) {
+      if (
+        errStr.includes("permissions policy") ||
+        errStr.includes("disallowed") ||
+        errStr.includes("notallowederror") ||
+        isEmbeddedAppShell()
+      ) {
         setPermissionBlocked(true);
-        showToast("Screen capture restricted in preview iframe. Open in a new tab.", "error");
+        showToast("Screen capture diblokir di sini. Buka di browser tab.", "error");
       } else {
         showToast(err?.message || "Screen capture permission was not granted.", "error");
       }
@@ -463,8 +489,11 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
 
   // Express One-Click Sync Handler
   const handleExpressSyncClick = async () => {
-    if (!videoRef.current || status === "IDLE" || status === "CAPTURE_ENDED" || status === "ERROR") {
+    if (!videoRef.current || !isCaptureActive(status)) {
       setShowSetupModal(true);
+      if (status === "ERROR") {
+        showToast("Screen capture putus — reconnect di Setup dulu.", "info");
+      }
       return;
     }
 
@@ -676,13 +705,13 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const isCaptureOn = status !== "IDLE" && status !== "CAPTURE_ENDED" && status !== "ERROR";
+  const isCaptureOn = isCaptureActive(status);
   const isConfigured = Boolean(region || altRegion);
 
   return (
     <>
-      {/* Sleek Integrated 1-Row OCR Control Toolbar */}
-      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 mb-3 shadow-xl flex items-center justify-between gap-2 font-sans select-none flex-wrap">
+      {/* OCR / clock tools — rare mid-possession; keep Sync + OCR status primary on narrow screens */}
+      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-2.5 mb-3 shadow-xl flex items-center gap-2 font-sans select-none overflow-x-auto max-w-full">
         
         {/* On-The-Fly OCR Status Badge (Read-only status in panel, opens Setup Modal on click) */}
         <button
@@ -750,19 +779,18 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
           onClick={() => setShowAutoMappingModal(true)}
         />
 
-        {/* Deteksi Roster AI Button */}
+        {/* Desktop / wide: extra tools. On phone these live inside OCR Setup (badge opens it). */}
         {onOpenAILineupModal && (
           <button
             onClick={onOpenAILineupModal}
-            className="py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0 cursor-pointer shadow-sm"
+            className="hidden md:flex py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 transition-colors items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0 cursor-pointer shadow-sm"
             title="Deteksi Roster Bench & No Punggung Pemain AI"
           >
             <Sparkles size={14} className="text-amber-400 animate-pulse" />
-            <span className="hidden sm:inline">Roster AI</span>
+            <span>Roster AI</span>
           </button>
         )}
 
-        {/* Define Area of OCR Button */}
         <button
           onClick={() => {
             if (!isCaptureOn) {
@@ -773,21 +801,20 @@ export const ClockSyncPanel: React.FC<ClockSyncPanelProps> = ({
               startCalibration("primary");
             }
           }}
-          className="py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0"
+          className="hidden md:flex py-2 px-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/30 transition-colors items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0"
           title="Define Area of OCR (Atur Area Scan Langsung)"
         >
           <Maximize2 size={14} className="text-amber-400" />
-          <span className="hidden sm:inline">Area OCR</span>
+          <span>Area OCR</span>
         </button>
 
-        {/* Setup Button */}
         <button
           onClick={() => setShowSetupModal(true)}
-          className="py-2 px-3 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl border border-zinc-700/60 transition-colors flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0"
+          className="hidden md:flex py-2 px-3 bg-zinc-800/90 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl border border-zinc-700/60 transition-colors items-center gap-1.5 text-xs font-bold uppercase tracking-wider shrink-0"
           title="Configure Visual Clock Sync Setup"
         >
           <Sliders size={14} className="text-amber-400" />
-          <span className="hidden sm:inline">Setup</span>
+          <span>Setup</span>
         </button>
       </div>
 

@@ -7,13 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
-
-	"hoopstat/internal/gdrive"
 )
 
 func newDocID(prefix string) string {
@@ -39,7 +37,7 @@ func (s *Server) listDrillSubmissions(w http.ResponseWriter, r *http.Request) {
 		if athleteID != "" && fmt.Sprint(it["athleteId"]) != athleteID {
 			continue
 		}
-		out = append(out, publicDoc("drill_submissions", it))
+		out = append(out, s.withSignedMedia(publicDoc("drill_submissions", it)))
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"items": out})
 }
@@ -58,7 +56,7 @@ func (s *Server) getDrillSubmission(w http.ResponseWriter, r *http.Request) {
 		writeForbidden(w)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"item": publicDoc("drill_submissions", item)})
+	writeJSON(w, http.StatusOK, map[string]any{"item": s.withSignedMedia(publicDoc("drill_submissions", item))})
 }
 
 type drillSubmitBody struct {
@@ -68,6 +66,10 @@ type drillSubmitBody struct {
 	DrillName    string `json:"drillName"`
 	VideoURL     string `json:"videoUrl"`
 	AthleteNotes string `json:"athleteNotes"`
+	// Clip window in seconds (0/0 = whole video); stored as metadata, the file is not re-encoded.
+	TrimStart     float64 `json:"trimStart"`
+	TrimEnd       float64 `json:"trimEnd"`
+	ParentConsent bool    `json:"parentConsent"`
 }
 
 func (s *Server) createDrillSubmissionLink(w http.ResponseWriter, r *http.Request) {
@@ -78,20 +80,24 @@ func (s *Server) createDrillSubmissionLink(w http.ResponseWriter, r *http.Reques
 	}
 	body.VideoURL = strings.TrimSpace(body.VideoURL)
 	if body.VideoURL == "" {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "videoUrl wajib (link YouTube/Drive)"})
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "videoUrl wajib (link YouTube/Loom)"})
 		return
 	}
 	if !isExternalVideoURL(body.VideoURL) {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "videoUrl harus http(s) YouTube/Drive/Loom atau link video publik"})
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "videoUrl harus http(s) YouTube/Loom atau link video publik"})
 		return
 	}
 	user := userFrom(r)
+	if err := s.checkSubmission(r, user, body); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
 	item, err := s.saveDrillSubmission(r, user, body, body.VideoURL, "", "link", "link", "")
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"item": item})
+	writeJSON(w, http.StatusCreated, map[string]any{"item": s.withSignedMedia(item)})
 }
 
 func (s *Server) createDrillSubmissionUpload(w http.ResponseWriter, r *http.Request) {
@@ -118,39 +124,50 @@ func (s *Server) createDrillSubmissionUpload(w http.ResponseWriter, r *http.Requ
 	}
 
 	body := drillSubmitBody{
-		AthleteID:    strings.TrimSpace(r.FormValue("athleteId")),
-		AthleteName:  strings.TrimSpace(r.FormValue("athleteName")),
-		DrillID:      strings.TrimSpace(r.FormValue("drillId")),
-		DrillName:    strings.TrimSpace(r.FormValue("drillName")),
-		AthleteNotes: strings.TrimSpace(r.FormValue("athleteNotes")),
+		AthleteID:     strings.TrimSpace(r.FormValue("athleteId")),
+		AthleteName:   strings.TrimSpace(r.FormValue("athleteName")),
+		DrillID:       strings.TrimSpace(r.FormValue("drillId")),
+		DrillName:     strings.TrimSpace(r.FormValue("drillName")),
+		AthleteNotes:  strings.TrimSpace(r.FormValue("athleteNotes")),
+		ParentConsent: r.FormValue("parentConsent") == "true",
 	}
+	body.TrimStart, _ = strconv.ParseFloat(r.FormValue("trimStart"), 64)
+	body.TrimEnd, _ = strconv.ParseFloat(r.FormValue("trimEnd"), 64)
 	user := userFrom(r)
+	if err := s.checkSubmission(r, user, body); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
 
 	var (
 		publicPath string
 		mediaFile  string
-		driveID    string
-		source     = "upload"
+		bunnyID    string
+		source     string
 	)
 
-	if s.drive != nil && s.drive.Ready() {
-		res, err := s.drive.Upload(r.Context(), gdrive.SafeFileName(hdr.Filename), ct, file)
-		if err == nil {
-			publicPath = res.ViewURL
-			driveID = res.FileID
-			source = "drive"
-		} else if _, seekErr := file.Seek(0, io.SeekStart); seekErr != nil || s.media == nil {
-			writeJSON(w, http.StatusBadGateway, map[string]string{"error": "upload Drive gagal: " + err.Error()})
+	switch kind {
+	case "video":
+		if s.bunny == nil || !s.bunny.Ready() {
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Bunny Stream belum dikonfigurasi (BUNNY_STREAM_*)."})
 			return
-		} else {
-			log.Printf("drive upload failed, saved locally instead (re-link via /api/drive/auth): %v", err)
 		}
-	}
-	if source != "drive" {
+		title := body.DrillName
+		if title == "" {
+			title = hdr.Filename
+		}
+		res, err := s.bunny.Upload(r.Context(), title, file)
+		if err != nil {
+			writeJSON(w, http.StatusBadGateway, map[string]string{"error": "upload Bunny gagal: " + err.Error()})
+			return
+		}
+		// HLS → expo-video (no Bunny iframe chrome). Embed kept on bunnyVideoId path if needed.
+		publicPath = res.PlayURL
+		bunnyID = res.VideoID
+		source = "bunny"
+	case "image":
 		if s.media == nil {
-			writeJSON(w, http.StatusServiceUnavailable, map[string]string{
-				"error": "Drive belum di-link. Admin buka /api/drive/auth (login dulu), atau set UPLOAD_DIR untuk fallback lokal.",
-			})
+			writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "UPLOAD_DIR belum diset untuk foto latihan."})
 			return
 		}
 		fileName, path, err := s.media.Save(hdr.Filename, ct, file)
@@ -160,17 +177,21 @@ func (s *Server) createDrillSubmissionUpload(w http.ResponseWriter, r *http.Requ
 		}
 		mediaFile = fileName
 		publicPath = path
+		source = "upload"
+	default:
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "hanya video atau gambar"})
+		return
 	}
 
-	item, err := s.saveDrillSubmission(r, user, body, publicPath, mediaFile, source, kind, driveID)
+	item, err := s.saveDrillSubmission(r, user, body, publicPath, mediaFile, source, kind, bunnyID)
 	if err != nil {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]any{"item": item})
+	writeJSON(w, http.StatusCreated, map[string]any{"item": s.withSignedMedia(item)})
 }
 
-func (s *Server) saveDrillSubmission(r *http.Request, user map[string]any, body drillSubmitBody, videoURL, mediaFile, source, mediaType, driveFileID string) (map[string]any, error) {
+func (s *Server) saveDrillSubmission(r *http.Request, user map[string]any, body drillSubmitBody, videoURL, mediaFile, source, mediaType, bunnyVideoID string) (map[string]any, error) {
 	if body.DrillID == "" {
 		body.DrillID = "general"
 	}
@@ -204,10 +225,35 @@ func (s *Server) saveDrillSubmission(r *http.Request, user map[string]any, body 
 		"submittedAt":  time.Now().UTC().Format(time.RFC3339),
 		"submittedBy":  fmt.Sprint(user["id"]),
 	}
-	if driveFileID != "" {
-		doc["driveFileId"] = driveFileID
+	if bunnyVideoID != "" {
+		doc["bunnyVideoId"] = bunnyVideoID
 	}
-	return s.putDoc(r.Context(), s.pool, "drill_submissions", doc)
+	if body.TrimEnd > 0 {
+		doc["trim"] = map[string]any{"start": body.TrimStart, "end": body.TrimEnd}
+	}
+	if body.ParentConsent {
+		doc["parentConsent"] = map[string]any{"accountId": fmt.Sprint(user["id"]), "name": fmt.Sprint(user["name"]), "at": time.Now().UTC().Format(time.RFC3339)}
+	}
+	item, err := s.putDoc(r.Context(), s.pool, "drill_submissions", doc)
+	if err == nil {
+		s.notify(r.Context(), uidOf(user), s.accountsWith(r.Context(), "do_coach_analysis"), "Video baru untuk direview", body.AthleteName+" · "+body.DrillName, "/review/"+asString(doc["id"]))
+	}
+	return item, err
+}
+
+// checkSubmission rejects a bad clip window, and a minor's video without a guardian's consent.
+func (s *Server) checkSubmission(r *http.Request, user map[string]any, body drillSubmitBody) error {
+	if body.TrimEnd != 0 && (body.TrimStart < 0 || body.TrimEnd <= body.TrimStart || body.TrimEnd-body.TrimStart > 600) {
+		return errors.New("potongan klip tidak valid (maks 10 menit)")
+	}
+	if body.AthleteID == "" || body.ParentConsent {
+		return nil
+	}
+	p, _ := s.getDoc(r.Context(), "profiles", body.AthleteID)
+	if p != nil && isMinorBirth(asString(p["birthDate"]), time.Now()) {
+		return errors.New("atlet di bawah umur: persetujuan orang tua/wali wajib")
+	}
+	return nil
 }
 
 type drillReviewBody struct {
@@ -267,7 +313,12 @@ func (s *Server) reviewDrillSubmission(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"item": item})
+	title := "Video kamu sudah direview"
+	if status == "needs_revision" {
+		title = "Coach minta rekam ulang"
+	}
+	s.notify(r.Context(), uidOf(user), []string{asString(existing["submittedBy"])}, title, asString(existing["drillName"])+": "+body.Comments, "/submissions")
+	writeJSON(w, http.StatusOK, map[string]any{"item": s.withSignedMedia(item)})
 }
 
 func (s *Server) serveMedia(w http.ResponseWriter, r *http.Request) {
@@ -275,7 +326,12 @@ func (s *Server) serveMedia(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusNotFound, errors.New("not found"))
 		return
 	}
-	f, ct, err := s.media.Open(r.PathValue("file"))
+	file := r.PathValue("file")
+	if !s.allowMedia(r, file) {
+		writeJSON(w, http.StatusUnauthorized, map[string]string{"error": "unauthorized"})
+		return
+	}
+	f, ct, err := s.media.Open(file)
 	if err != nil {
 		writeErr(w, http.StatusNotFound, errors.New("not found"))
 		return
@@ -283,7 +339,17 @@ func (s *Server) serveMedia(w http.ResponseWriter, r *http.Request) {
 	defer f.Close()
 	w.Header().Set("Content-Type", ct)
 	w.Header().Set("Cache-Control", "private, max-age=3600")
-	http.ServeContent(w, r, r.PathValue("file"), time.Time{}, f)
+	http.ServeContent(w, r, file, time.Time{}, f)
+}
+
+func (s *Server) withSignedMedia(item map[string]any) map[string]any {
+	if item == nil {
+		return item
+	}
+	if v, ok := item["videoUrl"].(string); ok && strings.HasPrefix(v, "/api/media/") {
+		item["videoUrl"] = s.signMediaURL(v)
+	}
+	return item
 }
 
 func isExternalVideoURL(raw string) bool {

@@ -46,6 +46,12 @@ func TestWithSPA(t *testing.T) {
 	if rec.Body.String() != "SPA" {
 		t.Fatalf("spa: %s", rec.Body.String())
 	}
+
+	rec = httptest.NewRecorder()
+	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/assets/index-D7-missing.js", nil))
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("missing asset must 404, got %d body %q", rec.Code, rec.Body.String())
+	}
 }
 
 func TestClientIP(t *testing.T) {

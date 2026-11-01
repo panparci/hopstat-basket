@@ -432,106 +432,107 @@ export const SinglePlayerActions: React.FC<SinglePlayerActionsProps> = ({
         </h2>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-2">
+      {/* Uniform min-h so make/miss/reb/foul rows don't wobble on narrow phones */}
+      <div className="grid grid-cols-3 gap-2 mb-2">
         <button
           onClick={() => startFTFlow("success")}
-          className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 p-3 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-2 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Target size={16} className="opacity-80" />
           <span>+1 FT</span>
         </button>
         <button
           onClick={() => onLogEvent("2pt_make", 2, playerId)}
-          className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 p-3 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-2 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Target size={16} className="opacity-80" />
           <span>+2 PT</span>
         </button>
         <button
           onClick={() => onLogEvent("3pt_make", 3, playerId)}
-          className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 p-3 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2 py-2 rounded-xl font-black text-sm hover:bg-emerald-100 dark:hover:bg-emerald-900/40 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Target size={16} className="opacity-80" />
           <span>+3 PT</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-2">
+      <div className="grid grid-cols-3 gap-2 mb-2">
         <button
           onClick={() => startFTFlow("miss")}
-          className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 p-2.5 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <XCircle size={14} className="opacity-80" />
           <span>Miss FT</span>
         </button>
         <button
           onClick={() => onLogEvent("2pt_miss", 0, playerId)}
-          className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 p-2.5 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <XCircle size={14} className="opacity-80" />
           <span>Miss 2</span>
         </button>
         <button
           onClick={() => onLogEvent("3pt_miss", 0, playerId)}
-          className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 p-2.5 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-red-100 dark:hover:bg-red-500/20 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <XCircle size={14} className="opacity-80" />
           <span>Miss 3</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-2">
+      <div className="grid grid-cols-2 gap-2 mb-2">
         <button
           onClick={() => onLogEvent("oreb", 0, playerId)}
-          className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 p-3 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5"
+          className="min-h-[52px] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <ArrowUpCircle size={14} /> O-REB
         </button>
         <button
           onClick={() => onLogEvent("dreb", 0, playerId)}
-          className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 p-3 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5"
+          className="min-h-[52px] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <Shield size={14} /> D-REB
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-4 gap-2 mb-2">
         <button
           onClick={() => onLogEvent("ast", 0, playerId)}
-          className="bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 p-2.5 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 px-1 py-2 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Handshake size={14} className="opacity-70" /> AST
         </button>
         <button
           onClick={() => onLogEvent("stl", 0, playerId)}
-          className="bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 p-2.5 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 px-1 py-2 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Hand size={14} className="opacity-70" /> STL
         </button>
         <button
           onClick={() => onLogEvent("blk", 0, playerId)}
-          className="bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 p-2.5 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 px-1 py-2 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <Ban size={14} className="opacity-70" /> BLK
         </button>
         <button
           onClick={() => onLogEvent("to", 0, playerId)}
-          className="bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 p-2.5 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
+          className="min-h-[52px] bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/50 px-1 py-2 rounded-xl font-bold text-xs hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-95 transition-all flex flex-col items-center justify-center gap-0.5"
         >
           <RefreshCcw size={14} className="opacity-70" /> TO
         </button>
       </div>
 
-      <div className="flex gap-3 mt-1.5">
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => onLogEvent("defensive_foul", 0, playerId)}
-          className="flex-1 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 p-3 rounded-xl font-bold text-xs hover:bg-orange-100 dark:hover:bg-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5"
+          className="min-h-[52px] bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-orange-100 dark:hover:bg-orange-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <Flag size={14} /> FOUL
         </button>
         <button
           onClick={() => onLogEvent("foul_drawn", 0, playerId)}
-          className="flex-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 p-3 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2.5"
+          className="min-h-[52px] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-2 py-2 rounded-xl font-bold text-xs hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           <Handshake size={14} /> FOUL DRAWN
         </button>

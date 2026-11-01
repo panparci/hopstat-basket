@@ -19,8 +19,10 @@ export interface FundamentalDrill {
   difficulty: SkillLevel;
   description: string;
   mechanics: string[]; // e.g., ["Posisi Kaki Tekuk Lutut", "Point of Release Tinggi"]
-  youtubeUrl: string; // e.g. "https://www.youtube.com/watch?v=..." or YouTube ID "dQw4w9WgXcQ"
+  youtubeUrl: string; // legacy 16:9 demo — prefer videoUrl (upload 9:16). Match film stays YouTube.
   youtubeVideoId: string;
+  /** Uploaded demo (Bunny / media) — 9:16; stored in DB. */
+  videoUrl?: string;
   loopStartTimeSec: number;
   loopEndTimeSec?: number;
   recommendedSets: number;
@@ -29,6 +31,12 @@ export interface FundamentalDrill {
   equipment: string[]; // e.g., ["Full Court", "Cone", "2 Bola Basketball"]
   thumbnailUrl?: string;
   createdAt?: string;
+  /** official = company catalog; coach = Skills Coach technique video on the same skillKey/category */
+  ownerType?: 'official' | 'coach';
+  ownerId?: string;
+  skillKey?: string; // shared taxonomy; defaults to category
+  visibility?: 'public' | 'connected' | 'private';
+  moderationStatus?: 'draft' | 'in_review' | 'published' | 'rejected';
 }
 
 export interface ScheduledDrillItem {
@@ -77,11 +85,12 @@ export interface DrillSubmission {
   drillId: string;
   drillName: string;
   workoutDayId?: string;
-  videoUrl: string; // YouTube / Drive link, or /api/media/... for upload
+  videoUrl: string; // athlete training clip: Bunny/upload 9:16 (DB). Match film ≠ this — YouTube only.
   mediaFile?: string;
   mediaType?: 'video' | 'image' | 'link';
-  source?: 'link' | 'upload' | 'drive';
+  source?: 'link' | 'upload' | 'drive' | 'bunny';
   driveFileId?: string;
+  bunnyVideoId?: string;
   athleteNotes: string;
   status: 'submitted' | 'reviewed' | 'needs_revision';
   submittedAt: string;

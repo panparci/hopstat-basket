@@ -9,9 +9,9 @@ import (
 	"syscall"
 	"time"
 
+	"hoopstat/internal/bunny"
 	"hoopstat/internal/config"
 	"hoopstat/internal/db"
-	"hoopstat/internal/gdrive"
 	"hoopstat/internal/httpapi"
 	"hoopstat/internal/media"
 
@@ -37,7 +37,19 @@ func main() {
 		log.Fatalf("upload dir: %v", err)
 	}
 
-	var driveClient *gdrive.Client
+	var stream *bunny.Client
+	if cfg.BunnyLibraryID != "" {
+		stream, err = bunny.New(cfg.BunnyLibraryID, cfg.BunnyAPIKey, cfg.BunnyCDNHost)
+		if err != nil {
+			log.Printf("bunny stream disabled: %v", err)
+			stream = nil
+		} else {
+			log.Printf("Bunny Stream ready (library %s → %s)", cfg.BunnyLibraryID, cfg.BunnyCDNHost)
+		}
+	} else {
+		log.Printf("Bunny Stream not configured — video uploads will fail until BUNNY_STREAM_* is set")
+	}
+
 	var googleLogin *oauth2.Config
 	if b, err := os.ReadFile(cfg.GoogleOAuthClient); err == nil {
 		if googleLogin, err = google.ConfigFromJSON(b, "openid", "email", "profile"); err == nil {
@@ -46,18 +58,9 @@ func main() {
 		} else {
 			log.Printf("google sign-in disabled: %v", err)
 		}
-		driveClient, err = gdrive.New(cfg.GoogleOAuthClient, cfg.GoogleOAuthToken, cfg.GoogleDriveFolder, cfg.GoogleOAuthRedirect)
-		if err != nil {
-			log.Printf("drive oauth disabled: %v", err)
-			driveClient = nil
-		} else if driveClient.Ready() {
-			log.Printf("Google Drive linked (uploads → Drive)")
-		} else {
-			log.Printf("Google Drive OAuth ready — link via GET /api/drive/auth (admin)")
-		}
 	}
 
-	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, driveClient, googleLogin)
+	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, stream, googleLogin)
 	if dir := httpapi.FindDist(); dir != "" {
 		h = httpapi.WithSPA(h, dir)
 		log.Printf("serving UI from %s", dir)

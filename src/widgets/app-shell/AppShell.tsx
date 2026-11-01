@@ -4,7 +4,7 @@ import {
   Home, Calendar, BarChart2, User, UsersRound, Brain, Youtube, 
   FileText, Users, ClipboardList, Menu, X, LogOut, Sun, Moon,
   ChevronDown, Trophy, UserCircle, Bell, Award, Target,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, UserCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePermissions } from '../../core/contexts/PermissionsContext';
@@ -27,6 +27,7 @@ export const CONSUMER_NAV_ITEMS: NavItemType[] = [
   { path: '/games', icon: Calendar, label: 'Pertandingan', permission: 'view_matches' },
   { path: '/stats', icon: BarChart2, label: 'Statistik', permission: 'view_own_stats' },
   { path: '/fundamentals', icon: Target, label: 'Latihan & Drill', permission: 'view_home' },
+  { path: '/coaches', icon: UserCheck, label: 'Skills Coach', permission: 'view_home' },
   { path: '/profiles', icon: User, label: 'Atlet Saya', permission: 'manage_profiles' },
   { path: '/services', icon: Youtube, label: 'Pesan Statistik', permission: 'request_stats' },
   { path: '/workspace', icon: ClipboardList, label: 'Ruang Kerja', permission: 'do_stat_tasks' },
@@ -105,7 +106,11 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   }
 
   // Inside the HoopStats mobile app the native tab bar is the navigation.
-  if (!user || navigator.userAgent.includes('HoopStatApp')) {
+  // localStorage flag is set by the app WebView boot script (UA append can miss on some WebViews).
+  const inApp =
+    typeof navigator !== 'undefined' &&
+    (navigator.userAgent.includes('HoopStatApp') || localStorage.getItem('hoopstat_app_shell') === '1');
+  if (!user || inApp) {
     return <>{children}</>;
   }
 

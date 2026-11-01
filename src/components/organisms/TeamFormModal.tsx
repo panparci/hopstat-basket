@@ -5,8 +5,9 @@ import { statsService } from '../../core/services/statsService';
 import { generateId } from '../../core/utils/idUtils';
 import { AITeamSetupModal } from './AITeamSetupModal';
 import { COLOR_GROUPS } from '../molecules/ColorPicker';
-import { QuickClubModal } from './QuickClubModal';
 import { usePermissions } from '../../core/contexts/PermissionsContext';
+import { AthleteSelectOrCreate } from '../../features/mdm/ui/AthleteSelectOrCreate';
+import { SelectOrCreateInput } from '../../features/mdm/ui/SelectOrCreateInput';
 
 interface TeamFormModalProps {
   team: Team | null;
@@ -65,12 +66,12 @@ const JerseyPicker: React.FC<{ title: string; hint: string; theme: Jersey['theme
   </div>
 );
 
-export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClose, onSave, refreshClubs }) => {
+export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClose, onSave, refreshClubs: _refreshClubs }) => {
   const { user } = usePermissions();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState(team?.name || '');
-  const [clubId, setClubId] = useState(team?.clubId || '');
+  const [clubId, setClubId] = useState(team?.clubId || team?.organizationId || '');
   const [ageGroup, setAgeGroup] = useState(team?.ageGroup || '');
   const [logoUrl, setLogoUrl] = useState(team?.logoUrl || '');
   const [roster, setRoster] = useState<Player[]>(team?.roster || []);
@@ -78,7 +79,6 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
   const [lightJersey, setLightJersey] = useState<Jersey>(team?.lightJersey || { color: '#ffffff', theme: 'terang', name: 'Putih' });
   const [darkJersey, setDarkJersey] = useState<Jersey>(team?.darkJersey || { color: 'var(--color-brand-navy)', theme: 'gelap', name: 'Navy' });
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [showQuickClubModal, setShowQuickClubModal] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
@@ -100,7 +100,8 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
       const newTeam: Team = {
         id: team?.id || generateId('team'),
         name: name.trim(),
-        clubId,
+        clubId: clubId || undefined,
+        organizationId: clubId || undefined,
         logoUrl,
         ageGroup,
         roster: roster.filter(p => p.name.trim() || p.jersey.trim()),
@@ -177,9 +178,20 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
           {step === 0 && (
             <div className="space-y-5">
               <div>
-                <label className={labelCls}>Nama tim <span className="text-red-500">*</span></label>
-                <p className={hintCls}>Nama yang akan muncul di papan skor dan statistik.</p>
-                <input autoFocus type="text" value={name} onChange={e => setName(e.target.value)} className={inputCls} placeholder="Contoh: Garuda KU 12" />
+                <SelectOrCreateInput
+                  entityType="training_squad"
+                  label="Nama tim *"
+                  selectedId={team?.id}
+                  selectedName={name}
+                  onChange={(id, n) => {
+                    setName(n);
+                    if (!team && id) {
+                      // pending/canonical squad id can become the team id on save
+                    }
+                  }}
+                  context={{ ageGroup, parentOrgId: clubId }}
+                />
+                <p className={hintCls}>Cari tim latihan yang sudah ada, atau ajukan nama baru.</p>
               </div>
 
               <div>
@@ -201,21 +213,14 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
               </div>
 
               <div>
-                <label className={labelCls}>Klub atau sekolah <span className="font-normal text-zinc-400">(opsional)</span></label>
-                <p className={hintCls}>Kosongkan kalau tim ini tidak berada di bawah klub/sekolah.</p>
-                <div className="flex gap-2">
-                  <select value={clubId} onChange={e => setClubId(e.target.value)} className={`flex-1 ${inputCls}`}>
-                    <option value="">Tidak ada (tim mandiri)</option>
-                    {clubs.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => setShowQuickClubModal(true)}
-                    className="px-4 bg-zinc-100 dark:bg-zinc-800 text-brand-navy dark:text-brand-orange rounded-2xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer text-xs font-bold flex items-center gap-1 shrink-0"
-                  >
-                    <Plus size={16} /> Klub baru
-                  </button>
-                </div>
+                <SelectOrCreateInput
+                  entityType="club"
+                  label="Klub atau sekolah (opsional)"
+                  selectedId={clubId || undefined}
+                  selectedName={clubs.find(c => c.id === clubId)?.name}
+                  onChange={(id) => setClubId(id)}
+                />
+                <p className={hintCls}>Cari klub/sekolah yang sudah ada, atau ajukan baru. Kosongkan jika tim mandiri.</p>
               </div>
 
               <details className="group">
@@ -276,7 +281,14 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
                 <div key={p.id} className="rounded-2xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/40 p-2">
                   <div className="flex gap-2 items-center">
                     <input type="text" inputMode="numeric" value={p.jersey} onChange={e => updatePlayer(i, 'jersey', e.target.value)} className="w-16 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-center text-sm font-bold outline-none focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange" placeholder="No." aria-label="Nomor punggung" />
-                    <input type="text" value={p.name} onChange={e => updatePlayer(i, 'name', e.target.value)} className="flex-1 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange" placeholder="Nama pemain" aria-label="Nama pemain" />
+                    <AthleteSelectOrCreate
+                      valueName={p.name}
+                      valueId={p.id}
+                      jersey={p.jersey}
+                      onPick={({ id, name, jersey: j }) => {
+                        setRoster((r) => r.map((row, idx) => (idx === i ? { ...row, id: id || row.id, name, jersey: j ?? row.jersey } : row)));
+                      }}
+                    />
                     <button type="button" onClick={() => setExpanded(expanded === p.id ? null : p.id)} className="p-3 text-zinc-400 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 cursor-pointer" aria-label="Detail pemain">
                       <ChevronDown size={16} className={expanded === p.id ? 'rotate-180' : ''} />
                     </button>
@@ -338,15 +350,6 @@ export const TeamFormModal: React.FC<TeamFormModalProps> = ({ team, clubs, onClo
       </div>
 
       <AITeamSetupModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} onExtract={handleAIExtract} />
-
-      <QuickClubModal
-        isOpen={showQuickClubModal}
-        onClose={() => setShowQuickClubModal(false)}
-        onSuccess={newClub => {
-          setClubId(newClub.id);
-          refreshClubs();
-        }}
-      />
     </div>
   );
 };

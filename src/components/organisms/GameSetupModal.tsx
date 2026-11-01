@@ -5,9 +5,9 @@ import { statsService } from '../../core/services/statsService';
 import { generateId } from '../../core/utils/idUtils';
 import { calculateAgeCategory } from '../../core/utils/ageCalculator';
 import { DIVISIONS, getDivisionForAthlete, getDivision, mapLegacyToDivisionCode, formatDivision } from '../../entities/division/model/divisions';
-import { OrganizationSelector } from '../../entities/organization/ui/OrganizationSelector';
 import { organizationRepo } from '../../entities/organization/model/organizationRepo';
 import { teamRepo } from '../../entities/team/model/teamRepo';
+import { SelectOrCreateInput } from '../../features/mdm/ui/SelectOrCreateInput';
 import { Match, RecordingType, Team, ChildProfile, Player, MatchRoster } from '../../core/types/stats';
 import { CompetitionGrade, COMPETITION_GRADE_LABELS } from '../../core/config/competition';
 import { ColorPicker } from '../molecules/ColorPicker';
@@ -45,7 +45,9 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
   const [opponent, setOpponent] = useState('');
   const [selectedOurTeamId, setSelectedOurTeamId] = useState('');
+  const [ourTeamName, setOurTeamName] = useState('');
   const [selectedTheirTeamId, setSelectedTheirTeamId] = useState('');
+  const [theirTeamName, setTheirTeamName] = useState('');
 
   // Organization States
   const [ourOrgId, setOurOrgId] = useState('');
@@ -62,7 +64,8 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
 
   const handleNextStepFromTeamSetup = async () => {
     if (!selectedProfileId || !ourOrgId || !theirOrgId) return;
-    await checkAndResolveTeams();
+    // Prefer teams already chosen via MDM SelectOrCreate
+    await checkAndResolveTeams(selectedOurTeamId || undefined, selectedTheirTeamId || undefined);
   };
 
   const checkAndResolveTeams = async (useOurTeamId?: string, useTheirTeamId?: string) => {
@@ -828,14 +831,31 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                       </select>
                     )}
 
-                    <OrganizationSelector
-                      label="Organisasi Tim Kita (Wajib)"
-                      selectedOrgId={ourOrgId}
+                    <SelectOrCreateInput
+                      entityType="club"
+                      label="Klub / Organisasi Kita"
+                      selectedId={ourOrgId}
+                      selectedName={ourOrgName}
                       onChange={(id, name) => {
                         setOurOrgId(id);
                         setOurOrgName(name);
                       }}
                     />
+                    {ourOrgId && (
+                      <div className="mt-2">
+                        <SelectOrCreateInput
+                          entityType="competition_team"
+                          label="Tim Tanding Kita"
+                          selectedId={selectedOurTeamId}
+                          selectedName={ourTeamName}
+                          onChange={(id, name) => {
+                            setSelectedOurTeamId(id);
+                            setOurTeamName(name);
+                          }}
+                          context={{ parentOrgId: ourOrgId, ageGroup: selectedDivisionCode }}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="bg-zinc-50 dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
@@ -872,14 +892,33 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Lawan (Wajib)</label>
                     
-                    <OrganizationSelector
-                      label="Organisasi Tim Lawan (Wajib)"
-                      selectedOrgId={theirOrgId}
+                    <SelectOrCreateInput
+                      entityType="club"
+                      label="Klub / Organisasi Lawan"
+                      selectedId={theirOrgId}
+                      selectedName={theirOrgName}
                       onChange={(id, name) => {
                         setTheirOrgId(id);
                         setTheirOrgName(name);
+                        setOpponent(name);
                       }}
                     />
+                    {theirOrgId && (
+                      <div className="mt-2">
+                        <SelectOrCreateInput
+                          entityType="competition_team"
+                          label="Tim Tanding Lawan"
+                          selectedId={selectedTheirTeamId}
+                          selectedName={theirTeamName}
+                          onChange={(id, name) => {
+                            setSelectedTheirTeamId(id);
+                            setTheirTeamName(name);
+                            setOpponent(name);
+                          }}
+                          context={{ parentOrgId: theirOrgId, ageGroup: selectedDivisionCode }}
+                        />
+                      </div>
+                    )}
                     
                     {!selectedTheirTeamId && opponent && (
                       <button 
@@ -958,27 +997,16 @@ export const GameSetupModal: React.FC<GameSetupModalProps> = ({ isOpen, onClose,
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                 <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Series / Turnamen (Opsional)</label>
-                  <select 
-                    value={selectedSeriesId}
-                    onChange={(e) => setSelectedSeriesId(e.target.value)}
-                    className="w-full p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 rounded-2xl focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange outline-none font-bold text-sm text-[#1A1A1A] dark:text-white transition-all"
-                  >
-                    <option value="adhoc">Pertandingan Lepas (Tanpa Series)</option>
-                    {seriesList.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">Nama Event (Opsional)</label>
-                  <input 
-                    type="text"
-                    value={eventName}
-                    onChange={(e) => setEventName(e.target.value)}
-                    placeholder="Contoh: Final Kejurda U-14"
-                    className="w-full p-4 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 rounded-2xl focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange outline-none font-bold text-sm text-[#1A1A1A] dark:text-white transition-all"
+                  <SelectOrCreateInput
+                    entityType="tournament"
+                    label="Series / Turnamen / Event"
+                    selectedId={selectedSeriesId === 'adhoc' ? undefined : selectedSeriesId}
+                    selectedName={eventName}
+                    onChange={(id, name) => {
+                      setSelectedSeriesId(id || 'adhoc');
+                      setEventName(name);
+                    }}
+                    context={{ city: location }}
                   />
                 </div>
 

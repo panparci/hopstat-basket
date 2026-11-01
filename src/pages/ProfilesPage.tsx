@@ -22,12 +22,16 @@ import { usePermissions } from '../core/contexts/PermissionsContext';
 import { TeamsPage } from './TeamsPage';
 import { ClaimAthletePage } from './ClaimAthletePage';
 import { ClaimStatusPage } from './ClaimStatusPage';
+import { SelectOrCreateInput } from '../features/mdm/ui/SelectOrCreateInput';
+import { organizationRepo } from '../entities/organization/model/organizationRepo';
+import { Organization } from '../entities/organization/model/types';
 
 export const ProfilesPage: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [profiles, setProfiles] = useState<ChildProfile[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [orgs, setOrgs] = useState<Organization[]>([]);
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -64,6 +68,7 @@ export const ProfilesPage: React.FC = () => {
 
   // Form state
   const [name, setName] = useState('');
+  const [athleteId, setAthleteId] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [voiceAliases, setVoiceAliases] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -87,6 +92,8 @@ export const ProfilesPage: React.FC = () => {
   const loadData = async () => {
     const p = await statsService.getProfiles();
     const t = await statsService.getTeams();
+    const o = await organizationRepo.list().catch(() => [] as Organization[]);
+    setOrgs(o);
     const user = await authService.getCurrentUser();
     
     let filteredProfiles = p.filter(profile => profile.claimStatus !== 'unclaimed');
@@ -164,7 +171,7 @@ export const ProfilesPage: React.FC = () => {
     if (!name.trim()) return;
 
     const profile: ChildProfile = {
-      id: editingProfile ? editingProfile.id : generateId('profile'),
+      id: editingProfile ? editingProfile.id : (athleteId || generateId('profile')),
       name: name.trim(),
       displayName: displayName.trim() || undefined,
       voiceAliases: voiceAliases ? voiceAliases.split(',').map(s => s.trim()).filter(s => s !== '') : undefined,
@@ -183,7 +190,7 @@ export const ProfilesPage: React.FC = () => {
         verified: true,
         verifiedAt: Date.now()
       }] : []),
-      claimStatus: editingProfile?.claimStatus || 'verified'
+      claimStatus: editingProfile?.claimStatus || (athleteId ? 'unclaimed' : 'verified')
     };
 
     if (editingProfile) {
@@ -232,6 +239,7 @@ export const ProfilesPage: React.FC = () => {
   const openAddModal = () => {
     setEditingProfile(null);
     setName('');
+    setAthleteId('');
     setDisplayName('');
     setVoiceAliases('');
     setBirthDate('');
@@ -247,6 +255,7 @@ export const ProfilesPage: React.FC = () => {
 
   const openEditModal = (profile: ChildProfile) => {
     setEditingProfile(profile);
+    setAthleteId(profile.id);
     setName(profile.name);
     setDisplayName(profile.displayName || '');
     setVoiceAliases(profile.voiceAliases?.join(', ') || '');
@@ -310,7 +319,9 @@ export const ProfilesPage: React.FC = () => {
 
   const getTeamName = (id?: string) => {
     if (!id) return '-';
-    return teams.find(t => t.id === id)?.name || 'Tidak Diketahui';
+    return teams.find(t => t.id === id)?.name
+      || orgs.find(o => o.id === id)?.name
+      || 'Tidak Diketahui';
   };
 
   return (
@@ -733,16 +744,16 @@ export const ProfilesPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                  Nama Atlet
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange transition-all"
-                  placeholder="Masukkan nama"
-                  autoFocus
+                <SelectOrCreateInput
+                  entityType="athlete"
+                  label="Nama Atlet"
+                  selectedId={editingProfile ? editingProfile.id : athleteId}
+                  selectedName={name}
+                  onChange={(id, n) => {
+                    setName(n);
+                    if (!editingProfile) setAthleteId(id);
+                  }}
+                  context={{ birthDate }}
                 />
               </div>
 
@@ -800,70 +811,46 @@ export const ProfilesPage: React.FC = () => {
               </div>
 
               <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                <h4 className="text-xs font-bold text-[#1A1A1A] dark:text-white uppercase tracking-wider">Afiliasi Klub</h4>
+                <h4 className="text-xs font-bold text-[#1A1A1A] dark:text-white uppercase tracking-wider">Afiliasi & Golden Record</h4>
                 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Klub Utama
-                  </label>
-                  <select
-                    value={mainTeamId}
-                    onChange={(e) => setMainTeamId(e.target.value)}
-                    className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange transition-all appearance-none"
-                  >
-                    <option value="">Pilih Klub Utama</option>
-                    {teams.map(team => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                  </select>
+                  <SelectOrCreateInput
+                    entityType="training_squad"
+                    label="Tim Klub Utama"
+                    selectedId={mainTeamId || undefined}
+                    selectedName={getTeamName(mainTeamId)}
+                    onChange={(id) => setMainTeamId(id)}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Klub Sekolah
-                  </label>
-                  <select
-                    value={schoolTeamId}
-                    onChange={(e) => setSchoolTeamId(e.target.value)}
-                    className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange transition-all appearance-none"
-                  >
-                    <option value="">Pilih Klub Sekolah</option>
-                    {teams.map(team => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                  </select>
+                  <SelectOrCreateInput
+                    entityType="school"
+                    label="Sekolah"
+                    selectedId={schoolTeamId || undefined}
+                    selectedName={getTeamName(schoolTeamId)}
+                    onChange={(id) => setSchoolTeamId(id)}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Klub Akademi
-                  </label>
-                  <select
-                    value={academyTeamId}
-                    onChange={(e) => setAcademyTeamId(e.target.value)}
-                    className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange transition-all appearance-none"
-                  >
-                    <option value="">Pilih Klub Akademi</option>
-                    {teams.map(team => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                  </select>
+                  <SelectOrCreateInput
+                    entityType="academy"
+                    label="Akademi"
+                    selectedId={academyTeamId || undefined}
+                    selectedName={getTeamName(academyTeamId)}
+                    onChange={(id) => setAcademyTeamId(id)}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                    Klub Pinjaman
-                  </label>
-                  <select
-                    value={loanTeamId}
-                    onChange={(e) => setLoanTeamId(e.target.value)}
-                    className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-xl px-4 py-3 text-sm font-bold text-[#1A1A1A] dark:text-white focus:ring-2 focus:ring-brand-navy dark:focus:ring-brand-orange transition-all appearance-none"
-                  >
-                    <option value="">Pilih Klub Pinjaman</option>
-                    {teams.map(team => (
-                      <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                  </select>
+                  <SelectOrCreateInput
+                    entityType="club"
+                    label="Klub Pinjaman / Organisasi"
+                    selectedId={loanTeamId || undefined}
+                    selectedName={getTeamName(loanTeamId)}
+                    onChange={(id) => setLoanTeamId(id)}
+                  />
                 </div>
 
                 <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">

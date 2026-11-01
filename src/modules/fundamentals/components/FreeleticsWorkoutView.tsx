@@ -62,11 +62,15 @@ export const FreeleticsWorkoutView: React.FC<FreeleticsWorkoutViewProps> = ({
 
   return (
     <div className="space-y-6 font-sans text-slate-900 dark:text-white">
-      {/* Freeletics Header Banner - High-contrast Athletic Style */}
-      <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-gradient-to-br dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 border border-slate-200 dark:border-zinc-800 p-6 shadow-sm dark:shadow-2xl">
-        {/* Background Decorative Accent */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-orange-600/10 rounded-full blur-3xl pointer-events-none" />
+      {/* Freeletics Header Banner — cinematic court night (left dark for copy, right hoop glow) */}
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-zinc-800 p-6 shadow-sm dark:shadow-2xl bg-zinc-950">
+        <div
+          className="absolute inset-0 bg-cover bg-center pointer-events-none"
+          style={{ backgroundImage: "url('/court_night_banner.svg')" }}
+          aria-hidden
+        />
+        {/* Left 60% readability veil */}
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/85 to-transparent pointer-events-none" aria-hidden />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -81,10 +85,10 @@ export const FreeleticsWorkoutView: React.FC<FreeleticsWorkoutViewProps> = ({
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
-              SESI HARI INI: <span className="text-amber-600 dark:text-amber-400">APA FOKUSMU HARI INI?</span>
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white">
+              SESI HARI INI: <span className="text-amber-400">APA FOKUSMU HARI INI?</span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-300 max-w-xl leading-relaxed">
               Program latihan fundamental bola basket dengan video demonstrasi looping berkecepatan tinggi.
             </p>
           </div>

@@ -109,8 +109,8 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
           ))}
         </div>
 
-        <div className="bg-zinc-50 dark:bg-zinc-950 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800 text-[10px] text-zinc-500 leading-relaxed font-semibold">
-          Sistem mendeteksi mode prototipe lokal. Pembayaran akan diproses secara instan (mock payment) dan aman demi kelancaran simulasi review.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl border border-amber-200 dark:border-amber-900/40 text-[10px] text-amber-900 dark:text-amber-200/90 leading-relaxed font-semibold">
+          Belum ada gerbang pembayaran otomatis. Setelah submit, klaim masuk antrean dan menunggu konfirmasi transfer oleh admin.
         </div>
 
         {uploadError && (

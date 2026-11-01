@@ -264,7 +264,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.setSession(w, r, fmt.Sprint(item["id"]))
-	writeJSON(w, http.StatusCreated, map[string]any{"user": item})
+	writeJSON(w, http.StatusCreated, map[string]any{"user": publicDoc("user_accounts", item)})
 }
 
 func (s *Server) login(w http.ResponseWriter, r *http.Request) {

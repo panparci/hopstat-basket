@@ -243,7 +243,7 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                   </span>
                   {sub.source && (
                     <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-zinc-800 text-slate-500">
-                      {sub.source === 'drive' ? 'Drive' : sub.source === 'upload' ? 'File' : 'Link'}
+                      {sub.source === 'bunny' ? 'Bunny' : sub.source === 'drive' ? 'Drive' : sub.source === 'upload' ? 'File' : 'Link'}
                     </span>
                   )}
                   <a
@@ -266,8 +266,8 @@ export const GoogleClassroomHub: React.FC<GoogleClassroomHubProps> = ({
                 <p>{sub.athleteNotes || '—'}</p>
               </div>
 
-              {sub.source === 'upload' && sub.videoUrl?.startsWith('/api/media/') && (
-                sub.mediaType === 'image' || /\.(jpg|jpeg|png|webp|gif)$/i.test(sub.videoUrl) ? (
+              {sub.source === 'upload' && sub.videoUrl?.includes('/api/media/') && (
+                sub.mediaType === 'image' || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(sub.videoUrl) ? (
                   <img
                     src={sub.videoUrl}
                     alt={sub.drillName}

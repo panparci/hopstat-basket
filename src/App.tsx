@@ -37,6 +37,9 @@ const ClaimReviewPage = lazy(() => import('./pages/admin/ClaimReviewPage').then(
 const AthletesPage = lazy(() => import('./pages/admin/AthletesPage').then(m => ({ default: m.AthletesPage })));
 const AdminGamesPage = lazy(() => import('./pages/admin/GamesPage').then(m => ({ default: m.AdminGamesPage })));
 const CurationsPage = lazy(() => import('./pages/admin/CurationsPage').then(m => ({ default: m.CurationsPage })));
+const MatchExclusionsPage = lazy(() => import('./pages/admin/MatchExclusionsPage').then(m => ({ default: m.MatchExclusionsPage })));
+const MasterDataPage = lazy(() => import('./pages/admin/MasterDataPage').then(m => ({ default: m.MasterDataPage })));
+const SkillsCoachesPage = lazy(() => import('./pages/SkillsCoachesPage').then(m => ({ default: m.SkillsCoachesPage })));
 const RequestStatsPage = lazy(() => import('./pages/services/RequestStatsPage').then(m => ({ default: m.RequestStatsPage })));
 const AdminStatRequestsPage = lazy(() => import('./pages/services/AdminStatRequestsPage').then(m => ({ default: m.AdminStatRequestsPage })));
 const StatTasksPage = lazy(() => import('./pages/services/StatTasksPage').then(m => ({ default: m.StatTasksPage })));
@@ -211,6 +214,9 @@ const AppContent = () => {
         <Route path="/fundamentals" element={
           <FundamentalsPage />
         } />
+        <Route path="/coaches" element={
+          <SkillsCoachesPage />
+        } />
       </Route>
 
       {/* Admin and Services Layout Wrap */}
@@ -277,6 +283,16 @@ const AppContent = () => {
         <Route path="/admin/curations" element={
           <RequirePermission permission="approve_applications">
             <CurationsPage />
+          </RequirePermission>
+        } />
+        <Route path="/admin/match-exclusions" element={
+          <RequirePermission permission="approve_applications">
+            <MatchExclusionsPage />
+          </RequirePermission>
+        } />
+        <Route path="/admin/master-data" element={
+          <RequirePermission permission="approve_applications">
+            <MasterDataPage />
           </RequirePermission>
         } />
         <Route path="/services/admin" element={

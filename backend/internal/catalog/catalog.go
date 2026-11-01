@@ -46,6 +46,15 @@ var Stores = map[string]StoreDef{
 	"workout_schedules":       {PK: "id"},
 	"drill_submissions":       {PK: "id"},
 	"classroom_qa":            {PK: "id"},
+	"follows":                 {PK: "id", Indexes: map[string]string{"by-user": "userId"}},
+	"reel_reactions":          {PK: "id", Indexes: map[string]string{"by-user": "userId", "by-target": "targetId"}},
+	"venues":                  {PK: "id"},
+	"training_sessions":       {PK: "id", Indexes: map[string]string{"by-coach": "coachId"}},
+	"session_registrations":   {PK: "id", Indexes: map[string]string{"by-session": "sessionId", "by-account": "accountId"}},
+	"master_aliases":          {PK: "id", Indexes: map[string]string{"by-canonical": "canonicalId", "by-type": "entityType"}},
+	"master_proposals":        {PK: "id", Indexes: map[string]string{"by-status": "status", "by-type": "entityType"}},
+	"match_exclusion_requests": {PK: "id", Indexes: map[string]string{"by-status": "status", "by-profile": "profileId", "by-requester": "requesterAccountId"}},
+	"coach_player_links":      {PK: "id", Indexes: map[string]string{"by-coach": "coachAccountId", "by-player": "profileId", "by-status": "status"}},
 }
 
 func Assert(name string) (StoreDef, error) {

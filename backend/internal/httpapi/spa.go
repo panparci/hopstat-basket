@@ -44,6 +44,22 @@ func WithSPA(api http.Handler, dir string) http.Handler {
 				return
 			}
 		}
+		// Missing hashed assets must 404 — never serve index.html as JS (MIME TypeError in WebView).
+		if strings.HasPrefix(rel, "assets/") || looksLikeStatic(rel) {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Cache-Control", "no-cache")
 		http.ServeFile(w, r, filepath.Join(root, "index.html"))
 	})
+}
+
+func looksLikeStatic(rel string) bool {
+	ext := strings.ToLower(filepath.Ext(rel))
+	switch ext {
+	case ".js", ".mjs", ".css", ".map", ".woff", ".woff2", ".ttf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico":
+		return true
+	default:
+		return false
+	}
 }

@@ -56,6 +56,11 @@ var writeAny = map[string][]string{
 	"workout_schedules":       {"view_home"},
 	"drill_submissions":       {"view_home"},
 	"classroom_qa":            {"view_home"},
+	"venues":                  {"track_match", "do_stat_tasks", "do_coach_analysis"},
+	"master_aliases":          {"manage_athletes", "approve_applications"},
+	"master_proposals":        {"view_home", "manage_teams", "manage_profiles", "track_match", "do_stat_tasks", "approve_applications"},
+	"match_exclusion_requests": {"manage_profiles", "approve_applications"},
+	"coach_player_links":      {"view_home", "do_coach_analysis", "manage_profiles"},
 }
 
 var matchChildStores = map[string]bool{
@@ -212,6 +217,11 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		}
 		return errForbidden
 	case "teams":
+		if existing == nil && asString(incoming["status"]) == "pending" {
+			if s.can(ctx, u, "track_match") || s.can(ctx, u, "do_stat_tasks") || s.can(ctx, u, "manage_teams") || s.can(ctx, u, "manage_profiles") {
+				return nil
+			}
+		}
 		if !s.can(ctx, u, "manage_teams") && !s.can(ctx, u, "manage_profiles") {
 			return errForbidden
 		}
@@ -220,6 +230,12 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 		}
 		return errForbidden
 	case "profiles":
+		// MDM select-or-create: pending/unclaimed profile from field input
+		if existing == nil && (asString(incoming["claimStatus"]) == "unclaimed" || asString(incoming["status"]) == "pending") {
+			if s.can(ctx, u, "track_match") || s.can(ctx, u, "do_stat_tasks") || s.can(ctx, u, "manage_profiles") || s.can(ctx, u, "manage_athletes") {
+				return nil
+			}
+		}
 		if !s.can(ctx, u, "manage_profiles") && !s.can(ctx, u, "manage_athletes") {
 			return errForbidden
 		}
@@ -233,6 +249,19 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 			doc = existing
 		}
 		if s.can(ctx, u, "view_home") && asString(doc["id"]) == id {
+			return nil
+		}
+		return errForbidden
+	case "follows", "reel_reactions":
+		if existing != nil && asString(existing["userId"]) != id {
+			return errForbidden
+		}
+		return nil
+	case "training_sessions":
+		if !s.can(ctx, u, "do_coach_analysis") {
+			return errForbidden
+		}
+		if existing == nil || asString(existing["coachId"]) == id {
 			return nil
 		}
 		return errForbidden
@@ -252,6 +281,57 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 			return nil
 		}
 		if s.can(ctx, u, "approve_applications") {
+			return nil
+		}
+		return errForbidden
+	case "master_proposals":
+		// Anyone authenticated may propose; only admins resolve.
+		if existing == nil {
+			return nil
+		}
+		if s.can(ctx, u, "approve_applications") || s.can(ctx, u, "manage_athletes") {
+			return nil
+		}
+		if asString(existing["submittedBy"]) == id {
+			return nil
+		}
+		return errForbidden
+	case "master_aliases":
+		// Golden-record aliases: admin / athlete-curator only (not ordinary parents).
+		if s.can(ctx, u, "approve_applications") || s.can(ctx, u, "manage_athletes") {
+			return nil
+		}
+		return errForbidden
+	case "match_exclusion_requests":
+		if existing == nil && s.can(ctx, u, "manage_profiles") {
+			return nil
+		}
+		if existing != nil && asString(existing["requesterAccountId"]) == id {
+			return nil
+		}
+		if s.can(ctx, u, "approve_applications") {
+			return nil
+		}
+		return errForbidden
+	case "coach_player_links":
+		if existing == nil {
+			return nil
+		}
+		if asString(existing["coachAccountId"]) == id || asString(existing["requestedByAccountId"]) == id {
+			return nil
+		}
+		if s.can(ctx, u, "do_coach_analysis") || s.can(ctx, u, "manage_profiles") || s.can(ctx, u, "approve_applications") {
+			return nil
+		}
+		return errForbidden
+	case "organizations":
+		// Field propose: create pending org without manage_teams (statistician / parent).
+		if existing == nil && asString(incoming["status"]) == "pending" {
+			if s.can(ctx, u, "track_match") || s.can(ctx, u, "do_stat_tasks") || s.can(ctx, u, "manage_profiles") || s.can(ctx, u, "manage_teams") {
+				return nil
+			}
+		}
+		if s.can(ctx, u, "manage_teams") {
 			return nil
 		}
 		return errForbidden
@@ -365,6 +445,31 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 		if !admin && !s.can(ctx, u, "do_coach_analysis") {
 			lockReview(existing, incoming, uidOf(u))
 		}
+	case "follows":
+		incoming["userId"] = uidOf(u)
+		if asString(incoming["teamId"]) == "" {
+			return nil, fmt.Errorf("teamId wajib")
+		}
+	case "reel_reactions":
+		incoming["userId"] = uidOf(u)
+		kind := asString(incoming["kind"])
+		if kind != "like" && kind != "save" && kind != "shortlist" {
+			return nil, fmt.Errorf("kind harus like, save, atau shortlist")
+		}
+		if kind == "shortlist" && !s.can(ctx, u, "view_gallery") {
+			return nil, fmt.Errorf("shortlist hanya untuk scout")
+		}
+		if asString(incoming["targetId"]) == "" {
+			return nil, fmt.Errorf("targetId wajib")
+		}
+	case "venues":
+		if err := cleanVenue(incoming); err != nil {
+			return nil, err
+		}
+	case "training_sessions":
+		if err := cleanSession(existing, incoming, u, time.Now()); err != nil {
+			return nil, err
+		}
 	case "role_applications":
 		if existing == nil {
 			incoming["userId"] = uidOf(u)
@@ -458,8 +563,15 @@ func (s *Server) paymentTargetOwned(ctx context.Context, uid, rid string) bool {
 	if c, _ := s.getDoc(ctx, "claim_requests", rid); c != nil {
 		return asString(c["claimantAccountId"]) == uid
 	}
+	if g, _ := s.getDoc(ctx, "session_registrations", rid); g != nil {
+		return asString(g["accountId"]) == uid
+	}
 	m, _ := s.getDoc(ctx, "matches", rid)
-	return m != nil
+	if m == nil {
+		return false
+	}
+	// Match id alone is not ownership — only creator/customer can attach payment.
+	return asString(m["createdBy"]) == uid || asString(m["customerId"]) == uid
 }
 
 func stageAllowed(from, to string) bool {
@@ -604,6 +716,12 @@ func (s *Server) filterList(ctx context.Context, u map[string]any, store string,
 		}
 		return nil
 	}
+	switch store {
+	case "training_sessions":
+		return s.visibleSessions(ctx, u, items)
+	case "session_registrations":
+		return s.visibleRegistrations(ctx, u, items)
+	}
 	if isAdmin(u) {
 		return items
 	}
@@ -626,12 +744,16 @@ func (s *Server) filterList(ctx context.Context, u map[string]any, store string,
 		}
 		reqs, _ := s.listDocs(ctx, "stat_requests", "by-customer", id)
 		claims, _ := s.listDocs(ctx, "claim_requests", "by-claimant", id)
+		regs, _ := s.listDocs(ctx, "session_registrations", "by-account", id)
 		own := map[string]bool{}
 		for _, r := range reqs {
 			own[asString(r["id"])] = true
 		}
 		for _, c := range claims {
 			own[asString(c["id"])] = true
+		}
+		for _, g := range regs {
+			own[asString(g["id"])] = true
 		}
 		for _, it := range items {
 			if own[asString(it["requestId"])] {
@@ -712,6 +834,22 @@ func (s *Server) filterList(ctx context.Context, u map[string]any, store string,
 		for _, it := range items {
 			if submissionVisible(it, id, guarded) {
 				out = append(out, it)
+			}
+		}
+		return out
+	case "follows":
+		for _, it := range items {
+			if asString(it["userId"]) == id {
+				out = append(out, it)
+			}
+		}
+		return out
+	case "reel_reactions":
+		for _, it := range items {
+			if asString(it["userId"]) == id {
+				out = append(out, it)
+			} else if asString(it["kind"]) == "like" {
+				out = append(out, map[string]any{"id": it["id"], "targetId": it["targetId"], "kind": "like"})
 			}
 		}
 		return out

@@ -4,6 +4,7 @@ import {
   Play, Zap, History, Trash2, Layers
 } from "lucide-react";
 import { NormalizedClockRegion, ClockSyncPoint, VisualClockSyncStatus } from "../types";
+import { captureStatusLabel, isCaptureActive } from "../lib/captureStatus";
 
 interface ClockSyncSetupModalProps {
   isOpen: boolean;
@@ -44,30 +45,21 @@ export const ClockSyncSetupModal: React.FC<ClockSyncSetupModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const isCaptureOn = status !== "IDLE" && status !== "CAPTURE_ENDED" && status !== "ERROR";
+  const isCaptureOn = isCaptureActive(status);
   const hasPrimaryRegion = Boolean(region);
   const isOnTheFlyEligible = isCaptureOn && hasPrimaryRegion;
 
-  const getStatusBadge = () => {
-    switch (status) {
-      case "READY":
-        return { label: "Ready to Sync", bg: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30" };
-      case "SCANNING":
-        return { label: "Scanning...", bg: "bg-amber-500/20 text-amber-500 border-amber-500/30 animate-pulse" };
-      case "CAPTURE_ACTIVE":
-        return { label: "Needs Calibration", bg: "bg-blue-500/10 text-blue-400 border-blue-500/30" };
-      case "REQUESTING_CAPTURE":
-        return { label: "Connecting...", bg: "bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse" };
-      case "CAPTURE_ENDED":
-        return { label: "Capture Stopped", bg: "bg-rose-500/10 text-rose-400 border-rose-500/30" };
-      case "ERROR":
-        return { label: "Connection Error", bg: "bg-red-500/10 text-red-400 border-red-500/30" };
-      default:
-        return { label: "Not Connected", bg: "bg-zinc-800 text-zinc-400 border-zinc-700" };
-    }
-  };
-
-  const badge = getStatusBadge();
+  const badgeBg =
+    status === "READY"
+      ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+      : status === "SCANNING" || status === "REQUESTING_CAPTURE"
+        ? "bg-amber-500/20 text-amber-500 border-amber-500/30 animate-pulse"
+        : status === "CAPTURE_ACTIVE"
+          ? "bg-blue-500/10 text-blue-400 border-blue-500/30"
+          : status === "CAPTURE_ENDED" || status === "ERROR"
+            ? "bg-red-500/10 text-red-400 border-red-500/30"
+            : "bg-zinc-800 text-zinc-400 border-zinc-700";
+  const badge = { label: captureStatusLabel(status), bg: badgeBg };
 
   const handleCalibrateClick = (type: "primary" | "alternative") => {
     onClose(); // Close setup modal so calibration modal can be seen cleanly!
@@ -105,23 +97,35 @@ export const ClockSyncSetupModal: React.FC<ClockSyncSetupModalProps> = ({
         <div className="p-6 flex flex-col gap-5 overflow-y-auto max-h-[75vh]">
           
           {/* Permission Block Warning */}
-          {permissionBlocked && (
+          {(permissionBlocked || status === "ERROR") && (
             <div className="p-4 bg-amber-500/10 dark:bg-amber-500/20 border border-amber-500/30 rounded-2xl flex flex-col gap-2.5">
               <div className="flex items-start gap-2.5 text-amber-600 dark:text-amber-400">
                 <ShieldAlert className="shrink-0 mt-0.5" size={18} />
                 <div>
-                  <p className="font-extrabold uppercase text-xs">Screen Capture Blocked in Preview iFrame</p>
+                  <p className="font-extrabold uppercase text-xs">
+                    {permissionBlocked ? "Screen Capture Blocked Here" : "Capture Failed — Reconnect"}
+                  </p>
                   <p className="text-xs text-zinc-600 dark:text-zinc-300 mt-1 leading-relaxed">
-                    Browser security restricts screen sharing inside embedded preview frames. Open the app in a new browser tab to enable full visual clock OCR sync!
+                    {permissionBlocked
+                      ? "Ini bukan WebSocket. Clock Sync pakai screen capture browser — di app/WebView biasanya diblokir. Buka tracking di browser, lalu Enable Screen Capture."
+                      : "Izinkan share tab/jendela saat diminta, atau buka di browser jika kamu di dalam app."}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => window.open(window.location.href, "_blank")}
+                type="button"
+                onClick={() => {
+                  const rn = (window as { ReactNativeWebView?: { postMessage: (m: string) => void } }).ReactNativeWebView;
+                  if (rn?.postMessage) {
+                    rn.postMessage(JSON.stringify({ type: "open-external", url: window.location.href }));
+                    return;
+                  }
+                  window.open(window.location.href, "_blank", "noopener,noreferrer");
+                }}
                 className="w-full py-2 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
                 <ExternalLink size={14} />
-                Open App in New Tab
+                Buka di Browser
               </button>
             </div>
           )}
@@ -172,12 +176,22 @@ export const ClockSyncSetupModal: React.FC<ClockSyncSetupModalProps> = ({
             </p>
 
             <button
-              onClick={() => handleCalibrateClick("primary")}
-              disabled={!isCaptureOn}
-              className="w-full py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => {
+                if (!isCaptureOn) {
+                  enableCapture();
+                  return;
+                }
+                handleCalibrateClick("primary");
+              }}
+              className="w-full py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
             >
               <Crop size={16} className="text-amber-400" />
-              {region ? "Calibrate / Edit Primary Region" : "Calibrate Primary Region"}
+              {!isCaptureOn
+                ? "Reconnect Capture dulu"
+                : region
+                  ? "Calibrate / Edit Primary Region"
+                  : "Calibrate Primary Region"}
             </button>
           </div>
 
@@ -209,12 +223,22 @@ export const ClockSyncSetupModal: React.FC<ClockSyncSetupModalProps> = ({
             </p>
 
             <button
-              onClick={() => handleCalibrateClick("alternative")}
-              disabled={!isCaptureOn}
-              className="w-full py-2.5 px-4 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 disabled:opacity-50 text-zinc-800 dark:text-zinc-200 font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => {
+                if (!isCaptureOn) {
+                  enableCapture();
+                  return;
+                }
+                handleCalibrateClick("alternative");
+              }}
+              className="w-full py-2.5 px-4 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm flex items-center justify-center gap-2"
             >
               <Layers size={16} className="text-amber-500" />
-              {altRegion ? "Calibrate / Edit Alternative Region" : "+ Add Alternative Clock Region"}
+              {!isCaptureOn
+                ? "Reconnect Capture dulu"
+                : altRegion
+                  ? "Calibrate / Edit Alternative Region"
+                  : "+ Add Alternative Clock Region"}
             </button>
           </div>
 

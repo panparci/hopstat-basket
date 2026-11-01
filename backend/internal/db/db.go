@@ -105,4 +105,10 @@ var extraSQL = []string{
 	`CREATE INDEX IF NOT EXISTS matches_by_team ON matches ((doc->>'teamId'))`,
 	`CREATE INDEX IF NOT EXISTS matches_by_child ON matches ((doc->>'childId'))`,
 	`CREATE INDEX IF NOT EXISTS matches_by_stage ON matches ((doc->>'productionStage'))`,
+	`CREATE INDEX IF NOT EXISTS follows_by_user ON follows ((doc->>'userId'))`,
+	`CREATE INDEX IF NOT EXISTS reel_reactions_by_user ON reel_reactions ((doc->>'userId'))`,
+	`CREATE INDEX IF NOT EXISTS reel_reactions_by_target ON reel_reactions ((doc->>'targetId'))`,
+	`CREATE INDEX IF NOT EXISTS training_sessions_by_coach ON training_sessions ((doc->>'coachId'))`,
+	`CREATE INDEX IF NOT EXISTS session_registrations_by_session ON session_registrations ((doc->>'sessionId'))`,
+	`CREATE INDEX IF NOT EXISTS session_registrations_by_account ON session_registrations ((doc->>'accountId'))`,
 }

@@ -276,24 +276,24 @@ export const ClaimReviewPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-20 text-zinc-900 dark:text-zinc-100">
-      {/* Top action header row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+    <div className="space-y-4 md:space-y-6 text-zinc-900 dark:text-zinc-100">
+      {/* Mobile: flush header strip; desktop keeps card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4 md:bg-white md:dark:bg-zinc-900 md:p-4 md:rounded-3xl md:border md:border-zinc-200 md:dark:border-zinc-800 md:shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-brand-orange/10 text-brand-orange rounded-2xl">
-            <Award size={24} />
+          <div className="p-2.5 md:p-3 bg-brand-orange/10 text-brand-orange rounded-2xl">
+            <Award size={22} />
           </div>
-          <div>
-            <h1 className="text-lg font-black uppercase tracking-tight">Panel Review Klaim</h1>
-            <p className="text-xs text-zinc-500">Tinjau, setujui, atau tolak klaim profil atlet yang diajukan oleh pengguna.</p>
+          <div className="min-w-0">
+            <h1 className="text-base md:text-lg font-black uppercase tracking-tight">Panel Review Klaim</h1>
+            <p className="text-xs text-zinc-500">Tinjau, setujui, atau tolak klaim profil atlet.</p>
           </div>
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         
         {/* Status Filter Tabs */}
-        <div className="flex bg-white dark:bg-zinc-900 p-1.5 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-sm max-w-lg mx-auto lg:mx-0 overflow-x-auto">
+        <div className="flex bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-100 dark:border-zinc-800 overflow-x-auto md:shadow-sm md:max-w-lg md:mx-0">
           {(['pending', 'approved', 'rejected', 'refund', 'all'] as FilterStatus[]).map((tab) => {
             const count = tab === 'refund'
               ? claims.filter(c => c.paymentStatus === 'refund_pending').length
@@ -334,9 +334,9 @@ export const ClaimReviewPage: React.FC = () => {
             <p className="text-xs font-semibold">Memuat data klaim atlet...</p>
           </div>
         ) : filteredClaims.length === 0 ? (
-          <div className="text-center p-10 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm flex flex-col items-center justify-center max-w-md mx-auto">
-            <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-800 rounded-full flex items-center justify-center text-zinc-400 mb-4 border border-zinc-100 dark:border-zinc-700">
-              <Award size={28} className="opacity-70 text-zinc-400 dark:text-zinc-500" />
+          <div className="text-center py-16 px-6 flex flex-col items-center justify-center min-h-[40vh] md:p-10 md:bg-white md:dark:bg-zinc-900 md:rounded-3xl md:border md:border-zinc-100 md:dark:border-zinc-800 md:shadow-sm md:max-w-md md:mx-auto md:min-h-0">
+            <div className="w-14 h-14 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center text-zinc-400 mb-4 border border-zinc-200 dark:border-zinc-700">
+              <Award size={26} className="opacity-70 text-zinc-400 dark:text-zinc-500" />
             </div>
             <h3 className="font-bold text-sm text-zinc-900 dark:text-white mb-1">
               Tidak Ada Pengajuan Klaim

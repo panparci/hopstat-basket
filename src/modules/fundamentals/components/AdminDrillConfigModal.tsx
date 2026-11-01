@@ -129,6 +129,9 @@ export const AdminDrillConfigModal: React.FC<AdminDrillConfigModalProps> = ({
     setIsSaving(true);
     try {
       const ytId = getYouTubeId(youtubeUrl);
+      const { authService } = await import('../../../services/authService');
+      const user = await authService.getCurrentUser();
+      const isAdmin = user?.role === 'admin';
       const newDrill: FundamentalDrill = {
         id: drill?.id || `drill-${Date.now()}`,
         name,
@@ -145,6 +148,12 @@ export const AdminDrillConfigModal: React.FC<AdminDrillConfigModalProps> = ({
         targetMuscles: targetMuscles.filter(m => m.trim().length > 0),
         equipment: equipment.filter(e => e.trim().length > 0),
         thumbnailUrl: thumbnailUrl || `https://images.unsplash.com/photo-1546519638-68e109498ffc?w=600&auto=format&fit=crop&q=80`,
+        // Coach videos share skillKey=category; they do not become official catalog masters.
+        ownerType: drill?.ownerType || (isAdmin ? 'official' : 'coach'),
+        ownerId: drill?.ownerId || (isAdmin ? undefined : user?.id),
+        skillKey: drill?.skillKey || category,
+        visibility: drill?.visibility || (isAdmin ? 'public' : 'connected'),
+        moderationStatus: drill?.moderationStatus || (isAdmin ? 'published' : 'published'),
       };
 
       await onSave(newDrill);

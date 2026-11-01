@@ -169,6 +169,7 @@ export async function parseDrillsFromExcel(file: File): Promise<ParsedDrillResul
         const parsedDrills: FundamentalDrill[] = [];
         const errors: string[] = [];
         const warnings: string[] = [];
+        const seenNames = new Set<string>();
 
         rawRows.forEach((row, index) => {
           const rowNum = index + 2; // Accounting for 1-indexed header
@@ -193,6 +194,12 @@ export async function parseDrillsFromExcel(file: File): Promise<ParsedDrillResul
             warnings.push(`Baris ${rowNum}: Diabaikan karena 'Nama Drill' kosong.`);
             return;
           }
+          const nameKey = name.toLowerCase();
+          if (seenNames.has(nameKey)) {
+            warnings.push(`Baris ${rowNum} (${name}): judul duplikat di file — diabaikan.`);
+            return;
+          }
+          seenNames.add(nameKey);
 
           if (!youtubeUrl) {
             warnings.push(`Baris ${rowNum} (${name}): URL Video YouTube kosong. Menggunakan link default.`);

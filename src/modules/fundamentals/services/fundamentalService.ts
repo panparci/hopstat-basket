@@ -10,6 +10,7 @@ import {
   FacilityAccess
 } from '../types';
 import { DEFAULT_FUNDAMENTAL_DRILLS } from './fundamentalSeedData';
+import { uniqueDrillsByName } from './uniqueDrills';
 import { callGeminiRaw } from '../../../core/services/ai/utils';
 import { initDB } from '../../../lib/db';
 
@@ -23,7 +24,7 @@ class FundamentalService {
   async getDrills(): Promise<FundamentalDrill[]> {
     const db = await initDB();
     const stored = await db.getAll(DRILLS_STORE);
-    if (Array.isArray(stored) && stored.length > 0) return stored;
+    if (Array.isArray(stored) && stored.length > 0) return uniqueDrillsByName(stored);
     for (const drill of DEFAULT_FUNDAMENTAL_DRILLS) {
       await db.put(DRILLS_STORE, drill);
     }
@@ -32,22 +33,32 @@ class FundamentalService {
 
   async saveDrill(drill: FundamentalDrill): Promise<FundamentalDrill[]> {
     const db = await initDB();
+    const key = drill.name.toLowerCase().trim();
+    if (key) {
+      const all = await db.getAll(DRILLS_STORE);
+      const clash = (Array.isArray(all) ? all : []).find(
+        (d: FundamentalDrill) => d.id !== drill.id && d.name.toLowerCase().trim() === key,
+      );
+      if (clash) throw new Error(`Judul drill "${drill.name}" sudah ada. Ganti nama atau edit yang lama.`);
+    }
     await db.put(DRILLS_STORE, drill);
     return this.getDrills();
   }
 
   async bulkImportDrills(importedDrills: FundamentalDrill[], mode: 'append' | 'replace' = 'append'): Promise<FundamentalDrill[]> {
     const db = await initDB();
+    // One row per name (case-insensitive), including duplicates inside the same Excel file.
+    const unique = uniqueDrillsByName(importedDrills);
     if (mode === 'replace') {
       await db.clear(DRILLS_STORE);
-      for (const drill of importedDrills) {
+      for (const drill of unique) {
         await db.put(DRILLS_STORE, drill);
       }
-      return importedDrills;
+      return unique;
     }
     const current = await this.getDrills();
-    const existingNames = new Set(current.map(d => d.name.toLowerCase().trim()));
-    const newItems = importedDrills.filter(d => !existingNames.has(d.name.toLowerCase().trim()));
+    const existingNames = new Set(current.map((d) => d.name.toLowerCase().trim()));
+    const newItems = unique.filter((d) => !existingNames.has(d.name.toLowerCase().trim()));
     for (const drill of newItems) {
       await db.put(DRILLS_STORE, drill);
     }

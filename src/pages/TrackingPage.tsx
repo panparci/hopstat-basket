@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { generateId } from '../core/utils/idUtils';
 import { 
-  Mic, Upload, 
+  Mic, 
   Target, XCircle, ArrowUpCircle, Shield, Handshake, Hand, Ban, Flag,
   RefreshCw, Plus, Zap, MoreHorizontal, ChevronDown, Undo, Redo, ArrowRightLeft
 } from 'lucide-react';
@@ -1664,39 +1664,41 @@ export const TrackingPage: React.FC = () => {
             />
           )}
           <main className="flex-1 overflow-y-auto p-2 flex flex-col relative">
-            <div className="flex gap-2 mb-2 relative">
+            <div className="flex gap-2 mb-2 relative max-w-full">
               <button
                 onClick={() => setShowCommentaryPanel(!showCommentaryPanel)}
-                className={`flex-1 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border ${
+                className={`flex-1 min-w-0 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border ${
                   showCommentaryPanel 
                     ? 'bg-brand-navy text-white border-brand-navy' 
                     : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-800'
                 }`}
               >
-                <Mic size={12} />
-                Commentator
+                <Mic size={12} className="shrink-0" />
+                <span className="truncate">Commentator</span>
               </button>
 
+              {/* Desktop: Replace stays visible. Mobile: same action lives under Adv. Actions → Koreksi Pemain */}
               <button
                 onClick={() => setShowCorrectionModal(true)}
-                className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 transition-all flex items-center justify-center gap-1.5"
+                className="hidden sm:flex px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 transition-all items-center justify-center gap-1.5 shrink-0"
                 title="Koreksi / Replace Pemain"
               >
                 <ArrowRightLeft size={12} />
                 <span>Replace</span>
               </button>
               
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   onClick={() => setShowUtilitiesMenu(!showUtilitiesMenu)}
-                  className={`px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border ${
+                  className={`px-3 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border ${
                     showUtilitiesMenu
                       ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-600'
                       : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                   }`}
                 >
                   <MoreHorizontal size={14} />
-                  <span>Adv. Actions</span>
+                  <span className="sm:hidden">Lainnya</span>
+                  <span className="hidden sm:inline">Adv. Actions</span>
                 </button>
                 
                 {showUtilitiesMenu && (
@@ -1708,8 +1710,9 @@ export const TrackingPage: React.FC = () => {
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="p-1.5 space-y-0.5">
                         <button
+                          type="button"
                           onClick={() => {
-                            setShowSubModal(true);
+                            void checkLineupIntegrity();
                             setShowUtilitiesMenu(false);
                           }}
                           className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
@@ -1718,8 +1721,9 @@ export const TrackingPage: React.FC = () => {
                           Refresh Lineup
                         </button>
                         <button
+                          type="button"
                           onClick={() => {
-                            setShowSubModal(true);
+                            startManualSub();
                             setShowUtilitiesMenu(false);
                           }}
                           className="w-full text-left px-3 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors flex items-center gap-2"
@@ -1903,8 +1907,10 @@ export const TrackingPage: React.FC = () => {
         <VoiceFeedbackToast feedback={voiceFeedback} onClose={() => setVoiceFeedback(null)} />
 
         <button 
-          onPointerDown={(e) => { e.preventDefault(); startListening(); }}
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); if (supported) startListening(); }}
           onPointerUp={(e) => { e.preventDefault(); stopListening(); }}
+          onPointerCancel={stopListening}
           onPointerLeave={stopListening}
           className={`flex-1 p-3 rounded-xl font-bold tracking-wide flex items-center justify-center gap-2 transition-all select-none touch-none ${
             isListening 
@@ -1914,12 +1920,10 @@ export const TrackingPage: React.FC = () => {
                 : 'bg-zinc-300 dark:bg-zinc-700 text-zinc-500 cursor-not-allowed'
           }`}
           disabled={!supported}
+          title={supported ? 'Tahan untuk bicara' : 'Voice butuh APK HoopStats (modul mikrofon). Expo Go tidak mendukung.'}
         >
           <Mic size={18} className={isListening ? 'animate-pulse' : ''} />
-          {isListening ? 'LISTENING...' : supported ? 'HOLD TO SPEAK (Z)' : 'NOT SUPPORTED'}
-        </button>
-        <button className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 p-3 rounded-xl font-bold flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
-          <Upload size={18} />
+          {isListening ? 'LISTENING...' : supported ? 'HOLD TO SPEAK (Z)' : 'VOICE: BUTUH APK'}
         </button>
       </div>
     </div>

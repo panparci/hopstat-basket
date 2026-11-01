@@ -68,4 +68,28 @@ export const parseKUFromString = (ageGroup?: string): number | undefined => {
   return undefined;
 };
 
+/** Calendar-year KU (Indonesia): KU = competitionYear − birthYear. Younger may play up; older may not. */
+export type KuEligibility = 'exact' | 'playing_up' | 'overage' | 'unknown';
+
+export interface KuEligibilityResult {
+  status: KuEligibility;
+  athleteKU?: number;
+  matchKU: number;
+}
+
+export function checkKuEligibility(
+  birthDateStr: string | undefined,
+  matchKU: number,
+  competitionYear: number,
+): KuEligibilityResult {
+  if (!birthDateStr || !matchKU || !competitionYear) return { status: 'unknown', matchKU };
+  const athleteKU = calculateAgeCategory(birthDateStr, competitionYear);
+  if (athleteKU === undefined) return { status: 'unknown', matchKU };
+  if (athleteKU === matchKU) return { status: 'exact', athleteKU, matchKU };
+  if (athleteKU < matchKU) return { status: 'playing_up', athleteKU, matchKU };
+  return { status: 'overage', athleteKU, matchKU };
+}
+
+export const birthYearFromKu = (ku: number, competitionYear = new Date().getFullYear()) => competitionYear - ku;
+
 

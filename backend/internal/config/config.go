@@ -14,10 +14,10 @@ type Config struct {
 	SessionSecret       string
 	UploadDir           string
 	GoogleOAuthClient   string
-	GoogleOAuthToken    string
-	GoogleDriveFolder   string
-	GoogleOAuthRedirect string
 	GoogleLoginRedirect string
+	BunnyLibraryID      string
+	BunnyAPIKey         string
+	BunnyCDNHost        string
 }
 
 func Load() Config {
@@ -39,17 +39,9 @@ func Load() Config {
 	if oauthClient == "" {
 		oauthClient = "secrets/oauth_web.json"
 	}
-	oauthToken := os.Getenv("GOOGLE_OAUTH_TOKEN")
-	if oauthToken == "" {
-		oauthToken = "secrets/drive_token.json"
-	}
-	redirect := os.Getenv("GOOGLE_OAUTH_REDIRECT")
-	if redirect == "" {
-		redirect = "https://hoopstats.kognifx.com/api/drive/callback"
-	}
 	loginRedirect := os.Getenv("GOOGLE_LOGIN_REDIRECT")
 	if loginRedirect == "" {
-		loginRedirect = strings.Replace(redirect, "/api/drive/callback", "/api/auth/google/callback", 1)
+		loginRedirect = "https://hoopstats.kognifx.com/api/auth/google/callback"
 	}
 	return Config{
 		Addr:                addr,
@@ -58,10 +50,10 @@ func Load() Config {
 		SessionSecret:       secret,
 		UploadDir:           uploadDir,
 		GoogleOAuthClient:   oauthClient,
-		GoogleOAuthToken:    oauthToken,
-		GoogleDriveFolder:   os.Getenv("GOOGLE_DRIVE_FOLDER_ID"),
-		GoogleOAuthRedirect: redirect,
 		GoogleLoginRedirect: loginRedirect,
+		BunnyLibraryID:      os.Getenv("BUNNY_STREAM_LIBRARY_ID"),
+		BunnyAPIKey:         os.Getenv("BUNNY_STREAM_API_KEY"),
+		BunnyCDNHost:        os.Getenv("BUNNY_STREAM_CDN_HOST"),
 	}
 }
 
