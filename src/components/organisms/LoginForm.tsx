@@ -23,7 +23,7 @@ export const LoginForm: React.FC = () => {
     e.preventDefault();
     setError(null);
 
-    if (!email) {
+    if (!email.trim()) {
       setError('Email wajib diisi');
       return;
     }
@@ -35,7 +35,7 @@ export const LoginForm: React.FC = () => {
     setLoading(true);
     
     try {
-      await authService.login(email, password);
+      await authService.login(email.trim(), password);
       const next = new URLSearchParams(window.location.search).get('next');
       // Only allow same-origin relative paths (Drive auth, etc.)
       if (next && next.startsWith('/') && !next.startsWith('//')) {
@@ -57,7 +57,8 @@ export const LoginForm: React.FC = () => {
           label="Email"
           icon={<Mail size={20} />}
           type="email"
-          placeholder="Enter your email"
+          autoComplete="email"
+          placeholder="nama@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -88,7 +89,7 @@ export const LoginForm: React.FC = () => {
         <button 
           type="submit" 
           disabled={loading}
-          className="w-full py-4 mt-2 rounded-2xl font-black tracking-widest text-white dark:text-white bg-zinc-900 dark:bg-white shadow-lg shadow-zinc-500/20 hover:opacity-90 transition-all disabled:opacity-50 uppercase cursor-pointer"
+          className="w-full py-4 mt-2 rounded-2xl font-black tracking-widest text-white dark:text-zinc-900 bg-zinc-900 dark:bg-white shadow-lg shadow-zinc-500/20 hover:opacity-90 transition-all disabled:opacity-50 uppercase cursor-pointer"
         >
           {loading ? 'SIGNING IN...' : 'SIGN IN'}
         </button>
