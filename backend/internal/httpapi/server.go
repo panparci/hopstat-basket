@@ -55,6 +55,7 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("POST /api/drill-submissions/upload", s.requireAuth(s.createDrillSubmissionUpload))
 	mux.HandleFunc("POST /api/drill-submissions/{id}/review", s.requireAuth(s.reviewDrillSubmission))
 	mux.HandleFunc("POST /api/training-sessions/{id}/register", s.requireAuth(s.registerSession))
+	mux.HandleFunc("GET /api/payments/gateway", s.requireAuth(s.paymentGateway))
 	mux.HandleFunc("POST /api/payments/{id}/charge", s.requireAuth(s.chargePayment))
 	mux.HandleFunc("POST /api/payments/midtrans/notification", s.midtransNotification)
 	mux.HandleFunc("GET /api/media/{file}", s.serveMedia)

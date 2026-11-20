@@ -65,6 +65,14 @@ func paymentAmount(doc map[string]any) int64 {
 	}
 }
 
+// GET /api/payments/gateway — whether Snap is live (no secrets).
+func (s *Server) paymentGateway(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]any{
+		"midtrans":   s.midtrans.enabled(),
+		"production": s.midtrans.Production,
+	})
+}
+
 // POST /api/payments/{id}/charge — Snap token for an existing pending payment owned by the caller.
 func (s *Server) chargePayment(w http.ResponseWriter, r *http.Request) {
 	if !s.midtrans.enabled() {

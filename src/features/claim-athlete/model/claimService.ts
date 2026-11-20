@@ -43,6 +43,22 @@ export const claimService = {
       await statsService.updateProfile(profile);
     }
 
+    // DP-11: same payment row; Snap if Midtrans configured, else admin-confirm (503).
+    try {
+      const res = await fetch(`/api/payments/${encodeURIComponent(paymentId)}/charge`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const snap = (await res.json()) as { redirect_url?: string };
+        if (snap.redirect_url) {
+          window.location.assign(snap.redirect_url);
+        }
+      }
+    } catch {
+      // offline / network — claim + pending payment already stored
+    }
+
     return newClaim;
   },
 
