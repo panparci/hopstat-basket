@@ -400,7 +400,7 @@ export const ClaimAthletePage: React.FC = () => {
             {activeStep === 'teaser' && 'Tinjau teaser statistik terbatas di bawah sebelum melanjutkan proses klaim.'}
             {activeStep === 'form' && 'Lengkapi informasi keluarga dan unggah Kartu Keluarga untuk membuktikan wali resmi.'}
             {activeStep === 'payment' && 'Pilih paket statistik Anda dan selesaikan transaksi aman.'}
-            {activeStep === 'success' && 'Klaim masuk antrean. Pembayaran menunggu konfirmasi admin (belum ada gerbang pembayaran otomatis).'}
+            {activeStep === 'success' && 'Klaim masuk antrean. Jika Midtrans aktif Anda sudah diarahkan ke Snap; jika belum, admin mengonfirmasi transfer.'}
           </p>
         </div>
 

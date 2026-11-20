@@ -13,37 +13,39 @@ export const claimService = {
     const db = await initDB();
     const claimId = crypto.randomUUID();
     const paymentId = crypto.randomUUID();
+    const now = Date.now();
 
-    // Create and store the PaymentRecord
+    // DP-11 order: claim first (so paymentTargetOwned sees claimant), then payment, then link paymentId.
+    const newClaim: ClaimRequest = {
+      ...claimData,
+      id: claimId,
+      status: 'pending',
+      createdAt: now,
+      updatedAt: now
+    };
+    await db.put('claim_requests', newClaim);
+
     const payment: PaymentRecord = {
       id: paymentId,
       requestId: claimId,
       amount,
       status: 'pending',
       method: paymentMethod,
-      createdAt: Date.now()
+      createdAt: now
     };
     await db.put('payments', payment);
 
-    const now = Date.now();
-    const newClaim: ClaimRequest = {
-      ...claimData,
-      id: claimId,
-      status: 'pending',
-      paymentId: paymentId,
-      createdAt: now,
-      updatedAt: now
-    };
+    newClaim.paymentId = paymentId;
+    newClaim.updatedAt = Date.now();
     await db.put('claim_requests', newClaim);
 
-    // Update profile status to claim_pending
     const profile = await db.get('profiles', claimData.profileId);
     if (profile) {
       profile.claimStatus = 'claim_pending';
       await statsService.updateProfile(profile);
     }
 
-    // DP-11: same payment row; Snap if Midtrans configured, else admin-confirm (503).
+    // Snap if Midtrans configured; 503 → admin-confirm path unchanged.
     try {
       const res = await fetch(`/api/payments/${encodeURIComponent(paymentId)}/charge`, {
         method: 'POST',
@@ -56,7 +58,7 @@ export const claimService = {
         }
       }
     } catch {
-      // offline / network — claim + pending payment already stored
+      // claim + pending payment already stored
     }
 
     return newClaim;

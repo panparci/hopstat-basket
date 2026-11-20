@@ -423,6 +423,9 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 				incoming["paymentStatus"] = existing["paymentStatus"]
 			} else {
 				delete(incoming, "paymentStatus")
+				if asString(incoming["profileId"]) == "" {
+					return nil, fmt.Errorf("profileId required")
+				}
 			}
 			incoming["claimantAccountId"] = uidOf(u)
 		}

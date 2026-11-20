@@ -220,7 +220,7 @@ export const ClaimStatusPage: React.FC = () => {
                             {refundInfo.desc}
                           </p>
                           <div className="text-[9px] text-zinc-400/80">
-                            * Integrasi API payment gateway otomatis (seperti Midtrans/Xendit) menyusul di produksi.
+                            * Midtrans Snap dipakai jika MIDTRANS_* terisi; jika belum, admin mengonfirmasi transfer manual.
                           </div>
                         </div>
                       )}
