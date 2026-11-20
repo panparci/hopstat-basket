@@ -60,7 +60,13 @@ func main() {
 		}
 	}
 
-	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, stream, googleLogin)
+	mid := httpapi.Midtrans(cfg.MidtransServerKey, cfg.MidtransClientKey, cfg.MidtransProduction)
+	if mid.Enabled() {
+		log.Printf("Midtrans enabled (production=%v)", cfg.MidtransProduction)
+	} else {
+		log.Printf("Midtrans not configured — payments stay admin-confirm (DP-11/12/16)")
+	}
+	h := httpapi.New(pool, cfg.GeminiAPIKey, cfg.SessionSecret, mediaStore, stream, googleLogin, mid)
 	if dir := httpapi.FindDist(); dir != "" {
 		h = httpapi.WithSPA(h, dir)
 		log.Printf("serving UI from %s", dir)

@@ -38,7 +38,7 @@ var writeAny = map[string][]string{
 	"audit_issue_resolutions": {"do_qa_review", "track_match", "do_stat_tasks"},
 	"timelines":               {"track_match", "do_stat_tasks"},
 	"coach_annotations":       {"do_coach_analysis"},
-	"ai_insights":             {"view_own_stats", "do_coach_analysis"},
+	"ai_insights":             {"do_coach_analysis"},
 	"profiles":                {"manage_profiles", "manage_athletes"},
 	"stat_requests":           {"request_stats", "assign_stat_tasks", "do_stat_tasks", "approve_applications"},
 	"user_accounts":           {"manage_users"},
@@ -273,6 +273,14 @@ func (s *Server) authorizeWrite(ctx context.Context, u map[string]any, store str
 			return nil
 		}
 		return errForbidden
+	case "classroom_qa":
+		if existing == nil {
+			return nil
+		}
+		if asString(existing["authorId"]) == id || asString(existing["userId"]) == id || s.can(ctx, u, "do_coach_analysis") || s.can(ctx, u, "manage_cms") {
+			return nil
+		}
+		return errForbidden
 	case "claim_requests":
 		if existing != nil && asString(existing["claimantAccountId"]) == id {
 			return nil
@@ -394,6 +402,15 @@ func (s *Server) sanitizeWrite(ctx context.Context, u map[string]any, store stri
 				incoming["status"] = existing["status"]
 				incoming["amount"] = existing["amount"]
 				incoming["requestId"] = existing["requestId"]
+			}
+		}
+	case "classroom_qa":
+		if existing == nil {
+			incoming["authorId"] = uidOf(u)
+		} else if !admin && !s.can(ctx, u, "do_coach_analysis") && !s.can(ctx, u, "manage_cms") {
+			incoming["authorId"] = existing["authorId"]
+			if _, ok := existing["userId"]; ok {
+				incoming["userId"] = existing["userId"]
 			}
 		}
 	case "claim_requests":

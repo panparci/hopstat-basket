@@ -18,6 +18,9 @@ type Config struct {
 	BunnyLibraryID      string
 	BunnyAPIKey         string
 	BunnyCDNHost        string
+	MidtransServerKey   string
+	MidtransClientKey   string
+	MidtransProduction  bool
 }
 
 func Load() Config {
@@ -54,6 +57,9 @@ func Load() Config {
 		BunnyLibraryID:      os.Getenv("BUNNY_STREAM_LIBRARY_ID"),
 		BunnyAPIKey:         os.Getenv("BUNNY_STREAM_API_KEY"),
 		BunnyCDNHost:        os.Getenv("BUNNY_STREAM_CDN_HOST"),
+		MidtransServerKey:   os.Getenv("MIDTRANS_SERVER_KEY"),
+		MidtransClientKey:   os.Getenv("MIDTRANS_CLIENT_KEY"),
+		MidtransProduction:  os.Getenv("MIDTRANS_IS_PRODUCTION") == "1" || strings.EqualFold(os.Getenv("MIDTRANS_IS_PRODUCTION"), "true"),
 	}
 }
 

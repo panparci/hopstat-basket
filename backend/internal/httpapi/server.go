@@ -28,12 +28,13 @@ type Server struct {
 	media         *media.Store
 	bunny         *bunny.Client
 	googleLogin   *oauth2.Config
+	midtrans      midtransCfg
 	aiLimit       hitLimiter
 	authLimit     hitLimiter
 }
 
-func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, stream *bunny.Client, googleLogin *oauth2.Config) http.Handler {
-	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, bunny: stream, googleLogin: googleLogin}
+func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.Store, stream *bunny.Client, googleLogin *oauth2.Config, midtrans midtransCfg) http.Handler {
+	s := &Server{pool: pool, geminiKey: geminiKey, sessionSecret: sessionSecret, media: mediaStore, bunny: stream, googleLogin: googleLogin, midtrans: midtrans}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.health)
 	mux.HandleFunc("GET /api/audit/roles", s.requireAdmin(s.auditRoles))
@@ -54,6 +55,8 @@ func New(pool *pgxpool.Pool, geminiKey, sessionSecret string, mediaStore *media.
 	mux.HandleFunc("POST /api/drill-submissions/upload", s.requireAuth(s.createDrillSubmissionUpload))
 	mux.HandleFunc("POST /api/drill-submissions/{id}/review", s.requireAuth(s.reviewDrillSubmission))
 	mux.HandleFunc("POST /api/training-sessions/{id}/register", s.requireAuth(s.registerSession))
+	mux.HandleFunc("POST /api/payments/{id}/charge", s.requireAuth(s.chargePayment))
+	mux.HandleFunc("POST /api/payments/midtrans/notification", s.midtransNotification)
 	mux.HandleFunc("GET /api/media/{file}", s.serveMedia)
 	mux.HandleFunc("GET /api/media-config", s.requireAuth(s.mediaConfig))
 	mux.HandleFunc("POST /api/media/upload", s.requireAuth(s.uploadCatalogMedia))
