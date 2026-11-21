@@ -72,12 +72,15 @@ export const FundamentalsPage: React.FC = () => {
     setLoading(true);
     try {
       const fetchedDrills = await fundamentalService.getDrills();
-      const fetchedProfile = await fundamentalService.getAthleteProfile(me);
-      const fetchedSchedule = await fundamentalService.getWorkoutSchedule(me);
-      const fetchedSubmissions = await fundamentalService.getSubmissions();
-      const fetchedQA = await fundamentalService.getQAThreads();
-
       setDrills(fetchedDrills);
+
+      const [fetchedProfile, fetchedSchedule, fetchedSubmissions, fetchedQA] = await Promise.all([
+        fundamentalService.getAthleteProfile(me),
+        fundamentalService.getWorkoutSchedule(me),
+        fundamentalService.getSubmissions(),
+        fundamentalService.getQAThreads(),
+      ]);
+
       setProfile(fetchedProfile);
       setSubmissions(fetchedSubmissions);
       setQaThreads(fetchedQA);
@@ -85,10 +88,15 @@ export const FundamentalsPage: React.FC = () => {
       if (fetchedSchedule && fetchedSchedule.length > 0) {
         setSchedule(fetchedSchedule);
       } else {
-        // Generate default schedule on first visit
-        const defaultSched = await fundamentalService.generateAISchedule('PG', 'menengah', 'half_court', 4);
-        setSchedule(defaultSched);
-        await fundamentalService.saveWorkoutSchedule(me, defaultSched);
+        // First visit: AI schedule, or local template if Gemini/SumoPod fails (demo-safe).
+        try {
+          const defaultSched = await fundamentalService.generateAISchedule('PG', 'menengah', 'half_court', 4);
+          setSchedule(defaultSched);
+          await fundamentalService.saveWorkoutSchedule(me, defaultSched);
+        } catch (schedErr) {
+          console.warn('Schedule bootstrap failed:', schedErr);
+          setSchedule([]);
+        }
       }
     } catch (err) {
       console.error('Error loading fundamentals data:', err);

@@ -210,6 +210,22 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
     const isGuard = position === 'PG' || position === 'SG';
     const isBig = position === 'C' || position === 'PF';
 
+    // Demo-safe: never throw if catalog empty / AI failed mid-load.
+    if (!drills.length) {
+      return [
+        {
+          id: `day-1-${Date.now()}`,
+          athleteId: 'current-athlete',
+          dayIndex: 1,
+          dayTitle: 'Hari 1: Pulihkan katalog drill',
+          focusArea: 'Setup',
+          estimatedMinutes: 0,
+          isRestDay: true,
+          drills: [],
+        },
+      ];
+    }
+
     const ballHandlingDrill = drills.find(d => d.category === 'ball_handling') || drills[0];
     const shootingDrill = drills.find(d => d.category === 'shooting') || drills[0];
     const footworkDrill = drills.find(d => d.category === 'footwork') || drills[0];

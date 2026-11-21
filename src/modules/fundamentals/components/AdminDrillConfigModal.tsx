@@ -15,6 +15,7 @@ import {
   Dumbbell
 } from 'lucide-react';
 import { FundamentalDrill, DrillCategory, SkillLevel } from '../types';
+import { extractYouTubeId } from '../services/drillExcelService';
 
 interface AdminDrillConfigModalProps {
   drill?: FundamentalDrill | null;
@@ -45,14 +46,7 @@ export const AdminDrillConfigModal: React.FC<AdminDrillConfigModalProps> = ({
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const getYouTubeId = (urlOrId: string) => {
-    if (!urlOrId) return '0j3aY_z1Jro';
-    if (urlOrId.length === 11) return urlOrId;
-    const match = urlOrId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-    return match ? match[1] : '0j3aY_z1Jro';
-  };
-
-  const videoId = getYouTubeId(youtubeUrl);
+  const videoId = extractYouTubeId(youtubeUrl);
 
   // YouTube Test Player Options
   const testOpts: YouTubeProps['opts'] = {
@@ -128,7 +122,7 @@ export const AdminDrillConfigModal: React.FC<AdminDrillConfigModalProps> = ({
 
     setIsSaving(true);
     try {
-      const ytId = getYouTubeId(youtubeUrl);
+      const ytId = extractYouTubeId(youtubeUrl);
       const { authService } = await import('../../../services/authService');
       const user = await authService.getCurrentUser();
       const isAdmin = user?.role === 'admin';

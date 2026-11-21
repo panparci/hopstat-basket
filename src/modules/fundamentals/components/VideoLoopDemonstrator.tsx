@@ -18,6 +18,7 @@ import {
   Award
 } from 'lucide-react';
 import { FundamentalDrill, ScheduledDrillItem } from '../types';
+import { extractYouTubeId } from '../services/drillExcelService';
 
 export interface SessionDrillItem {
   drill: FundamentalDrill;
@@ -78,17 +79,13 @@ export const VideoLoopDemonstrator: React.FC<VideoLoopDemonstratorProps> = ({
     setCompletedDrillsMap(map);
   }, [sessionDrills]);
 
-  // Extract YouTube ID safely
-  const getYouTubeId = (urlOrId: string) => {
-    if (!urlOrId) return '0j3aY_z1Jro';
-    if (urlOrId.length === 11) return urlOrId;
-    const match = urlOrId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-    return match ? match[1] : '0j3aY_z1Jro';
-  };
+  // Prefer Bunny/upload when present; else YouTube (catalog still mostly YT until migrate).
+  const bunnyUrl = (activeDrill.videoUrl || '').trim();
+  const videoId =
+    (activeDrill.youtubeVideoId && activeDrill.youtubeVideoId.length === 11
+      ? activeDrill.youtubeVideoId
+      : '') || extractYouTubeId(activeDrill.youtubeUrl || '');
 
-  const videoId = activeDrill.youtubeVideoId || getYouTubeId(activeDrill.youtubeUrl);
-
-  // YouTube Player Config
   const opts: YouTubeProps['opts'] = {
     height: '100%',
     width: '100%',
@@ -102,6 +99,8 @@ export const VideoLoopDemonstrator: React.FC<VideoLoopDemonstratorProps> = ({
       playlist: videoId,
       start: activeDrill.loopStartTimeSec || 0,
       end: activeDrill.loopEndTimeSec || undefined,
+      // Helps avoid embed error 153 on some browsers / Wi‑Fi filters.
+      origin: typeof window !== 'undefined' ? window.location.origin : 'https://hoopstats.kognifx.com',
     },
   };
 
@@ -215,15 +214,32 @@ export const VideoLoopDemonstrator: React.FC<VideoLoopDemonstratorProps> = ({
       {/* BACKGROUND VIDEO VIEWPORT */}
       <div className="absolute inset-0 z-0 bg-black flex items-center justify-center overflow-hidden">
         <div className="w-full h-full relative">
-          <YouTube
-            key={`${activeDrill.id}-${currentIndex}`}
-            videoId={videoId}
-            opts={opts}
-            onReady={onReady}
-            onStateChange={handleStateChange}
-            className="w-full h-full absolute inset-0"
-            iframeClassName="w-full h-full object-cover scale-105 pointer-events-none"
-          />
+          {bunnyUrl ? (
+            <video
+              key={`${activeDrill.id}-${currentIndex}-bunny`}
+              className="w-full h-full absolute inset-0 object-cover"
+              src={bunnyUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls={false}
+            />
+          ) : (
+            <YouTube
+              key={`${activeDrill.id}-${currentIndex}`}
+              videoId={videoId}
+              opts={opts}
+              onReady={onReady}
+              onStateChange={handleStateChange}
+              className="w-full h-full absolute inset-0"
+              iframeClassName="w-full h-full object-cover scale-105 pointer-events-none"
+              iframeProps={{
+                referrerPolicy: 'strict-origin-when-cross-origin',
+                allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+              }}
+            />
+          )}
         </div>
 
         {/* Video Dark Overlay Gradients for UI Contrast */}

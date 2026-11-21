@@ -33,7 +33,10 @@ export function extractYouTubeId(urlOrId: string): string {
   if (str.length === 11 && !str.includes('/') && !str.includes('.')) {
     return str;
   }
-  const match = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  // watch, youtu.be, embed, /v/, /shorts/, /live/
+  const match = str.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts\/|live\/|watch\?v=|watch\?.+&v=))([\w-]{11})/,
+  );
   return match ? match[1] : '0j3aY_z1Jro';
 }
 
