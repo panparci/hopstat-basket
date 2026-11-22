@@ -153,6 +153,26 @@ class FundamentalService {
     return schedule;
   }
 
+  /**
+   * Catalog re-import leaves stale drillIds → Program tab looks empty ("ga keluar").
+   * Rebuild from template when ≥ half the refs are orphans; otherwise drop orphans only.
+   */
+  healWorkoutSchedule(
+    days: WorkoutScheduleDay[],
+    drills: FundamentalDrill[],
+    athleteId: string,
+    position: PlayingPosition = 'PG',
+    skillLevel: SkillLevel = 'menengah',
+    facility: FacilityAccess = 'half_court',
+    goalDays = 4,
+  ): WorkoutScheduleDay[] {
+    if (!drills.length) return days;
+    if (!days.length || scheduleOrphanRatio(days, drills) >= 0.5) {
+      return this.createTemplateSchedule(drills, position, skillLevel, facility, goalDays, athleteId);
+    }
+    return sanitizeScheduleDrills(days, drills, athleteId);
+  }
+
   async toggleDrillCompletion(athleteId: string, dayId: string, drillId: string): Promise<WorkoutScheduleDay[]> {
     const schedule = await this.getWorkoutSchedule(athleteId);
     const dayIndex = schedule.findIndex(d => d.id === dayId);
@@ -223,6 +243,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       const rawDays = JSON.parse(cleanedJson);
 
       if (Array.isArray(rawDays) && rawDays.length > 0) {
+        const known = new Set(drills.map((d) => d.id));
         const generatedSchedule: WorkoutScheduleDay[] = rawDays.map((d: any, idx: number) => ({
           id: `day-${idx + 1}-${Date.now()}`,
           athleteId,
@@ -231,15 +252,17 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
           focusArea: d.focusArea || 'Fundamental Practice',
           estimatedMinutes: d.estimatedMinutes || 40,
           isRestDay: !!d.isRestDay,
-          drills: (d.drills || []).map((dr: any) => ({
-            drillId: dr.drillId || drills[0]?.id || 'drill-mikan-01',
-            sets: dr.sets || 4,
-            reps: dr.reps || '10 Reps',
-            notes: dr.notes || 'Jaga bentuk mekanik',
-            completed: false
-          }))
+          drills: (d.drills || [])
+            .filter((dr: any) => known.has(dr?.drillId))
+            .map((dr: any) => ({
+              drillId: dr.drillId,
+              sets: dr.sets || 4,
+              reps: dr.reps || '10 Reps',
+              notes: dr.notes || 'Jaga bentuk mekanik',
+              completed: false,
+            })),
         }));
-        return sanitizeScheduleDrills(generatedSchedule, drills, athleteId);
+        return this.healWorkoutSchedule(generatedSchedule, drills, athleteId, position, skillLevel, facilityAccess, weeklyGoalDays);
       }
     } catch (err) {
       console.warn('AI Schedule Generation fallback to template routine:', err);

@@ -86,7 +86,20 @@ export const FundamentalsPage: React.FC = () => {
       setQaThreads(fetchedQA);
 
       if (fetchedSchedule && fetchedSchedule.length > 0) {
-        setSchedule(fetchedSchedule);
+        // Heal orphan drillIds left by catalog re-import (demo: program looked empty).
+        const healed = fundamentalService.healWorkoutSchedule(
+          fetchedSchedule,
+          fetchedDrills,
+          me,
+          fetchedProfile?.position || 'PG',
+          fetchedProfile?.skillLevel || 'menengah',
+          fetchedProfile?.facilityAccess || 'half_court',
+          fetchedProfile?.weeklyGoalDays || 4,
+        );
+        setSchedule(healed);
+        if (JSON.stringify(healed) !== JSON.stringify(fetchedSchedule)) {
+          await fundamentalService.saveWorkoutSchedule(me, healed).catch(() => {});
+        }
       } else {
         // First visit: AI schedule, or local template if Gemini/SumoPod fails (demo-safe).
         try {
