@@ -90,7 +90,7 @@ export const FundamentalsPage: React.FC = () => {
       } else {
         // First visit: AI schedule, or local template if Gemini/SumoPod fails (demo-safe).
         try {
-          const defaultSched = await fundamentalService.generateAISchedule('PG', 'menengah', 'half_court', 4);
+          const defaultSched = await fundamentalService.generateAISchedule('PG', 'menengah', 'half_court', 4, me);
           setSchedule(defaultSched);
           await fundamentalService.saveWorkoutSchedule(me, defaultSched);
         } catch (schedErr) {
@@ -116,7 +116,7 @@ export const FundamentalsPage: React.FC = () => {
     facility: FacilityAccess,
     goalDays: number
   ) => {
-    const newSchedule = await fundamentalService.generateAISchedule(position, skillLevel, facility, goalDays);
+    const newSchedule = await fundamentalService.generateAISchedule(position, skillLevel, facility, goalDays, me);
     setSchedule(newSchedule);
     await fundamentalService.saveWorkoutSchedule(me, newSchedule);
 

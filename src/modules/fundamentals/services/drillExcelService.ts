@@ -40,6 +40,18 @@ export function extractYouTubeId(urlOrId: string): string {
   return match ? match[1] : '0j3aY_z1Jro';
 }
 
+/** Shorts embeds are flaky (error 153); prefer watch/youtu.be for loop demos. */
+export function isYouTubeShortsUrl(url?: string): boolean {
+  return /youtube\.com\/shorts\//i.test(url || '');
+}
+
+/** Normalize shorts → watch?v= so existing catalog rows embed reliably. */
+export function toEmbedSafeYouTubeUrl(url: string): string {
+  if (!isYouTubeShortsUrl(url)) return url;
+  const id = extractYouTubeId(url);
+  return `https://www.youtube.com/watch?v=${id}`;
+}
+
 /**
  * Map readable Indonesian category string to standard DrillCategory
  */

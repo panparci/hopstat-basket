@@ -197,12 +197,19 @@ export const FreeleticsWorkoutView: React.FC<FreeleticsWorkoutViewProps> = ({
                   if (currentSessionDrills.length > 0) {
                     setActiveSessionIndex(0);
                     setActiveLoopDrill(currentSessionDrills[0].drill);
+                    return;
                   }
+                  onOpenAIScheduleModal();
                 }}
-                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+                disabled={currentSessionDrills.length === 0 && !onOpenAIScheduleModal}
+                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
               >
                 <Play className="w-4 h-4 fill-zinc-950" />
-                <span>Mulai Latihan Sekarang</span>
+                <span>
+                  {currentSessionDrills.length > 0
+                    ? 'Mulai Latihan Sekarang'
+                    : 'Perbaiki Schedule (AI)'}
+                </span>
               </button>
             )}
           </div>
@@ -225,7 +232,17 @@ export const FreeleticsWorkoutView: React.FC<FreeleticsWorkoutViewProps> = ({
               <div className="grid grid-cols-1 gap-3">
                 {currentDaySchedule.drills?.map((item, idx) => {
                   const detail = getDrillDetails(item.drillId);
-                  if (!detail) return null;
+                  if (!detail) {
+                    return (
+                      <div
+                        key={idx}
+                        className="rounded-2xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4 text-xs text-slate-700 dark:text-zinc-300"
+                      >
+                        Drill <span className="font-mono">{item.drillId}</span> tidak ada di katalog.
+                        Generate ulang schedule atau buka tab Library.
+                      </div>
+                    );
+                  }
 
                   return (
                     <div

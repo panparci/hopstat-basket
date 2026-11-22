@@ -11,8 +11,50 @@ import {
 } from '../types';
 import { DEFAULT_FUNDAMENTAL_DRILLS } from './fundamentalSeedData';
 import { uniqueDrillsByName } from './uniqueDrills';
+import { isYouTubeShortsUrl, toEmbedSafeYouTubeUrl } from './drillExcelService';
 import { callGeminiRaw } from '../../../core/services/ai/utils';
 import { initDB } from '../../../lib/db';
+
+/** Prefer non-Shorts catalog rows — Shorts embeds often fail in-app (YT 153). */
+function pickDrill(
+  drills: FundamentalDrill[],
+  pred: (d: FundamentalDrill) => boolean,
+): FundamentalDrill {
+  const hits = drills.filter(pred);
+  return (
+    hits.find((d) => !isYouTubeShortsUrl(d.youtubeUrl)) ||
+    drills.find((d) => !isYouTubeShortsUrl(d.youtubeUrl)) ||
+    hits[0] ||
+    drills[0]
+  );
+}
+
+/** Drop orphan drillIds (catalog re-import). If ≥ half the refs are gone, caller should rebuild. */
+function scheduleOrphanRatio(days: WorkoutScheduleDay[], drills: FundamentalDrill[]): number {
+  const known = new Set(drills.map((d) => d.id));
+  let refs = 0;
+  let miss = 0;
+  for (const day of days) {
+    for (const item of day.drills || []) {
+      refs += 1;
+      if (!known.has(item.drillId)) miss += 1;
+    }
+  }
+  return refs === 0 ? 0 : miss / refs;
+}
+
+function sanitizeScheduleDrills(
+  days: WorkoutScheduleDay[],
+  drills: FundamentalDrill[],
+  athleteId: string,
+): WorkoutScheduleDay[] {
+  const known = new Set(drills.map((d) => d.id));
+  return days.map((day) => ({
+    ...day,
+    athleteId: athleteId || day.athleteId || 'current-athlete',
+    drills: (day.drills || []).filter((item) => known.has(item.drillId)),
+  }));
+}
 
 const DRILLS_STORE = 'fundamental_drills';
 const PROFILE_STORE = 'fundamental_profiles';
@@ -24,11 +66,17 @@ class FundamentalService {
   async getDrills(): Promise<FundamentalDrill[]> {
     const db = await initDB();
     const stored = await db.getAll(DRILLS_STORE);
-    if (Array.isArray(stored) && stored.length > 0) return uniqueDrillsByName(stored);
+    const normalize = (list: FundamentalDrill[]) =>
+      uniqueDrillsByName(list).map((d) =>
+        isYouTubeShortsUrl(d.youtubeUrl)
+          ? { ...d, youtubeUrl: toEmbedSafeYouTubeUrl(d.youtubeUrl) }
+          : d,
+      );
+    if (Array.isArray(stored) && stored.length > 0) return normalize(stored);
     for (const drill of DEFAULT_FUNDAMENTAL_DRILLS) {
       await db.put(DRILLS_STORE, drill);
     }
-    return DEFAULT_FUNDAMENTAL_DRILLS;
+    return normalize(DEFAULT_FUNDAMENTAL_DRILLS);
   }
 
   async saveDrill(drill: FundamentalDrill): Promise<FundamentalDrill[]> {
@@ -132,7 +180,8 @@ class FundamentalService {
     position: PlayingPosition,
     skillLevel: SkillLevel,
     facilityAccess: FacilityAccess,
-    weeklyGoalDays: number = 4
+    weeklyGoalDays: number = 4,
+    athleteId: string = 'current-athlete',
   ): Promise<WorkoutScheduleDay[]> {
     const drills = await this.getDrills();
 
@@ -176,7 +225,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       if (Array.isArray(rawDays) && rawDays.length > 0) {
         const generatedSchedule: WorkoutScheduleDay[] = rawDays.map((d: any, idx: number) => ({
           id: `day-${idx + 1}-${Date.now()}`,
-          athleteId: 'current-athlete',
+          athleteId,
           dayIndex: d.dayIndex || (idx + 1),
           dayTitle: d.dayTitle || `Hari ${idx + 1}`,
           focusArea: d.focusArea || 'Fundamental Practice',
@@ -190,14 +239,14 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
             completed: false
           }))
         }));
-        return generatedSchedule;
+        return sanitizeScheduleDrills(generatedSchedule, drills, athleteId);
       }
     } catch (err) {
       console.warn('AI Schedule Generation fallback to template routine:', err);
     }
 
     // Fallback Template if AI offline or JSON parse fails
-    return this.createTemplateSchedule(drills, position, skillLevel, facilityAccess, weeklyGoalDays);
+    return this.createTemplateSchedule(drills, position, skillLevel, facilityAccess, weeklyGoalDays, athleteId);
   }
 
   private createTemplateSchedule(
@@ -205,7 +254,8 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
     position: PlayingPosition,
     skillLevel: SkillLevel,
     facilityAccess: FacilityAccess,
-    weeklyGoalDays: number
+    weeklyGoalDays: number,
+    athleteId: string = 'current-athlete',
   ): WorkoutScheduleDay[] {
     const isGuard = position === 'PG' || position === 'SG';
     const isBig = position === 'C' || position === 'PF';
@@ -215,7 +265,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       return [
         {
           id: `day-1-${Date.now()}`,
-          athleteId: 'current-athlete',
+          athleteId,
           dayIndex: 1,
           dayTitle: 'Hari 1: Pulihkan katalog drill',
           focusArea: 'Setup',
@@ -226,16 +276,16 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       ];
     }
 
-    const ballHandlingDrill = drills.find(d => d.category === 'ball_handling') || drills[0];
-    const shootingDrill = drills.find(d => d.category === 'shooting') || drills[0];
-    const footworkDrill = drills.find(d => d.category === 'footwork') || drills[0];
-    const defenseDrill = drills.find(d => d.category === 'defense') || drills[0];
-    const postDrill = drills.find(d => d.category === 'post_moves') || drills[0];
+    const ballHandlingDrill = pickDrill(drills, (d) => d.category === 'ball_handling');
+    const shootingDrill = pickDrill(drills, (d) => d.category === 'shooting');
+    const footworkDrill = pickDrill(drills, (d) => d.category === 'footwork');
+    const defenseDrill = pickDrill(drills, (d) => d.category === 'defense');
+    const postDrill = pickDrill(drills, (d) => d.category === 'post_moves');
 
     return [
       {
         id: `day-1-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 1,
         dayTitle: 'Hari 1: Ball Handling & Footwork Burst',
         focusArea: 'Ball Handling & Footwork',
@@ -249,7 +299,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       },
       {
         id: `day-2-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 2,
         dayTitle: isBig ? 'Hari 2: Post Moves & Paint Dominance' : 'Hari 2: Perimeter Shooting & Form',
         focusArea: isBig ? 'Post Moves' : 'Shooting Consistency',
@@ -263,7 +313,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       },
       {
         id: `day-3-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 3,
         dayTitle: 'Hari 3: Recovery & Video Analysis',
         focusArea: 'Active Recovery',
@@ -273,7 +323,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       },
       {
         id: `day-4-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 4,
         dayTitle: 'Hari 4: Defensive Stance & Lateral Speed',
         focusArea: 'Defense & Conditioning',
@@ -286,20 +336,20 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       },
       {
         id: `day-5-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 5,
         dayTitle: 'Hari 5: Finishing & Game Simulation',
         focusArea: 'Finishing & Game Speed',
         estimatedMinutes: 55,
         isRestDay: false,
         drills: [
-          { drillId: drills.find(d => d.id === 'drill-euro-step-05')?.id || footworkDrill.id, sets: 4, reps: '10 Makes per Set', notes: 'Simulasi defender tinggi', completed: false },
+          { drillId: drills.find(d => d.id === 'drill-euro-step-05' && !isYouTubeShortsUrl(d.youtubeUrl))?.id || footworkDrill.id, sets: 4, reps: '10 Makes per Set', notes: 'Simulasi defender tinggi', completed: false },
           { drillId: shootingDrill.id, sets: 5, reps: '10 Makes', notes: 'Catch and shoot ritme game', completed: false }
         ]
       },
       {
         id: `day-6-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 6,
         dayTitle: 'Hari 6: Rest & Core Mobility',
         focusArea: 'Rest & Mobility',
@@ -309,7 +359,7 @@ Format Output WAJIB berupa JSON Array valid murni tanpa text markdown pengantar,
       },
       {
         id: `day-7-${Date.now()}`,
-        athleteId: 'current-athlete',
+        athleteId,
         dayIndex: 7,
         dayTitle: 'Hari 7: Weekly Challenge & Form Test',
         focusArea: 'Form Evaluation',
